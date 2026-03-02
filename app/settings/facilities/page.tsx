@@ -21,6 +21,7 @@ import { lookupsApi } from "@/lib/services/lookups";
 import { usePaginatedList } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { FacilityListItemDto, CreateFacilityRequest, UpdateFacilityRequest } from "@/lib/services/facilities";
 import type { EntityLookupDto } from "@/lib/services/lookups";
 
@@ -130,7 +131,7 @@ export default function FacilitiesPage() {
       <div>
         <PageHeader title="Facility Configuration" description="Independent service locations." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Facility Configuration" />
         </Card>
       </div>
     );

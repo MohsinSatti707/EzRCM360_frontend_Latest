@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ndcCodesApi } from "@/lib/services/ndcCodes";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { NdcCodeDto, CreateNdcCodeCommand } from "@/lib/services/ndcCodes";
 import type { PaginatedList } from "@/lib/types";
 import { toDateInput } from "@/lib/utils";
@@ -115,7 +116,7 @@ export default function NdcCodesPage() {
       <div>
         <PageHeader title="NDC Codes" description="National Drug Code master." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="NDC Codes" />
         </Card>
       </div>
     );

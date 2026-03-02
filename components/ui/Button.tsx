@@ -6,7 +6,7 @@ const baseStyles =
 
 const variantStyles = {
   primary:
-    "bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:bg-primary-800",
+    "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:bg-primary/80",
   secondary:
     "bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100",
   ghost: "text-slate-700 hover:bg-slate-100 active:bg-slate-200",

@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { feeSchedulesApi } from "@/lib/services/feeSchedules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { FeeScheduleDto, FeeScheduleDetailDto, CreateFeeScheduleCommand } from "@/lib/services/feeSchedules";
 import type { PaginatedList } from "@/lib/types";
 
@@ -137,7 +138,7 @@ export default function FeeSchedulesPage() {
       <div>
         <PageHeader title="Fee Schedules" description="Centralized valuation datasets." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Fee Schedules" />
         </Card>
       </div>
     );

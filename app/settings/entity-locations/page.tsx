@@ -22,6 +22,7 @@ import { lookupsApi } from "@/lib/services/lookups";
 import { usePaginatedList } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type {
   EntityLocationListItemDto,
   CreateEntityLocationRequest,
@@ -130,7 +131,7 @@ export default function EntityLocationsPage() {
       <div>
         <PageHeader title="Entity Locations" description="Manage entity locations." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Entity Locations" />
         </Card>
       </div>
     );

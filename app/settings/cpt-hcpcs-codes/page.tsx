@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { cptHcpcsCodesApi } from "@/lib/services/cptHcpcsCodes";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { CptHcpcsCodeDto, CreateCptHcpcsCodeCommand } from "@/lib/services/cptHcpcsCodes";
 import type { PaginatedList } from "@/lib/types";
 import { toDateInput } from "@/lib/utils";
@@ -121,7 +122,7 @@ export default function CptHcpcsCodesPage() {
       <div>
         <PageHeader title="CPT / HCPCS Codes" description="Procedure code master." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="CPT/HCPCS Codes" />
         </Card>
       </div>
     );

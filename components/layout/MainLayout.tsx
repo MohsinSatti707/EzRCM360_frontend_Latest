@@ -4,7 +4,7 @@ import { NavigationProgress } from "./NavigationProgress";
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <NavigationProgress />
       <Sidebar />
       <div className="flex min-h-screen flex-col pl-64 transition-all duration-200">

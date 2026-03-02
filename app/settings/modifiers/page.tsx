@@ -20,6 +20,7 @@ import { modifiersApi } from "@/lib/services/modifiers";
 import { usePaginatedList } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { ModifierDto, CreateModifierCommand } from "@/lib/services/modifiers";
 
 const MODULE_NAME = "Modifiers";
@@ -123,7 +124,7 @@ export default function ModifiersPage() {
       <div>
         <PageHeader title="Modifiers" description="Procedure and billing modifiers." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Modifiers" />
         </Card>
       </div>
     );

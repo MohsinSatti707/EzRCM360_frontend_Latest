@@ -8,6 +8,7 @@ import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { renderingParticipationsApi } from "@/lib/services/renderingParticipations";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import { lookupsApi } from "@/lib/services/lookups";
 import { useToast } from "@/lib/contexts/ToastContext";
 import type {
@@ -146,7 +147,7 @@ export default function RenderingParticipationPage() {
       <div>
         <PageHeader title="Rendering Provider-Plan Participation" description="Network participation status." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Rendering Participation" />
         </Card>
       </div>
     );

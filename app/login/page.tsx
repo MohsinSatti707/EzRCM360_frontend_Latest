@@ -77,16 +77,16 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-primary-50/20 p-6">
-      <Card className="w-full max-w-md animate-fade-in-up overflow-hidden p-8 shadow-ms-card hover:shadow-ms-card-hover">
+    <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-6">
+      <Card className="w-full max-w-md animate-fade-in-up overflow-hidden border border-border bg-card p-8 shadow-none">
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white font-semibold shadow-md shadow-primary-600/25">
             E
           </div>
           <span className="text-xl font-semibold tracking-tight text-slate-800">EzRCM360</span>
         </div>
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Sign in</h2>
-        <p className="mt-2 text-base text-slate-600">
+        <h2 className="font-aileron text-2xl font-semibold tracking-tight text-foreground">Sign in</h2>
+        <p className="mt-2 text-base text-muted-foreground">
           Use your credentials to access the settings portal.
         </p>
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
@@ -137,7 +137,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-primary-50/30 p-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-4">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
       </div>
     }>

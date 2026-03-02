@@ -7,6 +7,7 @@ import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { getApiUrl } from "@/lib/api";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import { organizationsApi } from "@/lib/services/organizations";
 import type {
   OrganizationProfileDto,
@@ -174,7 +175,7 @@ export default function OrganizationPage() {
     return (
       <PageShell breadcrumbs={[{ label: "Settings & Configurations", href: "/settings" }, { label: "Organization" }]} title="Organization">
         <Card className="p-6">
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Organization" />
         </Card>
       </PageShell>
     );
@@ -198,10 +199,10 @@ export default function OrganizationPage() {
       title="Organization"
       description="Manage organization profile and preferences."
     >
-      {/* Summary card - Microsoft-style with icon header */}
-      <Card className="mb-8 overflow-hidden animate-fade-in-up">
+      {/* Summary card - design: bg-[#F7F8F9] rounded-[5px] h-[120px] */}
+      <Card className="mb-8 overflow-hidden animate-fade-in-up rounded-[5px] border border-border bg-[#F7F8F9]">
         <div className="flex flex-col sm:flex-row">
-          <div className="flex min-h-[120px] min-w-[140px] items-center justify-center bg-gradient-to-br from-primary-50/80 to-primary-100/40 p-6">
+          <div className="flex min-h-[120px] min-w-[140px] items-center justify-center p-6">
             <div className="flex h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-primary-600 text-2xl font-semibold text-white shadow-lg shadow-primary-600/20">
               {profile.logoUrl ? (
                 <img
@@ -219,23 +220,23 @@ export default function OrganizationPage() {
             </div>
           </div>
           <div className="flex flex-1 flex-col justify-center px-6 py-5">
-            <h2 className="text-xl font-semibold text-slate-900">{profile.name}</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="font-aileron text-xl font-bold leading-none text-[#202830]">{profile.name}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               Organization profile and settings
             </p>
           </div>
         </div>
       </Card>
 
-      {/* Organization Information - Microsoft-style card */}
-      <Card className="overflow-hidden animate-fade-in-up stagger-1">
-        <div className="flex min-h-[80px] items-center gap-3 bg-gradient-to-r from-slate-50 to-slate-50/50 px-6 py-5">
+      {/* Organization Information - design style */}
+      <Card className="overflow-hidden animate-fade-in-up stagger-1 border border-border bg-card">
+        <div className="flex min-h-[80px] items-center gap-3 px-6 py-5">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100">
             <svg className="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-slate-900">Organization Information</h3>
+          <h3 className="text-base font-semibold text-foreground">Organization Information</h3>
         </div>
         <div className="grid gap-x-10 gap-y-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
           <div>

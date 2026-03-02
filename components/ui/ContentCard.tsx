@@ -57,23 +57,23 @@ export function ContentCard({
           {icon}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {category}
           </p>
           {title && (
-            <p className="mt-1.5 text-base font-semibold text-primary-600">
+            <p className="mt-1.5 text-base font-semibold text-primary">
               {title}
             </p>
           )}
           {description && (
-            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
               {description}
             </p>
           )}
         </div>
       </div>
       {links.length > 0 && (
-        <ul className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4">
+        <ul className="mt-5 flex flex-col gap-3 border-t border-border pt-4">
           {links.map((link) => (
             <li key={link.href}>
               {link.external ? (
@@ -81,7 +81,7 @@ export function ContentCard({
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center text-sm font-semibold text-primary-600 transition-colors hover:text-primary-700"
+                  className="group inline-flex items-center text-sm font-semibold text-primary transition-colors hover:text-primary/80"
                 >
                   {link.label}
                   <ExternalLinkIcon />
@@ -89,7 +89,7 @@ export function ContentCard({
               ) : (
                 <Link
                   href={link.href}
-                  className="group inline-flex items-center text-sm font-semibold text-primary-600 transition-colors hover:text-primary-700"
+                  className="group inline-flex items-center text-sm font-semibold text-primary transition-colors hover:text-primary/80"
                 >
                   {link.label}
                   <ChevronIcon />
@@ -103,7 +103,7 @@ export function ContentCard({
   );
 
   const baseClass =
-    "flex flex-col rounded-xl border border-slate-200/60 bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:border-slate-200";
+    "flex flex-col rounded-lg border border-border bg-card p-6 shadow-none transition-all duration-300 hover:shadow-[var(--shadow-card)]";
 
   if (href) {
     return (

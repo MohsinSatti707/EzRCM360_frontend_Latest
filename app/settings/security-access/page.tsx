@@ -23,6 +23,7 @@ import type {
 } from "@/lib/services/securityAccess";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 
 const MODULE_NAME = "Security Access";
 
@@ -204,7 +205,7 @@ export default function SecurityAccessPage() {
         description="Manage security and MFA settings."
       >
         <Card className="p-6">
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Security Access" />
         </Card>
       </PageShell>
     );

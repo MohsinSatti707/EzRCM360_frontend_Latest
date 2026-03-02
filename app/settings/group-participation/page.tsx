@@ -10,6 +10,7 @@ import { groupParticipationsApi } from "@/lib/services/groupParticipations";
 import { lookupsApi } from "@/lib/services/lookups";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type {
   GroupProviderPlanParticipationListItemDto,
   CreateGroupProviderPlanParticipationRequest,
@@ -146,7 +147,7 @@ export default function GroupParticipationPage() {
       <div>
         <PageHeader title="Group Provider-Plan Participation" description="Network participation status." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Group Participation" />
         </Card>
       </div>
     );

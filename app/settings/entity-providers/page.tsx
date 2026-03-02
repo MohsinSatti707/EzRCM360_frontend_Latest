@@ -10,6 +10,7 @@ import { entityProvidersApi } from "@/lib/services/entityProviders";
 import { lookupsApi } from "@/lib/services/lookups";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { EntityProviderListItemDto, CreateEntityProviderRequest, UpdateEntityProviderRequest } from "@/lib/services/entityProviders";
 import type { EntityLookupDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
@@ -136,7 +137,7 @@ export default function EntityProvidersPage() {
       <div>
         <PageHeader title="Entity Providers" description="Manage entity providers." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Entity Providers" />
         </Card>
       </div>
     );

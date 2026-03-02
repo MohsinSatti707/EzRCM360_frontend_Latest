@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { geographyApi } from "@/lib/services/geography";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type {
   ZipGeoMappingDto,
   ZipGeoMappingLookupsDto,
@@ -149,7 +150,7 @@ export default function GeographyResolutionPage() {
       <div>
         <PageHeader title="Geography Resolution" description="Zip-to-geography mappings for fee schedule resolution." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Geography Resolution" />
         </Card>
       </div>
     );

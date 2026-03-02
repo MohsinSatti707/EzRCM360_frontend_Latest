@@ -99,23 +99,23 @@ export function Sidebar() {
   const visibleRcm = rcmSubItems.filter((item) => canView(item.moduleName));
 
   const navLinkClass = (active: boolean) =>
-    `flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-3 text-sm font-medium transition-all duration-200 border-l-4 ${
+    `sidebar-item-text flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-3 text-sm font-medium transition-all duration-200 ${
       active
-        ? "border-primary-600 bg-primary-50/90 text-primary-700"
-        : "border-transparent text-slate-600 hover:bg-slate-50/80 hover:text-slate-800"
+        ? "bg-[hsl(210,100%,96%)] text-primary"
+        : "text-sidebar-foreground hover:bg-sidebar-accent/50"
     }`;
 
   const subLinkClass = (active: boolean) =>
-    `flex items-center gap-3 rounded-lg py-2.5 pl-9 pr-3 text-sm font-medium transition-all duration-200 border-l-4 ${
+    `sidebar-item-text flex items-center gap-3 rounded-lg py-2 pl-9 pr-3 text-sm font-medium transition-all duration-200 ${
       active
-        ? "border-primary-600 bg-primary-50/90 text-primary-700"
-        : "border-transparent text-slate-600 hover:bg-slate-50/80 hover:text-slate-800"
+        ? "bg-[hsl(210,100%,96%)] text-primary"
+        : "text-sidebar-foreground hover:bg-sidebar-accent/50"
     }`;
 
   return (
-    <aside className="fixed left-0 top-0 z-30 flex h-full w-64 flex-col border-r border-slate-200/60 bg-white shadow-[var(--shadow-sidebar)]">
+    <aside className="fixed left-0 top-0 z-30 flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar shadow-[var(--shadow-sidebar)]">
       {/* Logo / Brand */}
-      <div className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200/60 px-4">
+      <div className="flex h-14 shrink-0 items-center gap-3 border-b border-sidebar-border px-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-sm font-semibold text-white shadow-sm">
           E
         </div>
@@ -190,7 +190,7 @@ export function Sidebar() {
       </nav>
 
       {/* User section */}
-      <div className="shrink-0 border-t border-slate-200/60 p-3">
+      <div className="shrink-0 border-t border-sidebar-border p-3">
         <Link
           href="/profile/edit"
           className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-slate-50"
@@ -211,7 +211,7 @@ export function Sidebar() {
             <p className="truncate text-xs text-neutral-500">{userEmail ?? "—"}</p>
           </div>
         </Link>
-        <LogoutButton className="mt-2 flex w-full items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100" />
+        <LogoutButton className="mt-2 flex w-full items-center justify-center rounded-lg bg-[hsl(210,40%,96%)] px-3 py-3 text-sm font-medium text-primary transition-colors hover:bg-[hsl(210,40%,92%)]" />
       </div>
     </aside>
   );

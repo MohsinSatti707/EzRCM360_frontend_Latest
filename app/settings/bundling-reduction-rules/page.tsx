@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { bundlingReductionRulesApi } from "@/lib/services/bundlingReductionRules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { BundlingReductionRuleDto, CreateBundlingReductionRuleCommand } from "@/lib/services/bundlingReductionRules";
 import type { PaginatedList } from "@/lib/types";
 import { toDateInput } from "@/lib/utils";
@@ -126,7 +127,7 @@ export default function BundlingReductionRulesPage() {
       <div>
         <PageHeader title="Bundling / Reduction Rules" description="Bundling and multiple procedure reduction rules." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Bundling & Reduction Rules" />
         </Card>
       </div>
     );

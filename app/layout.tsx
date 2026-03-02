@@ -8,6 +8,8 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
+// Aileron loaded via @import in globals.css from fonts.cdnfonts.com
+
 export const metadata: Metadata = {
   title: "EzRCM360 - Settings & Configurations",
   description: "Settings and configurations portal for EzRCM360",

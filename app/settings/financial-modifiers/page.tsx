@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { financialModifiersApi } from "@/lib/services/financialModifiers";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { FinancialModifierDto, CreateFinancialModifierCommand } from "@/lib/services/financialModifiers";
 import type { PaginatedList } from "@/lib/types";
 import { toDateInput } from "@/lib/utils";
@@ -113,7 +114,7 @@ export default function FinancialModifiersPage() {
       <div>
         <PageHeader title="Financial Modifiers" description="Financial modifier factors (e.g. MER)." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Financial Modifiers" />
         </Card>
       </div>
     );

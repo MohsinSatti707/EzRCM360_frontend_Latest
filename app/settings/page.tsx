@@ -6,6 +6,7 @@ import { SettingsCard } from "@/components/settings/SettingsCard";
 import { usePermissionsOptional } from "@/lib/contexts/PermissionsContext";
 import { SETTINGS_HREF_TO_MODULE_NAME } from "@/lib/constants/routeModuleMap";
 
+/** Exact 9-section layout matching client design. Order and labels from spec. */
 const configSections = [
   {
     title: "Organization & Access",
@@ -26,6 +27,7 @@ const configSections = [
       { label: "Entity Information", href: "/settings/entities" },
       { label: "Entity Providers", href: "/settings/entity-providers" },
       { label: "Entity Locations", href: "/settings/entity-locations" },
+      { label: "Entity Billable Fee Schedules", href: "/settings/entity-fee-schedules" },
     ],
   },
   {
@@ -75,11 +77,21 @@ const configSections = [
     links: [
       { label: "ICD Codes", href: "/settings/icd-codes" },
       { label: "NDC Codes", href: "/settings/ndc-codes" },
-      { label: "CPT / HCPCS Codes", href: "/settings/cpt-hcpcs-codes" },
+      { label: "CPT/HCPCS Codes", href: "/settings/cpt-hcpcs-codes" },
       { label: "Modifiers", href: "/settings/modifiers" },
       { label: "Financial Modifiers", href: "/settings/financial-modifiers" },
       { label: "Bundling / Reduction Rules", href: "/settings/bundling-reduction-rules" },
       { label: "Procedure Grouping Rules", href: "/settings/procedure-grouping-rules" },
+    ],
+  },
+  {
+    title: "NSA Configuration",
+    description: "Centralized NSA eligibility and valuation governance.",
+    links: [
+      { label: "NSA Eligibility Rules", href: "/settings/nsa-eligibility" },
+      { label: "Federal NSA Rules", href: "/settings/nsa-federal" },
+      { label: "State NSA Rules", href: "/settings/nsa-state" },
+      { label: "Emergency Override Rules", href: "/settings/nsa-emergency" },
     ],
   },
 ];
@@ -87,7 +99,6 @@ const configSections = [
 export default function SettingsPage() {
   const permissions = usePermissionsOptional();
   const filteredSections = useMemo(() => {
-    /** Fail-secure: only show sections/links user has canView for. */
     if (!permissions || permissions.loading) return null;
     return configSections
       .map((section) => ({
@@ -106,20 +117,20 @@ export default function SettingsPage() {
   return (
     <PageShell
       title="Settings & Configurations"
-      description="Manage organization, users, payers, and configurations."
+      description={undefined}
     >
       {loading ? (
-        <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-64 animate-shimmer-bg rounded-xl" />
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+            <div key={i} className="h-56 animate-shimmer-bg rounded-xl border border-slate-200" />
           ))}
         </div>
       ) : filteredSections && filteredSections.length > 0 ? (
-        <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:grid-rows-3">
           {filteredSections.map((section, i) => (
             <div
               key={section.title}
-              className="animate-fade-in-up opacity-0"
+              className="flex animate-fade-in-up opacity-0"
               style={{
                 animationDelay: `${Math.min(i, 8) * 0.05}s`,
                 animationFillMode: "forwards",
@@ -129,6 +140,7 @@ export default function SettingsPage() {
                 title={section.title}
                 description={section.description}
                 links={section.links}
+                className="w-full"
               />
             </div>
           ))}

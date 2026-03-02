@@ -20,14 +20,14 @@ export function Header() {
   const title = getHeaderTitle(pathname);
 
   return (
-    <header className="sticky top-0 z-20 flex h-[3.5rem] shrink-0 items-center justify-between border-b border-slate-200/60 bg-white/90 px-6 shadow-[var(--shadow-header)] backdrop-blur-md lg:px-8">
+    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-border bg-background px-6 lg:px-8">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium tracking-tight text-slate-700">{title}</span>
+        <span className="text-sm font-medium tracking-tight text-foreground">{title}</span>
       </div>
       <div className="flex items-center gap-1">
         <button
           type="button"
-          className="relative rounded-lg p-2.5 text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-1"
+          className="relative flex items-center gap-2 rounded-lg p-2.5 text-muted-foreground transition-all duration-200 hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
           aria-label="Notifications"
         >
           <svg

@@ -22,6 +22,7 @@ import { lookupsApi } from "@/lib/services/lookups";
 import { usePaginatedList } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type {
   PayerListItemDto,
   CreatePayerRequest,
@@ -177,7 +178,7 @@ export default function PayersPage() {
       <div>
         <PageHeader title="Payer Configuration" description="Centralized payer registry." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Payer Configuration" />
         </Card>
       </div>
     );

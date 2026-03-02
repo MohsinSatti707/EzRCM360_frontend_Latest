@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { procedureGroupingRulesApi } from "@/lib/services/procedureGroupingRules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { ProcedureGroupingRuleDto, CreateProcedureGroupingRuleCommand } from "@/lib/services/procedureGroupingRules";
 import type { PaginatedList } from "@/lib/types";
 import { toDateInput } from "@/lib/utils";
@@ -115,7 +116,7 @@ export default function ProcedureGroupingRulesPage() {
       <div>
         <PageHeader title="Procedure Grouping Rules" description="Procedure grouping for ranking and reporting." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Procedure Grouping Rules" />
         </Card>
       </div>
     );

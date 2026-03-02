@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { icdCodesApi } from "@/lib/services/icdCodes";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { CreateIcdCodeCommand } from "@/lib/services/icdCodes";
 import type { IcdCodeDto } from "@/lib/types";
 import type { PaginatedList } from "@/lib/types";
@@ -133,7 +134,7 @@ export default function IcdCodesPage() {
       <div>
         <PageHeader title="ICD Codes" description="Standardized diagnosis codes (e.g. ICD-10)." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="ICD Codes" />
         </Card>
       </div>
     );

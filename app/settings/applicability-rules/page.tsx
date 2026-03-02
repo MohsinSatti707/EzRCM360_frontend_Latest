@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { applicabilityRulesApi } from "@/lib/services/applicabilityRules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type {
   ApplicabilityRuleDto,
   CreateApplicabilityRuleCommand,
@@ -196,7 +197,7 @@ export default function ApplicabilityRulesPage() {
       <div>
         <PageHeader title="Applicability Rules" description="Fee schedule applicability rules." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Applicability Rules" />
         </Card>
       </div>
     );

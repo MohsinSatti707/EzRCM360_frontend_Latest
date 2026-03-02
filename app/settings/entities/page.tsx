@@ -21,6 +21,7 @@ import { entitiesApi } from "@/lib/services/entities";
 import { usePaginatedList } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { EntityListItemDto, CreateEntityRequest, UpdateEntityRequest } from "@/lib/services/entities";
 
 const MODULE_NAME = "Entities";
@@ -125,7 +126,7 @@ export default function EntitiesPage() {
       <div>
         <PageHeader title="Entity Information" description="Define entity identity and structure." />
         <Card>
-          <p className="text-sm text-slate-600">You do not have permission to view this page.</p>
+          <AccessRestrictedContent sectionName="Entity Information" />
         </Card>
       </div>
     );
