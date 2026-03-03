@@ -37,7 +37,7 @@ export function Loader({
       >
         {spinner}
         {label && (
-          <p className="text-sm font-medium text-slate-500">{label}</p>
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
         )}
       </div>
     );
@@ -49,7 +49,7 @@ export function Loader({
     >
       {spinner}
       {label && (
-        <p className="text-sm text-slate-500">{label}</p>
+        <p className="text-sm text-muted-foreground">{label}</p>
       )}
     </div>
   );

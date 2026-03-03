@@ -16,7 +16,7 @@ export function ModalFooter({
   loading,
 }: ModalFooterProps) {
   return (
-    <div className="flex justify-end gap-2 border-t border-slate-200 px-6 py-4">
+    <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
       <Button variant="secondary" onClick={onCancel} disabled={loading}>
         Cancel
       </Button>

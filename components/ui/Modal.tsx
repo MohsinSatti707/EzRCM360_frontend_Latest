@@ -29,21 +29,21 @@ export function Modal({ open, onClose, title, children, size = "md" }: ModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" aria-hidden onClick={onClose} />
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-md" aria-hidden onClick={onClose} />
       <div
-        className={`relative w-full ${sizeClass} max-h-[90vh] flex flex-col rounded-xl border border-slate-200/60 bg-white shadow-xl animate-scale-in`}
+        className={`relative w-full ${sizeClass} max-h-[90vh] flex flex-col rounded-lg border bg-card text-card-foreground shadow-xl animate-scale-in`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200/60 px-6 py-4">
-          <h2 id="modal-title" className="text-lg font-semibold text-slate-900">
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
+          <h2 id="modal-title" className="text-lg font-semibold text-foreground">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             aria-label="Close"
           >
             <span className="sr-only">Close</span>

@@ -27,17 +27,17 @@ export function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60" aria-hidden onClick={onClose} />
+      <div className="absolute inset-0 bg-foreground/60" aria-hidden onClick={onClose} />
       <div
-        className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+        className="relative w-full max-w-md rounded-lg border bg-card p-6 shadow-xl text-card-foreground"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
       >
-        <h2 id="confirm-title" className="text-lg font-semibold text-slate-900">
+        <h2 id="confirm-title" className="text-lg font-semibold text-foreground">
           {title}
         </h2>
-        <p className="mt-2 text-sm text-slate-600">{message}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
         <div className="mt-6 flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             Cancel
@@ -46,12 +46,8 @@ export function ConfirmDialog({
             onClick={() => {
               onConfirm();
             }}
+            variant={variant === "danger" ? "danger" : "primary"}
             disabled={loading}
-            className={
-              variant === "danger"
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : undefined
-            }
           >
             {loading ? "…" : confirmLabel}
           </Button>

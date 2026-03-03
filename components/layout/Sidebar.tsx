@@ -116,10 +116,10 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-30 flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar shadow-[var(--shadow-sidebar)]">
       {/* Logo / Brand */}
       <div className="flex h-14 shrink-0 items-center gap-3 border-b border-sidebar-border px-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-sm font-semibold text-white shadow-sm">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-sm">
           E
         </div>
-        <span className="font-semibold tracking-tight text-slate-800">EzRCM360</span>
+        <span className="font-semibold tracking-tight text-foreground">EzRCM360</span>
       </div>
 
       {/* Navigation */}
@@ -193,7 +193,7 @@ export function Sidebar() {
       <div className="shrink-0 border-t border-sidebar-border p-3">
         <Link
           href="/profile/edit"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-slate-50"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-accent/50"
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-100 text-sm font-medium text-primary-700">
             {profilePictureUrl ? (
@@ -207,8 +207,8 @@ export function Sidebar() {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-neutral-800">{userName ?? "User"}</p>
-            <p className="truncate text-xs text-neutral-500">{userEmail ?? "—"}</p>
+            <p className="truncate text-sm font-medium text-foreground">{userName ?? "User"}</p>
+            <p className="truncate text-xs text-muted-foreground">{userEmail ?? "—"}</p>
           </div>
         </Link>
         <LogoutButton className="mt-2 flex w-full items-center justify-center rounded-lg bg-[hsl(210,40%,96%)] px-3 py-3 text-sm font-medium text-primary transition-colors hover:bg-[hsl(210,40%,92%)]" />

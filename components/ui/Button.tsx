@@ -1,17 +1,18 @@
 import Link from "next/link";
 
-/** Base styles – enterprise look with subtle transitions */
+/** Design system – matches EzRCM360_Design-main button.tsx */
 const baseStyles =
-  "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2";
 
 const variantStyles = {
   primary:
-    "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:bg-primary/80",
+    "bg-primary text-primary-foreground hover:bg-primary/90",
   secondary:
-    "bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100",
-  ghost: "text-slate-700 hover:bg-slate-100 active:bg-slate-200",
+    "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+  ghost:
+    "hover:bg-accent hover:text-accent-foreground",
   danger:
-    "bg-red-600 text-white shadow-sm hover:bg-red-700 hover:shadow-md active:bg-red-800",
+    "bg-destructive text-destructive-foreground hover:bg-destructive/90",
 } as const;
 
 export type ButtonVariant = keyof typeof variantStyles;
