@@ -178,57 +178,57 @@ export default function GeographyResolutionPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Mapping Name
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Category
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       State / Zip
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Geo Code / Name
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Year
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Active
                     </th>
                     {(canUpdate || canDelete) && (
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-500">
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                         Actions
                       </th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-900">
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-foreground">
                         {row.mappingName}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {fsCategoryLabel(row.fsCategory)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {row.state} / {row.zip}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {row.geoCode ?? "—"} / {row.geoName ?? "—"}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {row.year}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">
                         {row.active ? (
                           <span className="text-green-600">Yes</span>
                         ) : (
-                          <span className="text-slate-400">No</span>
+                          <span className="text-muted-foreground">No</span>
                         )}
                       </td>
                       {(canUpdate || canDelete) && (
@@ -246,8 +246,8 @@ export default function GeographyResolutionPage() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-600">
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">
                 Page {data.pageNumber} of {data.totalPages} ({data.totalCount}{" "}
                 total)
               </p>
@@ -271,7 +271,7 @@ export default function GeographyResolutionPage() {
           </>
         )}
         {!data && !error && (
-          <div className="py-8 text-center text-sm text-slate-500">
+          <div className="py-8 text-center text-sm text-muted-foreground">
             Loading…
           </div>
         )}
@@ -296,7 +296,7 @@ export default function GeographyResolutionPage() {
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Mapping name *
               </label>
               <input
@@ -305,11 +305,11 @@ export default function GeographyResolutionPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, mappingName: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Fee schedule category
               </label>
               <select
@@ -320,7 +320,7 @@ export default function GeographyResolutionPage() {
                     fsCategory: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 {lookups?.fsCategories?.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -330,7 +330,7 @@ export default function GeographyResolutionPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 State *
               </label>
               <select
@@ -338,7 +338,7 @@ export default function GeographyResolutionPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, state: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 <option value="">Select</option>
                 {lookups?.states?.map((s) => (
@@ -349,7 +349,7 @@ export default function GeographyResolutionPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Zip *
               </label>
               <input
@@ -358,11 +358,11 @@ export default function GeographyResolutionPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, zip: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Mapping type
               </label>
               <select
@@ -373,7 +373,7 @@ export default function GeographyResolutionPage() {
                     mappingType: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 {lookups?.mappingTypes?.map((m) => (
                   <option key={m.value} value={m.value}>
@@ -383,7 +383,7 @@ export default function GeographyResolutionPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Source
               </label>
               <select
@@ -391,7 +391,7 @@ export default function GeographyResolutionPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, source: Number(e.target.value) }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 {lookups?.sources?.map((s) => (
                   <option key={s.value} value={s.value}>
@@ -401,7 +401,7 @@ export default function GeographyResolutionPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Geo code
               </label>
               <input
@@ -410,11 +410,11 @@ export default function GeographyResolutionPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, geoCode: e.target.value || null }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Geo name
               </label>
               <input
@@ -423,11 +423,11 @@ export default function GeographyResolutionPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, geoName: e.target.value || null }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Year
               </label>
               <select
@@ -435,7 +435,7 @@ export default function GeographyResolutionPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, year: Number(e.target.value) }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 {lookups?.years?.map((y) => (
                   <option key={y} value={y}>
@@ -445,7 +445,7 @@ export default function GeographyResolutionPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Quarter
               </label>
               <input
@@ -460,7 +460,7 @@ export default function GeographyResolutionPage() {
                     quarter: v === "" ? null : Number(v),
                   }));
                 }}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div className="flex items-center sm:col-span-2">
@@ -471,9 +471,9 @@ export default function GeographyResolutionPage() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, active: e.target.checked }))
                   }
-                  className="rounded border-slate-300"
+                  className="rounded border-input"
                 />
-                <span className="text-sm text-slate-700">Active</span>
+                <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>

@@ -120,9 +120,9 @@ export default function SettingsPage() {
       description={undefined}
     >
       {loading ? (
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-            <div key={i} className="h-56 animate-shimmer-bg rounded-xl border border-slate-200" />
+            <div key={i} className="h-56 animate-shimmer-bg rounded-lg border border-border bg-card" />
           ))}
         </div>
       ) : filteredSections && filteredSections.length > 0 ? (
@@ -146,8 +146,8 @@ export default function SettingsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-12 text-center">
-          <p className="text-sm text-slate-600">
+        <div className="rounded-lg border border-border bg-muted/50 p-12 text-center">
+          <p className="text-sm text-muted-foreground">
             You don&apos;t have access to any settings. Contact your administrator.
           </p>
         </div>

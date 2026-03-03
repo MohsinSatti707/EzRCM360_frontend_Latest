@@ -142,24 +142,24 @@ export default function CptHcpcsCodesPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Code</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Short description</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Code type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Add-on</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Active</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Code</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Short description</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Code type</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Add-on</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Active</th>
                     {(canUpdate || canDelete) && (
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-500">Actions</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Actions</th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{row.code}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{row.shortDescription}</td>
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">{row.code}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{row.shortDescription}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{codeTypeLabel(row.codeType)}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{row.isAddOn ? "Yes" : "No"}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{row.isActive ? "Yes" : "No"}</td>
@@ -178,8 +178,8 @@ export default function CptHcpcsCodesPage() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-600">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
               <div className="flex gap-2">
                 <Button variant="secondary" disabled={!data.hasPreviousPage} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
                 <Button variant="secondary" disabled={!data.hasNextPage} onClick={() => setPage((p) => p + 1)}>Next</Button>
@@ -187,7 +187,7 @@ export default function CptHcpcsCodesPage() {
             </div>
           </>
         )}
-        {!data && !error && <div className="py-8 text-center text-sm text-slate-500">Loading…</div>}
+        {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit code" : "Add code"} size="lg">
@@ -195,41 +195,41 @@ export default function CptHcpcsCodesPage() {
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Code *</label>
-              <input type="text" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Code *</label>
+              <input type="text" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Code type</label>
-              <select value={form.codeType} onChange={(e) => setForm((f) => ({ ...f, codeType: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Code type</label>
+              <select value={form.codeType} onChange={(e) => setForm((f) => ({ ...f, codeType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {CODE_TYPE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Short description *</label>
-              <input type="text" value={form.shortDescription} onChange={(e) => setForm((f) => ({ ...f, shortDescription: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Short description *</label>
+              <input type="text" value={form.shortDescription} onChange={(e) => setForm((f) => ({ ...f, shortDescription: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Long description</label>
-              <textarea value={form.longDescription ?? ""} onChange={(e) => setForm((f) => ({ ...f, longDescription: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" rows={2} />
+              <label className="mb-1 block text-sm font-medium text-foreground">Long description</label>
+              <textarea value={form.longDescription ?? ""} onChange={(e) => setForm((f) => ({ ...f, longDescription: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" rows={2} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Effective start date</label>
-              <input type="date" value={toDateInput(form.effectiveStartDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveStartDate: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective start date</label>
+              <input type="date" value={toDateInput(form.effectiveStartDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveStartDate: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Effective end date</label>
-              <input type="date" value={toDateInput(form.effectiveEndDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveEndDate: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective end date</label>
+              <input type="date" value={toDateInput(form.effectiveEndDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveEndDate: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div className="flex items-center gap-4 sm:col-span-2">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isAddOn} onChange={(e) => setForm((f) => ({ ...f, isAddOn: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">Add-on</span>
+                <input type="checkbox" checked={form.isAddOn} onChange={(e) => setForm((f) => ({ ...f, isAddOn: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">Add-on</span>
               </label>
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">Active</span>
+                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>

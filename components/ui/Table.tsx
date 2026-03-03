@@ -1,31 +1,34 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
+/** Matches design table.tsx: border-b, hover:bg-muted/50, h-12 px-4 head, p-4 cell */
 export interface TableProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export function Table({ children, className = "" }: TableProps) {
+export function Table({ children, className }: TableProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card">
-      <table className={`min-w-full divide-y divide-border ${className}`}>
+    <div className="relative w-full overflow-auto rounded-lg border border-border bg-card">
+      <table className={cn("w-full caption-bottom text-sm", className)}>
         {children}
       </table>
     </div>
   );
 }
 
-export function TableHead({ children }: { children: React.ReactNode }) {
-  return <thead className="bg-muted/50">{children}</thead>;
+export function TableHead({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <thead className={cn("[&_tr]:border-b", className)}>{children}</thead>;
 }
 
-export function TableBody({ children }: { children: React.ReactNode }) {
-  return <tbody className="divide-y divide-border bg-card">{children}</tbody>;
+export function TableBody({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <tbody className={cn("[&_tr:last-child]:border-0", className)}>{children}</tbody>;
 }
 
 export function TableRow({
   children,
-  className = "",
+  className,
   style,
 }: {
   children: React.ReactNode;
@@ -33,7 +36,10 @@ export function TableRow({
   style?: React.CSSProperties;
 }) {
   return (
-    <tr className={`transition-colors duration-200 hover:bg-muted/30 ${className}`} style={style}>
+    <tr
+      className={cn("border-b border-border transition-colors hover:bg-muted/50", className)}
+      style={style}
+    >
       {children}
     </tr>
   );
@@ -42,7 +48,7 @@ export function TableRow({
 export function TableHeaderCell({
   children,
   align = "left",
-  className = "",
+  className,
 }: {
   children: React.ReactNode;
   align?: "left" | "right";
@@ -50,7 +56,11 @@ export function TableHeaderCell({
 }) {
   return (
     <th
-      className={`px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground ${align === "right" ? "text-right" : "text-left"} ${className}`}
+      className={cn(
+        "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+        align === "right" && "text-right",
+        className
+      )}
     >
       {children}
     </th>
@@ -60,7 +70,7 @@ export function TableHeaderCell({
 export function TableCell({
   children,
   align = "left",
-  className = "",
+  className,
   colSpan,
 }: {
   children: React.ReactNode;
@@ -71,7 +81,7 @@ export function TableCell({
   return (
     <td
       colSpan={colSpan}
-      className={`px-5 py-4 text-sm text-foreground ${align === "right" ? "text-right" : "text-left"} ${className}`}
+      className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0 text-foreground", align === "right" && "text-right", className)}
     >
       {children}
     </td>

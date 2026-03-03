@@ -79,9 +79,9 @@ export function EntityLocationFormModal({
               type="checkbox"
               checked={form.isActive ?? true}
               onChange={(e) => onFormChange({ ...form, isActive: e.target.checked })}
-              className="rounded border-slate-300"
+              className="rounded border-input"
             />
-            <span className="text-sm text-slate-700">Active</span>
+            <span className="text-sm text-foreground">Active</span>
           </label>
         </div>
         <ModalFooter

@@ -170,7 +170,7 @@ export default function EntityLocationsPage() {
                 {data.items.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell className="whitespace-nowrap">{row.entityDisplayName}</TableCell>
-                    <TableCell className="whitespace-nowrap font-medium text-slate-900">
+                    <TableCell className="whitespace-nowrap font-medium text-foreground">
                       {row.locationName}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">{row.locationType}</TableCell>

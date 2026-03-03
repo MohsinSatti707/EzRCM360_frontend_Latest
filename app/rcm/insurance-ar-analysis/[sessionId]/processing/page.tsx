@@ -24,18 +24,19 @@ function PipelineStep({
   index,
   isLast,
 }: {
-  step: { name: string; status: string; count?: number | null };
+  step: { name: string; status: string; message?: string | null; count?: number | null };
   index: number;
   isLast: boolean;
 }) {
   const completed = step.status === "Completed";
   const inProgress = step.status === "InProgress";
+  const failed = step.status === "Failed";
   const pending = step.status === "Pending";
 
   return (
     <div
       className={`flex items-start gap-4 animate-fade-in-up opacity-0 ${
-        completed || inProgress ? "opacity-100" : "opacity-60"
+        completed || inProgress || failed ? "opacity-100" : "opacity-60"
       }`}
       style={{ animationDelay: `${index * 80}ms`, animationFillMode: "forwards" }}
     >
@@ -44,9 +45,11 @@ function PipelineStep({
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-500 ${
             completed
               ? "border-emerald-500 bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-              : inProgress
-                ? "border-primary-600 bg-primary-50 text-primary-600 ring-4 ring-primary-100 animate-pulse-soft"
-                : "border-neutral-200 bg-white text-neutral-400"
+              : failed
+                ? "border-red-500 bg-red-50 text-red-600"
+                : inProgress
+                  ? "border-primary-600 bg-primary-50 text-primary-600 ring-4 ring-primary-100 animate-pulse-soft"
+                  : "border-border bg-card text-muted-foreground"
           }`}
         >
           {completed ? (
@@ -57,6 +60,10 @@ function PipelineStep({
                 clipRule="evenodd"
               />
             </svg>
+          ) : failed ? (
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-label="Failed">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
           ) : inProgress ? (
             <Loader variant="inline" size="sm" />
           ) : (
@@ -66,7 +73,7 @@ function PipelineStep({
         {!isLast && (
           <div
             className={`absolute top-12 left-1/2 h-8 w-0.5 -translate-x-1/2 rounded-full transition-colors duration-500 ${
-              completed ? "bg-emerald-400" : "bg-neutral-200"
+              completed ? "bg-emerald-400" : "bg-border"
             }`}
           />
         )}
@@ -76,18 +83,23 @@ function PipelineStep({
           className={`text-sm font-medium transition-colors ${
             completed
               ? "text-emerald-700"
-              : inProgress
-                ? "text-neutral-900"
-                : "text-neutral-500"
+              : failed
+                ? "text-red-700"
+                : inProgress
+                  ? "text-foreground"
+                  : "text-muted-foreground"
           }`}
         >
           {step.name}
           {step.count != null ? (
-            <span className="ml-1.5 text-neutral-500">({step.count})</span>
+            <span className="ml-1.5 text-muted-foreground">({step.count})</span>
           ) : null}
         </p>
+        {failed && step.message && (
+          <p className="mt-1 text-xs text-red-600">{step.message}</p>
+        )}
         {inProgress && (
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
               className="h-full w-3/5 rounded-full bg-primary-500 animate-pulse-soft"
             />
@@ -190,10 +202,16 @@ export default function InsuranceArAnalysisProcessingPage() {
   }, [sessionId]);
 
   const needsResolution = (val: string | null | undefined) =>
-    val && /NotFound|Pending|ActionRequired/i.test(val);
+    val && /NotFound|Pending|ActionRequired|Failed/i.test(val);
 
-  const needsPayerResolution = needsResolution(session?.payerValidationStatus);
-  const needsPlanResolution = needsResolution(session?.planValidationStatus);
+  const payerPlanStepFailed = status?.steps?.some(
+    (s) => s.name === "Payer & Plan Validation" && s.status === "Failed"
+  );
+
+  const needsPayerResolution =
+    needsResolution(session?.payerValidationStatus) || payerPlanStepFailed;
+  const needsPlanResolution =
+    needsResolution(session?.planValidationStatus) || payerPlanStepFailed;
   const needsProviderResolution = needsResolution(session?.providerParticipationValidationStatus);
   const needsFacilityResolution = needsResolution(session?.facilityParticipationValidationStatus);
 
@@ -330,9 +348,11 @@ export default function InsuranceArAnalysisProcessingPage() {
     status?.sessionStatus === "ConflictResolution" ||
     status?.currentStage?.toLowerCase().includes("conflict");
 
+  const isEnrichmentPending = status?.sessionStatus === "EnrichmentPending";
   const isProcessing =
-    status?.sessionStatus === "Processing" ||
-    (status?.sessionStatus !== "Completed" && status?.sessionStatus !== "Failed");
+    !isEnrichmentPending &&
+    (status?.sessionStatus === "Processing" ||
+      (status?.sessionStatus !== "Completed" && status?.sessionStatus !== "Failed"));
 
   return (
     <PageShell
@@ -345,19 +365,19 @@ export default function InsuranceArAnalysisProcessingPage() {
     >
       {session && (
         <Card className="mb-6 animate-fade-in-up">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Session Summary
           </h3>
           <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <dt className="text-neutral-500">Uploaded by</dt>
-              <dd className="mt-0.5 font-medium text-neutral-900">
+              <dt className="text-muted-foreground">Uploaded by</dt>
+              <dd className="mt-0.5 font-medium text-foreground">
                 {session.uploadedBy ?? "—"}
               </dd>
             </div>
             <div>
-              <dt className="text-neutral-500">Uploaded at</dt>
-              <dd className="mt-0.5 font-medium text-neutral-900">
+              <dt className="text-muted-foreground">Uploaded at</dt>
+              <dd className="mt-0.5 font-medium text-foreground">
                 {session.uploadedAt
                   ? new Date(session.uploadedAt).toLocaleDateString(undefined, {
                       month: "short",
@@ -370,8 +390,8 @@ export default function InsuranceArAnalysisProcessingPage() {
               </dd>
             </div>
             <div>
-              <dt className="text-neutral-500">Total rows</dt>
-              <dd className="mt-0.5 font-medium text-neutral-900">
+              <dt className="text-muted-foreground">Total rows</dt>
+              <dd className="mt-0.5 font-medium text-foreground">
                 {session.totalRows ?? "—"}
               </dd>
             </div>
@@ -380,23 +400,55 @@ export default function InsuranceArAnalysisProcessingPage() {
       )}
 
       <Card className="overflow-hidden">
-        <div className="border-b border-neutral-200 bg-gradient-to-r from-primary-50 to-primary-50/50 px-6 py-5">
+        <div
+          className={`border-b border-border px-6 py-5 ${
+            isEnrichmentPending
+              ? "bg-gradient-to-r from-amber-50 to-amber-50/80"
+              : "bg-gradient-to-r from-primary-50 to-primary-50/50"
+          }`}
+        >
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-100">
-              <div
-                className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"
-                role="status"
-                aria-label="Loading"
-              />
-            </div>
+            {isEnrichmentPending ? (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+                <svg
+                  className="h-6 w-6 text-amber-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-label="Action required"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+            ) : (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-100">
+                <div
+                  className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"
+                  role="status"
+                  aria-label="Loading"
+                />
+              </div>
+            )}
             <div>
-              <h2 className="text-lg font-semibold text-neutral-900">
-                {isProcessing ? "Analyzing your AR data" : status?.overallMessage ?? "Processing"}
+              <h2 className="text-lg font-semibold text-foreground">
+                {isEnrichmentPending
+                  ? "Action required"
+                  : isProcessing
+                    ? "Analyzing your AR data"
+                    : status?.overallMessage ?? "Processing"}
               </h2>
-              <p className="text-sm text-neutral-600">
-                {isProcessing
-                  ? "Running validation, enrichment, and recovery calculations. This typically takes 1–3 minutes."
-                  : status?.overallMessage}
+              <p className="text-sm text-muted-foreground">
+                {isEnrichmentPending
+                  ? status?.overallMessage ??
+                    "Download the file for this step, resolve or exclude, then re-upload."
+                  : isProcessing
+                    ? "Running validation, enrichment, and recovery calculations. This typically takes 1–3 minutes."
+                    : status?.overallMessage}
               </p>
             </div>
           </div>
@@ -406,10 +458,10 @@ export default function InsuranceArAnalysisProcessingPage() {
           {!status ? (
             <div className="flex flex-col items-center justify-center gap-4 py-12">
               <ValidationAnalysisIcon className="h-20 w-20" />
-              <p className="text-sm font-medium text-neutral-700">
+              <p className="text-sm font-medium text-foreground">
                 Loading pipeline status…
               </p>
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-muted-foreground">
                 No errors detected so far.
               </p>
             </div>

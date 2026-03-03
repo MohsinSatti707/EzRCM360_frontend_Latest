@@ -167,28 +167,28 @@ export default function GroupParticipationPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Provider</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Plan</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Effective from</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Effective to</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Active</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Provider</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Plan</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Effective from</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Effective to</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Active</th>
                     {(canUpdate || canDelete) && (
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-500">Actions</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Actions</th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-900">{row.entityProviderDisplayName ?? row.entityProviderId}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.planDisplayName ?? row.planId}</td>
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-foreground">{row.entityProviderDisplayName ?? row.entityProviderId}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.planDisplayName ?? row.planId}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{statusLabel(row.participationStatus)}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.effectiveTo ? toDateInput(row.effectiveTo) : "—"}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.effectiveTo ? toDateInput(row.effectiveTo) : "—"}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{row.isActive ? "Yes" : "No"}</td>
                       {(canUpdate || canDelete) && (
                         <td className="min-w-[180px] whitespace-nowrap px-5 py-4 text-right">
@@ -205,8 +205,8 @@ export default function GroupParticipationPage() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-600">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
               <div className="flex gap-2">
                 <Button variant="secondary" disabled={!data.hasPreviousPage} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
                 <Button variant="secondary" disabled={!data.hasNextPage} onClick={() => setPage((p) => p + 1)}>Next</Button>
@@ -214,7 +214,7 @@ export default function GroupParticipationPage() {
             </div>
           </>
         )}
-        {!data && !error && <div className="py-8 text-center text-sm text-slate-500">Loading…</div>}
+        {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit participation" : "Add participation"} size="lg">
@@ -222,8 +222,8 @@ export default function GroupParticipationPage() {
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Provider *</label>
-              <select value={form.entityProviderId} onChange={(e) => setForm((f) => ({ ...f, entityProviderId: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required>
+              <label className="mb-1 block text-sm font-medium text-foreground">Provider *</label>
+              <select value={form.entityProviderId} onChange={(e) => setForm((f) => ({ ...f, entityProviderId: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" required>
                 <option value="">Select provider</option>
                 {entityProviders.map((p) => (
                   <option key={p.id} value={p.id}>{p.displayName}</option>
@@ -231,8 +231,8 @@ export default function GroupParticipationPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Plan *</label>
-              <select value={form.planId} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required>
+              <label className="mb-1 block text-sm font-medium text-foreground">Plan *</label>
+              <select value={form.planId} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" required>
                 <option value="">Select plan</option>
                 {plans.map((p) => (
                   <option key={p.id} value={p.id}>{p.displayName}</option>
@@ -240,33 +240,33 @@ export default function GroupParticipationPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Participation status</label>
-              <select value={form.participationStatus} onChange={(e) => setForm((f) => ({ ...f, participationStatus: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Participation status</label>
+              <select value={form.participationStatus} onChange={(e) => setForm((f) => ({ ...f, participationStatus: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {participationStatuses.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Source</label>
-              <select value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Source</label>
+              <select value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {participationSources.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Effective from</label>
-              <input type="date" value={toDateInput(form.effectiveFrom ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveFrom: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective from</label>
+              <input type="date" value={toDateInput(form.effectiveFrom ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveFrom: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Effective to</label>
-              <input type="date" value={toDateInput(form.effectiveTo ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveTo: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective to</label>
+              <input type="date" value={toDateInput(form.effectiveTo ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveTo: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div className="sm:col-span-2">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">Active</span>
+                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>

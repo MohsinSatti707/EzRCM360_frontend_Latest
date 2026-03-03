@@ -125,10 +125,10 @@ function ModuleCell({
   depth: number;
   onToggle?: () => void;
 }) {
-  const iconClass = "h-5 w-5 shrink-0 text-slate-500";
+  const iconClass = "h-5 w-5 shrink-0 text-muted-foreground";
   const Chevron = () => (
     <svg
-      className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+      className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -197,7 +197,7 @@ function ModuleCell({
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); onToggle?.(); }}
-          className="flex shrink-0 rounded p-0.5 hover:bg-slate-100"
+          className="flex shrink-0 rounded p-0.5 hover:bg-muted"
           aria-expanded={isExpanded}
         >
           <Chevron />
@@ -459,10 +459,10 @@ export default function RolesPermissionsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
-            <h2 className="text-base font-semibold text-slate-800">Roles</h2>
+            <h2 className="text-base font-semibold text-foreground">Roles</h2>
           </div>
           {rolesLoading ? (
-            <div className="py-12 text-center text-sm text-slate-500">Loading…</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
           ) : (
             <ul className="space-y-1.5">
               {roles.map((role) => (
@@ -473,10 +473,10 @@ export default function RolesPermissionsPage() {
                     className={`flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-left text-sm font-medium transition-all duration-200 ${
                       selectedRole?.id === role.id
                         ? "bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-100"
-                        : "text-slate-700 hover:bg-slate-50"
+                        : "text-foreground hover:bg-muted"
                     }`}
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm font-semibold text-slate-600">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold text-muted-foreground">
                       {role.name.charAt(0).toUpperCase()}
                     </span>
                     <span className="truncate">{role.name}</span>
@@ -495,32 +495,32 @@ export default function RolesPermissionsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
-            <h2 className="text-base font-semibold text-slate-800">Permissions</h2>
+            <h2 className="text-base font-semibold text-foreground">Permissions</h2>
           </div>
           {!selectedRole ? (
-            <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-16">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+            <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/50 py-16">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                 </svg>
               </div>
-              <p className="text-center text-sm font-medium text-slate-600">Select a role to view and edit permissions</p>
-              <p className="mt-1 text-center text-xs text-slate-500">Choose a role from the list on the left</p>
+              <p className="text-center text-sm font-medium text-muted-foreground">Select a role to view and edit permissions</p>
+              <p className="mt-1 text-center text-xs text-muted-foreground">Choose a role from the list on the left</p>
             </div>
           ) : permissionsLoading ? (
-            <div className="py-12 text-center text-sm text-slate-500">Loading…</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
           ) : (
             <>
               <div className="mb-4 flex items-start justify-between gap-2">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-slate-900">
+                    <span className="text-lg font-bold text-foreground">
                       {selectedRole.name.toUpperCase()}
                     </span>
                     <button
                       type="button"
                       onClick={openEditRole}
-                      className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                      className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
                       title="Edit role"
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -530,7 +530,7 @@ export default function RolesPermissionsPage() {
                     <button
                       type="button"
                       onClick={() => setDeleteId(selectedRole.id)}
-                      className="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
+                      className="rounded p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-600"
                       title="Delete role"
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -539,13 +539,13 @@ export default function RolesPermissionsPage() {
                     </button>
                   </div>
                   {selectedRole.description && (
-                    <p className="mt-1 text-sm text-slate-600">{selectedRole.description}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{selectedRole.description}</p>
                   )}
                 </div>
               </div>
 
-              <div className="overflow-x-auto rounded-lg border border-slate-200">
-                <table className="w-full table-fixed divide-y divide-slate-200">
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="w-full table-fixed divide-y divide-border">
                   <colgroup>
                     <col className="min-w-[200px]" />
                     <col className="w-20" />
@@ -566,7 +566,7 @@ export default function RolesPermissionsPage() {
                             ref={headerViewRef}
                             checked={allView}
                             onChange={(e) => selectAllInColumn("canView", e.target.checked)}
-                            className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                            className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
                           />
                           <span>View</span>
                         </label>
@@ -578,7 +578,7 @@ export default function RolesPermissionsPage() {
                             ref={headerCreateRef}
                             checked={allCreate}
                             onChange={(e) => selectAllInColumn("canCreate", e.target.checked)}
-                            className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                            className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
                           />
                           <span>Create</span>
                         </label>
@@ -590,7 +590,7 @@ export default function RolesPermissionsPage() {
                             ref={headerUpdateRef}
                             checked={allUpdate}
                             onChange={(e) => selectAllInColumn("canUpdate", e.target.checked)}
-                            className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                            className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
                           />
                           <span>Update</span>
                         </label>
@@ -602,7 +602,7 @@ export default function RolesPermissionsPage() {
                             ref={headerDeleteRef}
                             checked={allDelete}
                             onChange={(e) => selectAllInColumn("canDelete", e.target.checked)}
-                            className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                            className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
                           />
                           <span>Delete</span>
                         </label>
@@ -612,15 +612,15 @@ export default function RolesPermissionsPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 bg-white">
+                  <tbody className="divide-y divide-border bg-card">
                     {rowsToRender.map(({ node, depth }) => {
                         const p = permissionByModuleId.get(node.id);
                         if (!p) return null;
                         const hasChildren = node.children.length > 0;
                         const isExpanded = expandedParentIds.has(node.id);
                         return (
-                          <tr key={p.moduleId} className="hover:bg-slate-50">
-                            <td className="overflow-hidden text-ellipsis whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
+                          <tr key={p.moduleId} className="hover:bg-muted">
+                            <td className="overflow-hidden text-ellipsis whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">
                               <ModuleCell
                                 moduleName={p.moduleName}
                                 hasChildren={hasChildren}
@@ -634,7 +634,7 @@ export default function RolesPermissionsPage() {
                                 type="checkbox"
                                 checked={p.canView}
                                 onChange={(e) => updatePermission(p.moduleId, { canView: e.target.checked })}
-                                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                                className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
                               />
                             </td>
                             <td className="px-2 py-2 text-center">
@@ -642,7 +642,7 @@ export default function RolesPermissionsPage() {
                                 type="checkbox"
                                 checked={p.canCreate}
                                 onChange={(e) => updatePermission(p.moduleId, { canCreate: e.target.checked })}
-                                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                                className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
                               />
                             </td>
                             <td className="px-2 py-2 text-center">
@@ -650,7 +650,7 @@ export default function RolesPermissionsPage() {
                                 type="checkbox"
                                 checked={p.canUpdate}
                                 onChange={(e) => updatePermission(p.moduleId, { canUpdate: e.target.checked })}
-                                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                                className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
                               />
                             </td>
                             <td className="px-2 py-2 text-center">
@@ -658,7 +658,7 @@ export default function RolesPermissionsPage() {
                                 type="checkbox"
                                 checked={p.canDelete}
                                 onChange={(e) => updatePermission(p.moduleId, { canDelete: e.target.checked })}
-                                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                                className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
                               />
                             </td>
                             <td className="px-3 py-2 align-middle">
@@ -667,7 +667,7 @@ export default function RolesPermissionsPage() {
                                 onChange={(e) =>
                                   updatePermission(p.moduleId, { visibilityLevel: e.target.value })
                                 }
-                                className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                className="w-full min-w-0 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                               >
                                 {VISIBILITY_LEVELS.map((v) => (
                                   <option key={v} value={v}>
@@ -713,23 +713,23 @@ export default function RolesPermissionsPage() {
           )}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Role Name</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Role Name</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 placeholder="e.g., System Administrator"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Description</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Description</label>
               <textarea
                 value={form.description ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 placeholder="Write description here..."
                 rows={4}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
             </div>
           </div>

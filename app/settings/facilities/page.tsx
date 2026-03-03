@@ -169,7 +169,7 @@ export default function FacilitiesPage() {
               <TableBody>
                 {data.items.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell className="whitespace-nowrap font-medium text-slate-900">
+                    <TableCell className="whitespace-nowrap font-medium text-foreground">
                       {row.name}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">{row.facilityType}</TableCell>
@@ -205,7 +205,7 @@ export default function FacilitiesPage() {
           </>
         )}
         {loading && !data && !error && (
-          <div className="py-8 text-center text-sm text-slate-500">Loading…</div>
+          <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
         )}
       </Card>
 

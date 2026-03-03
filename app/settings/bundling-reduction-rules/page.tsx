@@ -147,25 +147,25 @@ export default function BundlingReductionRulesPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Primary CPT</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Secondary CPT</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Reduction factor</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Rule type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Active</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Primary CPT</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Secondary CPT</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Reduction factor</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Rule type</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Active</th>
                     {(canUpdate || canDelete) && (
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-500">Actions</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Actions</th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{row.primaryCptCode}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.secondaryCptCode}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.reductionFactor}</td>
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">{row.primaryCptCode}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.secondaryCptCode}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.reductionFactor}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{ruleTypeLabel(row.ruleType)}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{row.isActive ? "Yes" : "No"}</td>
                       {(canUpdate || canDelete) && (
@@ -183,8 +183,8 @@ export default function BundlingReductionRulesPage() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-600">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
               <div className="flex gap-2">
                 <Button variant="secondary" disabled={!data.hasPreviousPage} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
                 <Button variant="secondary" disabled={!data.hasNextPage} onClick={() => setPage((p) => p + 1)}>Next</Button>
@@ -192,7 +192,7 @@ export default function BundlingReductionRulesPage() {
             </div>
           </>
         )}
-        {!data && !error && <div className="py-8 text-center text-sm text-slate-500">Loading…</div>}
+        {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit rule" : "Add rule"} size="lg">
@@ -200,47 +200,47 @@ export default function BundlingReductionRulesPage() {
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Primary CPT code *</label>
-              <input type="text" value={form.primaryCptCode} onChange={(e) => setForm((f) => ({ ...f, primaryCptCode: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Primary CPT code *</label>
+              <input type="text" value={form.primaryCptCode} onChange={(e) => setForm((f) => ({ ...f, primaryCptCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Secondary CPT code *</label>
-              <input type="text" value={form.secondaryCptCode} onChange={(e) => setForm((f) => ({ ...f, secondaryCptCode: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Secondary CPT code *</label>
+              <input type="text" value={form.secondaryCptCode} onChange={(e) => setForm((f) => ({ ...f, secondaryCptCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Reduction factor</label>
-              <input type="number" step="any" value={form.reductionFactor} onChange={(e) => setForm((f) => ({ ...f, reductionFactor: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Reduction factor</label>
+              <input type="number" step="any" value={form.reductionFactor} onChange={(e) => setForm((f) => ({ ...f, reductionFactor: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Rule type</label>
-              <select value={form.ruleType} onChange={(e) => setForm((f) => ({ ...f, ruleType: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Rule type</label>
+              <select value={form.ruleType} onChange={(e) => setForm((f) => ({ ...f, ruleType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {RULE_TYPE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Rule name</label>
-              <input type="text" value={form.ruleName ?? ""} onChange={(e) => setForm((f) => ({ ...f, ruleName: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Rule name</label>
+              <input type="text" value={form.ruleName ?? ""} onChange={(e) => setForm((f) => ({ ...f, ruleName: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div className="sm:col-span-2">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.modifier59Override} onChange={(e) => setForm((f) => ({ ...f, modifier59Override: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">Modifier 59 override</span>
+                <input type="checkbox" checked={form.modifier59Override} onChange={(e) => setForm((f) => ({ ...f, modifier59Override: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">Modifier 59 override</span>
               </label>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Effective start date</label>
-              <input type="date" value={toDateInput(form.effectiveStartDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveStartDate: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective start date</label>
+              <input type="date" value={toDateInput(form.effectiveStartDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveStartDate: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Effective end date</label>
-              <input type="date" value={toDateInput(form.effectiveEndDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveEndDate: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective end date</label>
+              <input type="date" value={toDateInput(form.effectiveEndDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveEndDate: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div className="sm:col-span-2">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">Active</span>
+                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>

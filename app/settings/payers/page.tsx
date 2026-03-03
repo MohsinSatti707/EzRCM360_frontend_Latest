@@ -214,8 +214,8 @@ export default function PayersPage() {
               <TableBody>
                 {data.items.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell className="font-medium text-slate-900">{row.payerName}</TableCell>
-                    <TableCell className="max-w-[180px] truncate text-slate-600">{row.aliases ?? "—"}</TableCell>
+                    <TableCell className="font-medium text-foreground">{row.payerName}</TableCell>
+                    <TableCell className="max-w-[180px] truncate text-muted-foreground">{row.aliases ?? "—"}</TableCell>
                     <TableCell className="whitespace-nowrap">
                       {entityTypeLabel(row.entityType)}
                     </TableCell>

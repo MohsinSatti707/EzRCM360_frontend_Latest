@@ -35,7 +35,7 @@ export function FileUploadZone({
 
   return (
     <div className="space-y-2 animate-fade-in">
-      <p className="text-sm text-neutral-600">{hint}</p>
+      <p className="text-sm text-muted-foreground">{hint}</p>
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -48,10 +48,10 @@ export function FileUploadZone({
           handleFiles(e.dataTransfer.files);
         }}
         onClick={() => inputRef.current?.click()}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 transition-all duration-300 ease-out ${
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-12 transition-all duration-300 ease-out ${
           drag
             ? "scale-[1.02] border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/10"
-            : "border-neutral-300 hover:border-primary-400 hover:bg-neutral-50 hover:shadow-md active:scale-[0.99]"
+            : "border-border hover:border-primary/50 hover:bg-muted/50 hover:shadow-md active:scale-[0.99]"
         }`}
       >
         <div
@@ -73,9 +73,9 @@ export function FileUploadZone({
             />
           </svg>
         </div>
-        <p className="text-sm font-semibold text-neutral-800">{label}</p>
-        <p className="mt-1 text-sm text-neutral-500">or click to browse</p>
-        <span className="mt-3 inline-flex items-center rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-shadow hover:shadow-md">
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        <p className="mt-1 text-sm text-muted-foreground">or click to browse</p>
+        <span className="mt-3 inline-flex items-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-shadow hover:bg-primary/90">
           Select File
         </span>
         <input

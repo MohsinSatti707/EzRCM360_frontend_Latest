@@ -40,9 +40,9 @@ export function AccessDenied({
       <div className="mx-auto max-w-md text-center">
         {/* Icon */}
         <div className="mb-6 flex justify-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
             <svg
-              className="h-10 w-10 text-slate-500"
+              className="h-10 w-10 text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -58,17 +58,17 @@ export function AccessDenied({
         </div>
 
         {/* Title */}
-        <h2 className="text-xl font-semibold text-slate-900">
+        <h2 className="text-xl font-semibold text-foreground">
           Access restricted
         </h2>
 
         {/* Message */}
-        <p className="mt-3 text-sm leading-relaxed text-slate-600">
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {displayMessage}
         </p>
 
         {/* Support note */}
-        <p className="mt-4 text-xs text-slate-500">
+        <p className="mt-4 text-xs text-muted-foreground">
           Contact your administrator if you believe you should have access.
         </p>
 

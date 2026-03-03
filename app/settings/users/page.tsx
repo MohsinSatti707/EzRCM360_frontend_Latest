@@ -251,7 +251,7 @@ export default function UsersPage() {
     >
       <Card className="overflow-hidden p-0 animate-fade-in-up">
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
           <div className="flex flex-wrap items-center gap-3">
             <select
               value={statusFilter}
@@ -266,7 +266,7 @@ export default function UsersPage() {
               ))}
             </select>
             <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -283,7 +283,7 @@ export default function UsersPage() {
         </div>
 
         {error && (
-          <div className="border-b border-slate-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+          <div className="border-b border-border bg-red-50 px-4 py-2 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -291,7 +291,7 @@ export default function UsersPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr className="bg-primary-50">
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-primary-900">
@@ -322,25 +322,25 @@ export default function UsersPage() {
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 bg-white">
+                <tbody className="divide-y divide-border bg-card">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">
                         {toUserDisplayId(row.id)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-900">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-foreground">
                         {row.userName}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {row.email}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {row.organizationName ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {row.roleName ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {moduleNames(row.moduleIds ?? [])}
                       </td>
                       <td className="whitespace-nowrap px-4 py-2 text-sm">
@@ -364,7 +364,7 @@ export default function UsersPage() {
                               <button
                                 type="button"
                                 onClick={() => openEdit(row)}
-                                className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                                className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
                                 title="Edit"
                               >
                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -376,7 +376,7 @@ export default function UsersPage() {
                               <button
                                 type="button"
                                 onClick={() => setDeleteId(row.id)}
-                                className="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
+                                className="rounded p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-600"
                                 title="Delete"
                               >
                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -392,8 +392,8 @@ export default function UsersPage() {
                 </tbody>
               </table>
             </div>
-            <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
-              <p className="text-sm text-slate-600">
+            <div className="flex items-center justify-between border-t border-border px-4 py-3">
+              <p className="text-sm text-muted-foreground">
                 Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)
               </p>
               <div className="flex gap-2">
@@ -412,7 +412,7 @@ export default function UsersPage() {
           </>
         )}
         {!data && !error && (
-          <div className="py-12 text-center text-sm text-slate-500">Loading…</div>
+          <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
         )}
       </Card>
 
@@ -429,7 +429,7 @@ export default function UsersPage() {
           )}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">User Name</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">User Name</label>
               <input
                 type="text"
                 value={form.userName}
@@ -439,7 +439,7 @@ export default function UsersPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Email</label>
               <input
                 type="email"
                 value={form.email}
@@ -450,7 +450,7 @@ export default function UsersPage() {
             </div>
             {!editId && (
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Password (optional)</label>
+                <label className="mb-1 block text-sm font-medium text-foreground">Password (optional)</label>
                 <input
                   type="password"
                   value={form.password ?? ""}
@@ -461,7 +461,7 @@ export default function UsersPage() {
             )}
             {editId && (
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">New password (optional)</label>
+                <label className="mb-1 block text-sm font-medium text-foreground">New password (optional)</label>
                 <input
                   type="password"
                   value={(form as { newPassword?: string }).newPassword ?? ""}
@@ -471,7 +471,7 @@ export default function UsersPage() {
               </div>
             )}
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Organization</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Organization</label>
               <select
                 value={form.organizationId ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, organizationId: e.target.value }))}
@@ -486,7 +486,7 @@ export default function UsersPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Role Assignment</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Role Assignment</label>
               <select
                 value={form.roleId ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, roleId: e.target.value }))}
@@ -501,7 +501,7 @@ export default function UsersPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Module Access</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Module Access</label>
               <select
                 multiple
                 value={form.moduleIds ?? []}
@@ -518,11 +518,11 @@ export default function UsersPage() {
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-slate-500">Hold Ctrl (Windows) or Cmd (Mac) to select multiple.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Hold Ctrl (Windows) or Cmd (Mac) to select multiple.</p>
             </div>
             {editId && (
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">User Status</label>
+                <label className="mb-1 block text-sm font-medium text-foreground">User Status</label>
                 <select
                   value={form.status}
                   onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))}

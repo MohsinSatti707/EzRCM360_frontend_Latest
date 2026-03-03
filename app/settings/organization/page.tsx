@@ -240,60 +240,60 @@ export default function OrganizationPage() {
         </div>
         <div className="grid gap-x-10 gap-y-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Organization Name
             </dt>
-            <dd className="mt-1 text-sm font-medium text-slate-900">{profile.name}</dd>
+            <dd className="mt-1 text-sm font-medium text-foreground">{profile.name}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Primary Administrator
             </dt>
-            <dd className="mt-1 text-sm font-medium text-slate-900" title={profile.primaryAdministratorUserId ?? undefined}>
+            <dd className="mt-1 text-sm font-medium text-foreground" title={profile.primaryAdministratorUserId ?? undefined}>
               {formatId(profile.primaryAdministratorUserId)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Default Time Zone
             </dt>
-            <dd className="mt-1 text-sm text-slate-900">
+            <dd className="mt-1 text-sm text-foreground">
               {profile.defaultTimeZone ?? "Not set"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               System Date Format
             </dt>
-            <dd className="mt-1 text-sm text-slate-900">
+            <dd className="mt-1 text-sm text-foreground">
               {profile.systemDateFormat
                 ? `${profile.systemDateFormat} (e.g. ${formatDateExample(profile.systemDateFormat)})`
                 : "Not set"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               System Time Format
             </dt>
-            <dd className="mt-1 text-sm text-slate-900">
+            <dd className="mt-1 text-sm text-foreground">
               {profile.systemTimeFormat
                 ? `${profile.systemTimeFormat} (e.g. ${formatTimeExample(profile.systemTimeFormat)})`
                 : "Not set"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Organization Status
             </dt>
             <dd className="mt-1">
-              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${profile.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${profile.isActive ? "bg-emerald-50 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
                 {profile.isActive ? "Active" : "Inactive"}
               </span>
             </dd>
           </div>
         </div>
         {canUpdate && (
-          <div className="border-t border-slate-100 px-6 py-5">
+          <div className="border-t border-border px-6 py-5">
             <Button onClick={openEdit} className="inline-flex items-center gap-2">
               Edit Organization
               <svg
@@ -329,7 +329,7 @@ export default function OrganizationPage() {
           )}
           <div className="space-y-5">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Organization Name
               </label>
               <input
@@ -341,7 +341,7 @@ export default function OrganizationPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Primary Administrator
               </label>
               <input
@@ -358,7 +358,7 @@ export default function OrganizationPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Default Time Zone
               </label>
               <select
@@ -383,7 +383,7 @@ export default function OrganizationPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 System Date Format
               </label>
               <div className="flex flex-wrap items-baseline gap-2">
@@ -404,13 +404,13 @@ export default function OrganizationPage() {
                     </option>
                   ))}
                 </select>
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-muted-foreground">
                   → {formatDateExample(form.systemDateFormat)}
                 </span>
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 System Time Format
               </label>
               <div className="flex flex-wrap items-baseline gap-2">
@@ -431,20 +431,20 @@ export default function OrganizationPage() {
                     </option>
                   ))}
                 </select>
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-muted-foreground">
                   → {formatTimeExample(form.systemTimeFormat)}
                 </span>
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Upload Logo
               </label>
-              <p className="mb-2 text-xs text-slate-500">
+              <p className="mb-2 text-xs text-muted-foreground">
                 Supported Formats (PNG, JPG, PDF) | Maximum file size: {MAX_LOGO_MB} MB
               </p>
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-input bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 Upload File(s)
@@ -456,7 +456,7 @@ export default function OrganizationPage() {
                 />
               </label>
               {logoFile && (
-                <p className="mt-1 text-xs text-slate-600">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Selected: {logoFile.name}
                 </p>
               )}

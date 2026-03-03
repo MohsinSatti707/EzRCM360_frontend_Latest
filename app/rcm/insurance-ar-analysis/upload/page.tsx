@@ -224,17 +224,17 @@ export default function InsuranceArAnalysisUploadPage() {
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
-        <nav className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+        <nav className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           <Link href="/rcm/insurance-ar-analysis" className="transition-colors hover:text-primary-600 hover:underline">
             Insurance AR Analysis
           </Link>
-          <span className="text-slate-300" aria-hidden>/</span>
-          <span className="text-slate-700">Upload AR Intake</span>
+          <span className="text-muted-foreground" aria-hidden>/</span>
+          <span className="text-foreground">Upload AR Intake</span>
         </nav>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Data Upload and AR Analysis Session Creation
         </h1>
-        <p className="mt-2 text-base text-slate-600">
+        <p className="mt-2 text-base text-muted-foreground">
           Upload AR intake and PM reports to start an analysis session.
         </p>
       </div>
@@ -244,7 +244,7 @@ export default function InsuranceArAnalysisUploadPage() {
         <Card className="animate-fade-in-up">
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-neutral-700">Validation Mode</label>
+              <label className="block text-sm font-medium text-foreground">Validation Mode</label>
               <div className="mt-2 flex gap-6">
                 <label className="flex cursor-pointer items-center gap-2">
                   <input
@@ -257,9 +257,9 @@ export default function InsuranceArAnalysisUploadPage() {
                       setRowsPassed(false);
                       setValidationResult(null);
                     }}
-                    className="h-4 w-4 border-neutral-300 text-primary-600 focus:ring-primary-500"
+                    className="h-4 w-4 border-input text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm text-neutral-700">Full (recommended) — validates columns and rows in one step</span>
+                  <span className="text-sm text-foreground">Full (recommended) — validates columns and rows in one step</span>
                 </label>
                 <label className="flex cursor-pointer items-center gap-2">
                   <input
@@ -272,26 +272,26 @@ export default function InsuranceArAnalysisUploadPage() {
                       setRowsPassed(false);
                       setValidationResult(null);
                     }}
-                    className="h-4 w-4 border-neutral-300 text-primary-600 focus:ring-primary-500"
+                    className="h-4 w-4 border-input text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm text-neutral-700">Columns first, then Rows — two-step validation</span>
+                  <span className="text-sm text-foreground">Columns first, then Rows — two-step validation</span>
                 </label>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700">Practice Name</label>
+              <label className="block text-sm font-medium text-foreground">Practice Name</label>
               <input
                 type="text"
                 value={practiceName}
                 onChange={(e) => setPracticeName(e.target.value)}
                 placeholder="e.g., Medical Billing"
-                className="mt-1 w-full max-w-md rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="mt-1 w-full max-w-md rounded-md border border-input px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700">
+              <label className="block text-sm font-medium text-foreground">
                 Upload AR Intake File
               </label>
               {!intakeFile ? (
@@ -310,8 +310,8 @@ export default function InsuranceArAnalysisUploadPage() {
                     </svg>
                   </div>
                   <div>
-                    <p className="font-medium text-neutral-900">{intakeFile.name}</p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="font-medium text-foreground">{intakeFile.name}</p>
+                    <p className="text-xs text-muted-foreground">
                       File size: {(intakeFile.size / 1024).toFixed(1)}KB
                     </p>
                   </div>
@@ -382,7 +382,7 @@ export default function InsuranceArAnalysisUploadPage() {
         <Card className="animate-fade-in-up">
           <div className="space-y-6">
             <div>
-              <h3 className="text-base font-semibold text-neutral-900">
+              <h3 className="text-base font-semibold text-foreground">
                 Upload PM Source Reports (Required for Audit)
               </h3>
               <FileUploadZone
@@ -394,7 +394,7 @@ export default function InsuranceArAnalysisUploadPage() {
             </div>
             {pmFiles.length > 0 && (
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-neutral-700">Uploaded File(s)</h4>
+                <h4 className="text-sm font-medium text-foreground">Uploaded File(s)</h4>
                 <ul className="space-y-2">
                   {pmFiles.map((f, i) => (
                     <li
@@ -407,15 +407,15 @@ export default function InsuranceArAnalysisUploadPage() {
                         </svg>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-neutral-900">{f.name}</p>
-                        <p className="text-xs text-neutral-500">
+                        <p className="font-medium text-foreground">{f.name}</p>
+                        <p className="text-xs text-muted-foreground">
                           File size: {(f.size / 1024).toFixed(2)}KB
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setPmFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-neutral-600"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-border hover:text-muted-foreground"
                         aria-label="Remove file"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -448,43 +448,43 @@ export default function InsuranceArAnalysisUploadPage() {
       {step === 3 && sessionDetail && (
         <Card className="animate-fade-in-up">
           <div className="space-y-6">
-            <h3 className="text-base font-semibold text-neutral-900">Review & Create Session</h3>
+            <h3 className="text-base font-semibold text-foreground">Review & Create Session</h3>
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-neutral-500">Session Name</dt>
-                <dd className="font-medium text-neutral-900">{sessionDetail.sessionName}</dd>
+                <dt className="text-muted-foreground">Session Name</dt>
+                <dd className="font-medium text-foreground">{sessionDetail.sessionName}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Practice Name</dt>
-                <dd className="font-medium text-neutral-900">{sessionDetail.practiceName}</dd>
+                <dt className="text-muted-foreground">Practice Name</dt>
+                <dd className="font-medium text-foreground">{sessionDetail.practiceName}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Uploaded by</dt>
-                <dd className="font-medium text-neutral-900">{sessionDetail.uploadedBy ?? "—"}</dd>
+                <dt className="text-muted-foreground">Uploaded by</dt>
+                <dd className="font-medium text-foreground">{sessionDetail.uploadedBy ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Uploaded at</dt>
-                <dd className="font-medium text-neutral-900">{formatDate(sessionDetail.uploadedAt)}</dd>
+                <dt className="text-muted-foreground">Uploaded at</dt>
+                <dd className="font-medium text-foreground">{formatDate(sessionDetail.uploadedAt)}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Source Type</dt>
-                <dd className="font-medium text-neutral-900">{sessionDetail.sourceType}</dd>
+                <dt className="text-muted-foreground">Source Type</dt>
+                <dd className="font-medium text-foreground">{sessionDetail.sourceType}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Intake Template File</dt>
-                <dd className="font-medium text-neutral-900">{sessionDetail.intakeTemplateFile ?? "—"}</dd>
+                <dt className="text-muted-foreground">Intake Template File</dt>
+                <dd className="font-medium text-foreground">{sessionDetail.intakeTemplateFile ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">PM Source Report File</dt>
-                <dd className="font-medium text-neutral-900">
+                <dt className="text-muted-foreground">PM Source Report File</dt>
+                <dd className="font-medium text-foreground">
                   {sessionDetail.pmSourceReportFiles.length > 0
                     ? sessionDetail.pmSourceReportFiles.join(", ")
                     : "—"}
                 </dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Total Rows</dt>
-                <dd className="font-medium text-neutral-900">
+                <dt className="text-muted-foreground">Total Rows</dt>
+                <dd className="font-medium text-foreground">
                   {sessionDetail.totalRows != null ? `${sessionDetail.totalRows} Rows` : "—"}
                 </dd>
               </div>
@@ -527,23 +527,23 @@ function ValidationStatus({
   const allErrors = [...result.columnErrors, ...result.rowErrors];
 
   return (
-    <div className="space-y-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-      <h4 className="font-semibold text-neutral-900">
+    <div className="space-y-4 rounded-lg border border-border bg-muted p-4">
+      <h4 className="font-semibold text-foreground">
         {loading ? "Validation In Progress" : result.success ? "Validation Completed" : "Validation In Progress"}
       </h4>
       {loading && (
         <div className="flex flex-col items-center justify-center gap-3 py-4">
           <ValidationAnalysisIcon className="h-20 w-20" />
-          <p className="text-sm font-medium text-neutral-700">
+          <p className="text-sm font-medium text-foreground">
             No errors detected so far.
           </p>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-muted-foreground">
             Analyzing your intake file. This may take a moment.
           </p>
         </div>
       )}
       {!loading && result.success && (
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Validation Completed. You can now move to the next step.
         </p>
       )}
@@ -556,8 +556,8 @@ function ValidationStatus({
             </svg>
           </div>
           <div>
-            <p className="font-medium text-neutral-900">{intakeFileName}</p>
-            <p className="text-xs text-neutral-500">Uploaded AR Intake File</p>
+            <p className="font-medium text-foreground">{intakeFileName}</p>
+            <p className="text-xs text-muted-foreground">Uploaded AR Intake File</p>
           </div>
         </div>
       )}
@@ -565,17 +565,17 @@ function ValidationStatus({
       {!loading && (
         <>
           <div>
-            <p className="text-sm font-medium text-neutral-700">
+            <p className="text-sm font-medium text-foreground">
               {loading ? "Validating Column(s)" : "Column(s) Validation"}
             </p>
             <div className="mt-1 flex items-center gap-2">
-              <div className="h-2 flex-1 rounded-full bg-neutral-200">
+              <div className="h-2 flex-1 rounded-full bg-border">
                 <div
                   className="h-full rounded-full bg-primary-600"
                   style={{ width: colOk ? "100%" : "10%" }}
                 />
               </div>
-              <span className="text-xs text-neutral-600">{colOk ? "Completed" : "10%"}</span>
+              <span className="text-xs text-muted-foreground">{colOk ? "Completed" : "10%"}</span>
             </div>
             {colOk ? (
               <div className="mt-2 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
@@ -603,17 +603,17 @@ function ValidationStatus({
           </div>
 
           <div>
-            <p className="text-sm font-medium text-neutral-700">
+            <p className="text-sm font-medium text-foreground">
               {loading ? "Validating Row(s)" : "Row(s) Validation"}
             </p>
             <div className="mt-1 flex items-center gap-2">
-              <div className="h-2 flex-1 rounded-full bg-neutral-200">
+              <div className="h-2 flex-1 rounded-full bg-border">
                 <div
                   className="h-full rounded-full bg-primary-600"
                   style={{ width: rowOk ? "100%" : result.rowValidatedCount > 0 ? "100%" : "10%" }}
                 />
               </div>
-              <span className="text-xs text-neutral-600">
+              <span className="text-xs text-muted-foreground">
                 {rowOk || (result.rowValidatedCount > 0 && result.rowErrors.length > 0)
                   ? "Completed"
                   : "10%"}
@@ -646,7 +646,7 @@ function ValidationStatus({
 
           {allErrors.length > 0 && (
             <div>
-              <p className="text-sm font-semibold text-neutral-800">
+              <p className="text-sm font-semibold text-foreground">
                 {String(allErrors.length).padStart(2, "0")} Error(s) Found
               </p>
               <Table>

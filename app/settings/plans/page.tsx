@@ -225,7 +225,7 @@ export default function PlansPage() {
               <TableBody>
                 {data.items.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell className="font-medium text-slate-900">{row.planName}</TableCell>
+                    <TableCell className="font-medium text-foreground">{row.planName}</TableCell>
                     <TableCell className="whitespace-nowrap">{row.linkedPayerName}</TableCell>
                     <TableCell className="whitespace-nowrap">
                       {planCategoryLabel(row.planCategory)} / {planTypeLabel(row.planType)}
@@ -257,7 +257,7 @@ export default function PlansPage() {
           </>
         )}
         {loading && !data && !error && (
-          <div className="py-8 text-center text-sm text-slate-500">Loading…</div>
+          <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
         )}
       </Card>
 
@@ -270,8 +270,8 @@ export default function PlansPage() {
         )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Payer *</label>
-              <select value={form.payerId} onChange={(e) => setForm((f) => ({ ...f, payerId: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required>
+              <label className="mb-1 block text-sm font-medium text-foreground">Payer *</label>
+              <select value={form.payerId} onChange={(e) => setForm((f) => ({ ...f, payerId: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" required>
                 <option value="">Select payer</option>
                 {payers.map((p) => (
                   <option key={p.id} value={p.id}>{p.payerName}</option>
@@ -279,36 +279,36 @@ export default function PlansPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Plan name *</label>
-              <input type="text" value={form.planName} onChange={(e) => setForm((f) => ({ ...f, planName: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Plan name *</label>
+              <input type="text" value={form.planName} onChange={(e) => setForm((f) => ({ ...f, planName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Aliases</label>
-              <input type="text" value={form.aliases ?? ""} onChange={(e) => setForm((f) => ({ ...f, aliases: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Optional" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Aliases</label>
+              <input type="text" value={form.aliases ?? ""} onChange={(e) => setForm((f) => ({ ...f, aliases: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="Optional" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Plan ID prefix</label>
-              <input type="text" value={form.planIdPrefix ?? ""} onChange={(e) => setForm((f) => ({ ...f, planIdPrefix: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Plan ID prefix</label>
+              <input type="text" value={form.planIdPrefix ?? ""} onChange={(e) => setForm((f) => ({ ...f, planIdPrefix: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Plan category</label>
-              <select value={form.planCategory} onChange={(e) => setForm((f) => ({ ...f, planCategory: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Plan category</label>
+              <select value={form.planCategory} onChange={(e) => setForm((f) => ({ ...f, planCategory: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {planCategories.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Plan type</label>
-              <select value={form.planType} onChange={(e) => setForm((f) => ({ ...f, planType: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Plan type</label>
+              <select value={form.planType} onChange={(e) => setForm((f) => ({ ...f, planType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {planTypes.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Market type</label>
-              <select value={form.marketType ?? ""} onChange={(e) => setForm((f) => ({ ...f, marketType: e.target.value ? Number(e.target.value) : null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Market type</label>
+              <select value={form.marketType ?? ""} onChange={(e) => setForm((f) => ({ ...f, marketType: e.target.value ? Number(e.target.value) : null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 <option value="">—</option>
                 {marketTypes.map((m) => (
                   <option key={m.value} value={m.value}>{m.label}</option>
@@ -316,8 +316,8 @@ export default function PlansPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">NSA category</label>
-              <select value={form.nsaCategory ?? ""} onChange={(e) => setForm((f) => ({ ...f, nsaCategory: e.target.value ? Number(e.target.value) : null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">NSA category</label>
+              <select value={form.nsaCategory ?? ""} onChange={(e) => setForm((f) => ({ ...f, nsaCategory: e.target.value ? Number(e.target.value) : null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 <option value="">—</option>
                 {nsaCategories.map((n) => (
                   <option key={n.value} value={n.value}>{n.label}</option>
@@ -326,49 +326,49 @@ export default function PlansPage() {
             </div>
             <div className="flex items-center gap-4 sm:col-span-2">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.oonBenefits} onChange={(e) => setForm((f) => ({ ...f, oonBenefits: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">OON benefits</span>
+                <input type="checkbox" checked={form.oonBenefits} onChange={(e) => setForm((f) => ({ ...f, oonBenefits: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">OON benefits</span>
               </label>
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.nsaEligible} onChange={(e) => setForm((f) => ({ ...f, nsaEligible: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">NSA eligible</span>
+                <input type="checkbox" checked={form.nsaEligible} onChange={(e) => setForm((f) => ({ ...f, nsaEligible: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">NSA eligible</span>
               </label>
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.providerParticipationApplicable} onChange={(e) => setForm((f) => ({ ...f, providerParticipationApplicable: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">Provider participation applicable</span>
+                <input type="checkbox" checked={form.providerParticipationApplicable} onChange={(e) => setForm((f) => ({ ...f, providerParticipationApplicable: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">Provider participation applicable</span>
               </label>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Plan responsibility %</label>
-              <input type="number" step="any" value={form.planResponsibilityPct ?? ""} onChange={(e) => setForm((f) => ({ ...f, planResponsibilityPct: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="—" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Plan responsibility %</label>
+              <input type="number" step="any" value={form.planResponsibilityPct ?? ""} onChange={(e) => setForm((f) => ({ ...f, planResponsibilityPct: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="—" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Patient responsibility %</label>
-              <input type="number" step="any" value={form.patientResponsibilityPct ?? ""} onChange={(e) => setForm((f) => ({ ...f, patientResponsibilityPct: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="—" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Patient responsibility %</label>
+              <input type="number" step="any" value={form.patientResponsibilityPct ?? ""} onChange={(e) => setForm((f) => ({ ...f, patientResponsibilityPct: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="—" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Typical deductible</label>
-              <input type="number" step="any" value={form.typicalDeductible ?? ""} onChange={(e) => setForm((f) => ({ ...f, typicalDeductible: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="—" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Typical deductible</label>
+              <input type="number" step="any" value={form.typicalDeductible ?? ""} onChange={(e) => setForm((f) => ({ ...f, typicalDeductible: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="—" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">OOP max</label>
-              <input type="number" step="any" value={form.oopMax ?? ""} onChange={(e) => setForm((f) => ({ ...f, oopMax: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="—" />
+              <label className="mb-1 block text-sm font-medium text-foreground">OOP max</label>
+              <input type="number" step="any" value={form.oopMax ?? ""} onChange={(e) => setForm((f) => ({ ...f, oopMax: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="—" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Timely filing initial (days)</label>
-              <input type="number" value={form.timelyFilingInitialDays} onChange={(e) => setForm((f) => ({ ...f, timelyFilingInitialDays: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Timely filing initial (days)</label>
+              <input type="number" value={form.timelyFilingInitialDays} onChange={(e) => setForm((f) => ({ ...f, timelyFilingInitialDays: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Timely filing resubmission (days)</label>
-              <input type="number" value={form.timelyFilingResubmissionDays ?? ""} onChange={(e) => setForm((f) => ({ ...f, timelyFilingResubmissionDays: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="—" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Timely filing resubmission (days)</label>
+              <input type="number" value={form.timelyFilingResubmissionDays ?? ""} onChange={(e) => setForm((f) => ({ ...f, timelyFilingResubmissionDays: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="—" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Timely filing appeal (days)</label>
-              <input type="number" value={form.timelyFilingAppealDays} onChange={(e) => setForm((f) => ({ ...f, timelyFilingAppealDays: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Timely filing appeal (days)</label>
+              <input type="number" value={form.timelyFilingAppealDays} onChange={(e) => setForm((f) => ({ ...f, timelyFilingAppealDays: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Status</label>
-              <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
+              <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {STATUS_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.name}</option>
                 ))}

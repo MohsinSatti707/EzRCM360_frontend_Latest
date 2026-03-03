@@ -188,10 +188,10 @@ export default function MfaSetupPage() {
     <div className="flex min-h-screen flex-col items-center bg-surface p-4">
       <div className="mb-4 flex w-full max-w-md items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600 text-white font-semibold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold">
             E
           </div>
-          <span className="text-xl font-semibold text-slate-800">EzRCM360</span>
+          <span className="text-xl font-semibold text-foreground">EzRCM360</span>
         </div>
         <Button variant="secondary" onClick={handleBackToLogin}>
           Back to Login
@@ -199,26 +199,26 @@ export default function MfaSetupPage() {
       </div>
 
       <Card className="w-full max-w-md">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-foreground">
           Multi-Factor Authentication Setup
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           {method === "email" && emailCodeSent
             ? "Enter the 6-digit code sent to your email."
             : "Set up MFA using an authenticator app or receive codes by email."}
         </p>
 
         {method === "authenticator" && !emailCodeSent && (
-          <div className="mt-6 rounded-lg bg-slate-50 p-4">
-            <h2 className="text-sm font-semibold text-slate-800">Scan the QR Code</h2>
-            <p className="mt-1 text-xs text-slate-600">
+          <div className="mt-6 rounded-lg bg-muted p-4">
+            <h2 className="text-sm font-semibold text-foreground">Scan the QR Code</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
               Open your authenticator app (Google Authenticator, Authy, etc.) and scan this code.
             </p>
-            <div className="mt-4 flex justify-center bg-white p-4 rounded">
+            <div className="mt-4 flex justify-center bg-card p-4 rounded-lg">
               {qrDataUrl ? (
                 <img src={qrDataUrl} alt="QR Code" className="h-48 w-48" />
               ) : (
-                <div className="flex h-48 w-48 items-center justify-center rounded bg-slate-100 text-sm text-slate-500">
+                <div className="flex h-48 w-48 items-center justify-center rounded bg-muted text-sm text-muted-foreground">
                   Loading…
                 </div>
               )}
@@ -228,7 +228,7 @@ export default function MfaSetupPage() {
 
         {method === "authenticator" && !emailCodeSent && (
           <div className="mt-4 flex items-center gap-2">
-            <span className="text-sm text-slate-500">Or</span>
+            <span className="text-sm text-muted-foreground">Or</span>
             <button
               type="button"
               onClick={handleSendEmailCode}
@@ -241,14 +241,14 @@ export default function MfaSetupPage() {
         )}
 
         {(method === "email" && emailCodeSent) && (
-          <p className="mt-4 text-sm text-slate-600">
+          <p className="mt-4 text-sm text-muted-foreground">
             Check your inbox and enter the 6-digit code below. The code expires in 10 minutes.
           </p>
         )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label htmlFor="code" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="code" className="block text-sm font-medium text-foreground">
               Verification Code
             </label>
             <input
@@ -259,7 +259,7 @@ export default function MfaSetupPage() {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="000000"
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-center text-lg tracking-[0.5em] shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+              className="mt-1 block w-full rounded-lg border border-input px-3 py-2 text-center text-lg tracking-[0.5em] shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
               autoComplete="one-time-code"
             />
           </div>

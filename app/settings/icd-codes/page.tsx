@@ -161,41 +161,41 @@ export default function IcdCodesPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Code
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Description
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Version
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Billable
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Active
                     </th>
                     {(canUpdate || canDelete) && (
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-500">
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                         Actions
                       </th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">
                         {row.code}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {row.description}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {row.version}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -219,8 +219,8 @@ export default function IcdCodesPage() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-600">
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">
                 Page {data.pageNumber} of {data.totalPages} ({data.totalCount}{" "}
                 total)
               </p>
@@ -244,7 +244,7 @@ export default function IcdCodesPage() {
           </>
         )}
         {!data && !error && (
-          <div className="py-8 text-center text-sm text-slate-500">
+          <div className="py-8 text-center text-sm text-muted-foreground">
             Loading…
           </div>
         )}
@@ -268,7 +268,7 @@ export default function IcdCodesPage() {
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Code *
               </label>
               <input
@@ -277,11 +277,11 @@ export default function IcdCodesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, code: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Version
               </label>
               <input
@@ -290,11 +290,11 @@ export default function IcdCodesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, version: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Description *
               </label>
               <textarea
@@ -303,11 +303,11 @@ export default function IcdCodesPage() {
                   setForm((f) => ({ ...f, description: e.target.value }))
                 }
                 rows={2}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Effective start date
               </label>
               <input
@@ -321,11 +321,11 @@ export default function IcdCodesPage() {
                       : null,
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Effective end date
               </label>
               <input
@@ -339,7 +339,7 @@ export default function IcdCodesPage() {
                       : null,
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div className="flex items-center gap-4 sm:col-span-2">
@@ -350,9 +350,9 @@ export default function IcdCodesPage() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, isBillable: e.target.checked }))
                   }
-                  className="rounded border-slate-300"
+                  className="rounded border-input"
                 />
-                <span className="text-sm text-slate-700">Billable</span>
+                <span className="text-sm text-foreground">Billable</span>
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -361,9 +361,9 @@ export default function IcdCodesPage() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, isActive: e.target.checked }))
                   }
-                  className="rounded border-slate-300"
+                  className="rounded border-input"
                 />
-                <span className="text-sm text-slate-700">Active</span>
+                <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>

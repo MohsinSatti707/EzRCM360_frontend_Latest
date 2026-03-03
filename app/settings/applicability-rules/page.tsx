@@ -224,41 +224,41 @@ export default function ApplicabilityRulesPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Sort
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Rule set / Display
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Payer category
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                       Active
                     </th>
                     {(canUpdate || canDelete) && (
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-500">
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                         Actions
                       </th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {row.sortOrder}
                       </td>
                       <td className="px-4 py-3 text-sm">
-                        <span className="font-medium text-slate-900">
+                        <span className="font-medium text-foreground">
                           {row.ruleSetName}
                         </span>
-                        <span className="text-slate-500"> / {row.displayName}</span>
+                        <span className="text-muted-foreground"> / {row.displayName}</span>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
                         {payerCategoryLabel(row.payerCategory)}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -279,8 +279,8 @@ export default function ApplicabilityRulesPage() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-600">
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">
                 Page {data.pageNumber} of {data.totalPages} ({data.totalCount}{" "}
                 total)
               </p>
@@ -304,7 +304,7 @@ export default function ApplicabilityRulesPage() {
           </>
         )}
         {!data && !error && (
-          <div className="py-8 text-center text-sm text-slate-500">
+          <div className="py-8 text-center text-sm text-muted-foreground">
             Loading…
           </div>
         )}
@@ -329,7 +329,7 @@ export default function ApplicabilityRulesPage() {
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Sort order
               </label>
               <input
@@ -341,12 +341,12 @@ export default function ApplicabilityRulesPage() {
                     sortOrder: Number(e.target.value) || 0,
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div className="sm:col-span-2" />
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Rule set name *
               </label>
               <input
@@ -355,11 +355,11 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, ruleSetName: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Display name *
               </label>
               <input
@@ -368,11 +368,11 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, displayName: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Payer entity type *
               </label>
               <input
@@ -381,11 +381,11 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, payerEntityType: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Plan category *
               </label>
               <input
@@ -394,11 +394,11 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, planCategory: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Claim category *
               </label>
               <input
@@ -407,11 +407,11 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, claimCategory: e.target.value }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Provider participation
               </label>
               <select
@@ -422,7 +422,7 @@ export default function ApplicabilityRulesPage() {
                     providerParticipation: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 {PROVIDER_PARTICIPATION.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -432,7 +432,7 @@ export default function ApplicabilityRulesPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Payer category
               </label>
               <select
@@ -443,7 +443,7 @@ export default function ApplicabilityRulesPage() {
                     payerCategory: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 {PAYER_CATEGORY.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -453,7 +453,7 @@ export default function ApplicabilityRulesPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Fee schedule applied
               </label>
               <select
@@ -464,7 +464,7 @@ export default function ApplicabilityRulesPage() {
                     feeScheduleApplied: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 {FEE_SCHEDULE_APPLIED.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -474,7 +474,7 @@ export default function ApplicabilityRulesPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 MER calculation scope
               </label>
               <select
@@ -485,7 +485,7 @@ export default function ApplicabilityRulesPage() {
                     merCalculationScope: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               >
                 {MER_CALCULATION_SCOPE.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -495,7 +495,7 @@ export default function ApplicabilityRulesPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 State
               </label>
               <input
@@ -507,11 +507,11 @@ export default function ApplicabilityRulesPage() {
                     state: e.target.value.trim() || null,
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Place of service
               </label>
               <input
@@ -523,11 +523,11 @@ export default function ApplicabilityRulesPage() {
                     placeOfService: e.target.value.trim() || null,
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Modifier
               </label>
               <input
@@ -539,11 +539,11 @@ export default function ApplicabilityRulesPage() {
                     modifier: e.target.value.trim() || null,
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Effective start date
               </label>
               <input
@@ -555,11 +555,11 @@ export default function ApplicabilityRulesPage() {
                     effectiveStartDate: e.target.value || null,
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Effective end date
               </label>
               <input
@@ -571,7 +571,7 @@ export default function ApplicabilityRulesPage() {
                     effectiveEndDate: e.target.value || null,
                   }))
                 }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
             </div>
             <div className="flex items-center sm:col-span-2">
@@ -582,9 +582,9 @@ export default function ApplicabilityRulesPage() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, isActive: e.target.checked }))
                   }
-                  className="rounded border-slate-300"
+                  className="rounded border-input"
                 />
-                <span className="text-sm text-slate-700">Active</span>
+                <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>

@@ -151,7 +151,7 @@ export default function EditProfilePage() {
 
           {/* Avatar */}
           <div>
-            <label className="block text-sm font-medium text-slate-700">Profile Picture</label>
+            <label className="block text-sm font-medium text-foreground">Profile Picture</label>
             <div className="mt-2 flex items-center gap-4">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-100 text-2xl font-medium text-primary-700">
                 {avatarSrc ? (
@@ -174,10 +174,10 @@ export default function EditProfilePage() {
                 <input
                   type="file"
                   accept=".png,.jpg,.jpeg,.webp"
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100"
+                  className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100"
                   onChange={(e) => setPictureFile(e.target.files?.[0] ?? null)}
                 />
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   PNG, JPG, JPEG or WebP. Max {MAX_MB} MB.
                 </p>
               </div>
@@ -186,7 +186,7 @@ export default function EditProfilePage() {
 
           {/* User Name */}
           <div>
-            <label htmlFor="userName" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="userName" className="block text-sm font-medium text-foreground">
               User Name
             </label>
             <input
@@ -195,13 +195,13 @@ export default function EditProfilePage() {
               value={form.userName ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, userName: e.target.value }))}
               required
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="mt-1 block w-full rounded-lg border border-input px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground">
               Email
             </label>
             <input
@@ -210,15 +210,15 @@ export default function EditProfilePage() {
               value={form.email ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
               required
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="mt-1 block w-full rounded-lg border border-input px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
 
           {/* New Password (optional) */}
-          <div className="space-y-4 border-t border-slate-200 pt-6">
-            <p className="text-sm font-medium text-slate-700">Change Password (optional)</p>
+          <div className="space-y-4 border-t border-border pt-6">
+            <p className="text-sm font-medium text-foreground">Change Password (optional)</p>
             <div>
-              <label htmlFor="newPassword" className="block text-sm text-slate-600">
+              <label htmlFor="newPassword" className="block text-sm text-muted-foreground">
                 New Password
               </label>
               <input
@@ -226,12 +226,12 @@ export default function EditProfilePage() {
                 type="password"
                 value={form.newPassword ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, newPassword: e.target.value }))}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="mt-1 block w-full rounded-lg border border-input px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 placeholder="Leave blank to keep current"
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm text-slate-600">
+              <label htmlFor="confirmPassword" className="block text-sm text-muted-foreground">
                 Confirm New Password
               </label>
               <input
@@ -239,7 +239,7 @@ export default function EditProfilePage() {
                 type="password"
                 value={form.confirmPassword ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="mt-1 block w-full rounded-lg border border-input px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
             </div>
           </div>

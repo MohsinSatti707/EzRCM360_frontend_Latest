@@ -143,11 +143,11 @@ export default function InsuranceArAnalysisListPage() {
     >
       <Card className="overflow-hidden animate-fade-in-up">
         {/* Toolbar with gradient header */}
-        <div className="border-b border-slate-200/80 bg-gradient-to-r from-slate-50 to-white px-6 py-5">
+        <div className="border-b border-border/80 bg-gradient-to-r from-muted/50 to-background px-6 py-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-1 flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
-                <label htmlFor="status" className="text-sm font-medium text-slate-600">Status</label>
+                <label htmlFor="status" className="text-sm font-medium text-muted-foreground">Status</label>
                 <select
                   id="status"
                   value={statusFilter}
@@ -160,7 +160,7 @@ export default function InsuranceArAnalysisListPage() {
                 </select>
               </div>
               <div className="flex items-center gap-2">
-                <label htmlFor="uploaded-by" className="text-sm font-medium text-slate-600">Uploaded by</label>
+                <label htmlFor="uploaded-by" className="text-sm font-medium text-muted-foreground">Uploaded by</label>
                 <select
                   id="uploaded-by"
                   value={uploadedBy}
@@ -177,7 +177,7 @@ export default function InsuranceArAnalysisListPage() {
                 </select>
               </div>
               <div className="relative flex-1 min-w-[12rem] max-w-xs">
-                <svg className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
@@ -224,7 +224,7 @@ export default function InsuranceArAnalysisListPage() {
               <TableBody>
                 {displayedItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-16 text-center text-sm text-slate-500">
+                    <TableCell colSpan={7} className="py-16 text-center text-sm text-muted-foreground">
                       {canCreate
                         ? "No sessions found. Click \"Upload Data\" to create one."
                         : "No sessions found."}
@@ -240,7 +240,7 @@ export default function InsuranceArAnalysisListPage() {
                         animationFillMode: "forwards",
                       }}
                     >
-                      <TableCell className="font-medium text-slate-900">
+                      <TableCell className="font-medium text-foreground">
                         {row.sessionName}
                       </TableCell>
                       <TableCell>{row.practiceName ?? "—"}</TableCell>
@@ -270,7 +270,7 @@ export default function InsuranceArAnalysisListPage() {
                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                           </Link>
                         ) : (
-                          <span className="text-sm text-slate-400">—</span>
+                          <span className="text-sm text-muted-foreground">—</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -280,16 +280,16 @@ export default function InsuranceArAnalysisListPage() {
             </Table>
             </div>
 
-            <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-200/80 bg-slate-50/50 px-6 py-4 sm:flex-row">
+            <div className="flex flex-col items-center justify-between gap-4 border-t border-border/80 bg-muted/50 px-6 py-4 sm:flex-row">
               <div className="flex flex-wrap items-center gap-4">
-                <p className="text-sm text-slate-600">
-                  <span className="font-medium text-slate-700">{displayedItems.length}</span>
-                  <span className="text-slate-500"> of </span>
-                  <span className="font-medium text-slate-700">{data.totalCount}</span>
-                  <span className="text-slate-500"> result{data.totalCount !== 1 ? "s" : ""}</span>
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">{displayedItems.length}</span>
+                  <span className="text-muted-foreground"> of </span>
+                  <span className="font-medium text-foreground">{data.totalCount}</span>
+                  <span className="text-muted-foreground"> result{data.totalCount !== 1 ? "s" : ""}</span>
                 </p>
                 <div className="flex items-center gap-2">
-                  <label htmlFor="per-page" className="text-sm text-slate-500">Per page</label>
+                  <label htmlFor="per-page" className="text-sm text-muted-foreground">Per page</label>
                   <select
                     id="per-page"
                     value={pageSize}

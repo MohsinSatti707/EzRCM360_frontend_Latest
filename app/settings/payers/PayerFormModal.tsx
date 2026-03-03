@@ -129,7 +129,7 @@ export function PayerFormModal({
         <div className="space-y-6">
           {/* Basic info */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-slate-800">Basic information</h3>
+            <h3 className="text-sm font-semibold text-foreground">Basic information</h3>
             <Input
               label="Payer name"
               required
@@ -158,18 +158,18 @@ export function PayerFormModal({
           {/* Addresses */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">Addresses</h3>
+              <h3 className="text-sm font-semibold text-foreground">Addresses</h3>
               <Button type="button" variant="secondary" onClick={addAddress}>
                 Add address
               </Button>
             </div>
             {addresses.length === 0 && (
-              <p className="text-sm text-slate-500">No addresses. Click &quot;Add address&quot; to add one.</p>
+              <p className="text-sm text-muted-foreground">No addresses. Click &quot;Add address&quot; to add one.</p>
             )}
             {addresses.map((addr, index) => (
               <div
                 key={index}
-                className="rounded-lg border border-slate-200 bg-slate-50/50 p-4 space-y-3"
+                className="rounded-lg border border-border bg-muted/50 p-4 space-y-3"
               >
                 <div className="flex justify-end">
                   <Button
@@ -220,18 +220,18 @@ export function PayerFormModal({
           {/* Phone numbers */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">Phone numbers</h3>
+              <h3 className="text-sm font-semibold text-foreground">Phone numbers</h3>
               <Button type="button" variant="secondary" onClick={addPhone}>
                 Add phone
               </Button>
             </div>
             {phoneNumbers.length === 0 && (
-              <p className="text-sm text-slate-500">No phone numbers.</p>
+              <p className="text-sm text-muted-foreground">No phone numbers.</p>
             )}
             {phoneNumbers.map((ph, index) => (
               <div
                 key={index}
-                className="flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50/50 p-4"
+                className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-muted/50 p-4"
               >
                 <div className="min-w-[200px] flex-1">
                   <Input
@@ -262,18 +262,18 @@ export function PayerFormModal({
           {/* Emails */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">Emails</h3>
+              <h3 className="text-sm font-semibold text-foreground">Emails</h3>
               <Button type="button" variant="secondary" onClick={addEmail}>
                 Add email
               </Button>
             </div>
             {emails.length === 0 && (
-              <p className="text-sm text-slate-500">No emails.</p>
+              <p className="text-sm text-muted-foreground">No emails.</p>
             )}
             {emails.map((em, index) => (
               <div
                 key={index}
-                className="flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50/50 p-4"
+                className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-muted/50 p-4"
               >
                 <div className="min-w-[200px] flex-1">
                   <Input
@@ -304,27 +304,27 @@ export function PayerFormModal({
 
           {/* Plans */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-slate-800">Linked plans</h3>
-            <p className="text-sm text-slate-500">
+            <h3 className="text-sm font-semibold text-foreground">Linked plans</h3>
+            <p className="text-sm text-muted-foreground">
               Select plans that belong to this payer. Plans are scoped to your organization.
             </p>
             {planOptions.length === 0 && (
-              <p className="text-sm text-slate-500">No plans available. Create plans first under Plan Configuration.</p>
+              <p className="text-sm text-muted-foreground">No plans available. Create plans first under Plan Configuration.</p>
             )}
-            <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 p-3">
+            <div className="max-h-48 overflow-y-auto rounded-lg border border-border p-3">
               <div className="space-y-2">
                 {planOptions.map((plan) => (
                   <label
                     key={plan.id}
-                    className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-slate-100"
+                    className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-muted"
                   >
                     <input
                       type="checkbox"
                       checked={planIds.includes(plan.id)}
                       onChange={() => togglePlan(plan.id)}
-                      className="rounded border-slate-300"
+                      className="rounded border-input"
                     />
-                    <span className="text-sm text-slate-800">{plan.displayName}</span>
+                    <span className="text-sm text-foreground">{plan.displayName}</span>
                   </label>
                 ))}
               </div>

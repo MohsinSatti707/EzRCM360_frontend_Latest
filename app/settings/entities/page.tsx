@@ -164,9 +164,9 @@ export default function EntitiesPage() {
                 {data.items.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell>
-                      <span className="font-medium text-slate-900">{row.legalName}</span> / {row.displayName}
+                      <span className="font-medium text-foreground">{row.legalName}</span> / {row.displayName}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-slate-600">{row.organizationName ?? "—"}</TableCell>
+                    <TableCell className="whitespace-nowrap text-muted-foreground">{row.organizationName ?? "—"}</TableCell>
                     <TableCell className="whitespace-nowrap">{row.groupNpi}</TableCell>
                     <TableCell className="whitespace-nowrap">{row.taxId}</TableCell>
                     <TableCell className="whitespace-nowrap">{statusLabel(row.status)}</TableCell>

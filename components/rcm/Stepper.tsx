@@ -17,10 +17,10 @@ export function Stepper({ steps }: { steps: StepperStep[] }) {
               <div
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-all duration-300 ease-out ${
                   step.completed
-                    ? "border-primary-600 bg-primary-600 text-white shadow-md shadow-primary-600/25"
+                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
                     : step.active
-                      ? "border-primary-600 bg-primary-50 text-primary-600 ring-4 ring-primary-100"
-                      : "border-neutral-200 bg-white text-neutral-400"
+                      ? "border-primary bg-accent text-primary ring-4 ring-accent"
+                      : "border-border bg-card text-muted-foreground"
                 } ${step.active ? "scale-105" : ""}`}
               >
                 {step.completed ? (
@@ -42,10 +42,10 @@ export function Stepper({ steps }: { steps: StepperStep[] }) {
               <span
                 className={`mt-2 text-center text-xs font-medium sm:text-sm ${
                   step.active
-                    ? "text-neutral-900"
+                    ? "text-foreground"
                     : step.completed
-                      ? "text-neutral-600"
-                      : "text-neutral-400"
+                      ? "text-muted-foreground"
+                      : "text-muted-foreground"
                 }`}
               >
                 {step.label}
@@ -55,8 +55,8 @@ export function Stepper({ steps }: { steps: StepperStep[] }) {
               <div
                 className={`mx-1 h-1 flex-1 rounded-full transition-all duration-500 sm:mx-3 ${
                   step.completed
-                    ? "bg-primary-600"
-                    : "bg-neutral-200"
+                    ? "bg-primary"
+                    : "bg-border"
                 }`}
               />
             )}

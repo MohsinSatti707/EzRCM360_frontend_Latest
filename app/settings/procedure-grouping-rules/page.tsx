@@ -136,26 +136,26 @@ export default function ProcedureGroupingRulesPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Group code</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Group name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">CPT/HCPCS code</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Sort order</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Active</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Group code</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Group name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">CPT/HCPCS code</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Sort order</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Active</th>
                     {(canUpdate || canDelete) && (
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-500">Actions</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Actions</th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{row.groupCode}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{row.groupName}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.cptHcpcsCode}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.sortOrder}</td>
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">{row.groupCode}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{row.groupName}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.cptHcpcsCode}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.sortOrder}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{row.isActive ? "Yes" : "No"}</td>
                       {(canUpdate || canDelete) && (
                         <td className="min-w-[180px] whitespace-nowrap px-5 py-4 text-right">
@@ -172,8 +172,8 @@ export default function ProcedureGroupingRulesPage() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-600">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
               <div className="flex gap-2">
                 <Button variant="secondary" disabled={!data.hasPreviousPage} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
                 <Button variant="secondary" disabled={!data.hasNextPage} onClick={() => setPage((p) => p + 1)}>Next</Button>
@@ -181,7 +181,7 @@ export default function ProcedureGroupingRulesPage() {
             </div>
           </>
         )}
-        {!data && !error && <div className="py-8 text-center text-sm text-slate-500">Loading…</div>}
+        {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit rule" : "Add rule"} size="lg">
@@ -189,33 +189,33 @@ export default function ProcedureGroupingRulesPage() {
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Group code *</label>
-              <input type="text" value={form.groupCode} onChange={(e) => setForm((f) => ({ ...f, groupCode: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Group code *</label>
+              <input type="text" value={form.groupCode} onChange={(e) => setForm((f) => ({ ...f, groupCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Group name *</label>
-              <input type="text" value={form.groupName} onChange={(e) => setForm((f) => ({ ...f, groupName: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Group name *</label>
+              <input type="text" value={form.groupName} onChange={(e) => setForm((f) => ({ ...f, groupName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">CPT/HCPCS code *</label>
-              <input type="text" value={form.cptHcpcsCode} onChange={(e) => setForm((f) => ({ ...f, cptHcpcsCode: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">CPT/HCPCS code *</label>
+              <input type="text" value={form.cptHcpcsCode} onChange={(e) => setForm((f) => ({ ...f, cptHcpcsCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Sort order</label>
-              <input type="number" value={form.sortOrder ?? 0} onChange={(e) => setForm((f) => ({ ...f, sortOrder: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Sort order</label>
+              <input type="number" value={form.sortOrder ?? 0} onChange={(e) => setForm((f) => ({ ...f, sortOrder: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Effective start date</label>
-              <input type="date" value={toDateInput(form.effectiveStartDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveStartDate: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective start date</label>
+              <input type="date" value={toDateInput(form.effectiveStartDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveStartDate: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Effective end date</label>
-              <input type="date" value={toDateInput(form.effectiveEndDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveEndDate: e.target.value || null }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective end date</label>
+              <input type="date" value={toDateInput(form.effectiveEndDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveEndDate: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div className="sm:col-span-2">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">Active</span>
+                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>

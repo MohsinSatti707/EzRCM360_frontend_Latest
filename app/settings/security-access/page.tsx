@@ -64,12 +64,12 @@ function Toggle({
         relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent
         transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
         ${disabled ? "cursor-not-allowed opacity-60" : ""}
-        ${checked ? "bg-primary-600" : "bg-slate-200"}
+        ${checked ? "bg-primary" : "bg-muted"}
       `}
     >
       <span
         className={`
-          pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0
+          pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow ring-0
           transition-transform
           ${checked ? "translate-x-5" : "translate-x-0.5"}
         `}
@@ -241,21 +241,21 @@ export default function SecurityAccessPage() {
         <div className="space-y-8">
           {/* Multi-Factor Authentication (MFA) section - two-column grid */}
           <section>
-            <h2 className="mb-4 text-lg font-semibold text-slate-900">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">
               Multi-Factor Authentication (MFA)
             </h2>
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Left column: MFA for Account Administrator + MFA Frequency */}
               <div className="flex flex-col gap-6">
                 <Card className="p-6">
-                  <h3 className="text-base font-semibold text-slate-900">
+                  <h3 className="text-base font-semibold text-foreground">
                     MFA for Account Administrator
                   </h3>
                   <p className="mt-2 text-sm font-semibold text-primary-600">
                     Multi-Factor Authentication is mandatory for all Account Administrators and
                     cannot be disabled.
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     Account Administrators have elevated permissions that affect system security,
                     user access, and configuration. MFA is always required for these roles to reduce
                     the risk of unauthorized access.
@@ -263,11 +263,11 @@ export default function SecurityAccessPage() {
                 </Card>
 
                 <Card className="p-6">
-                  <h3 className="text-base font-semibold text-slate-900">MFA Frequency</h3>
+                  <h3 className="text-base font-semibold text-foreground">MFA Frequency</h3>
                   <p className="mt-2 text-sm font-semibold text-primary-600">
                     Define how often users must re-confirm their identity using MFA
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     By default, users are required to complete MFA at least once every 24 hours. You
                     may choose to require MFA at every login for stricter security.
                   </p>
@@ -287,7 +287,7 @@ export default function SecurityAccessPage() {
                           disabled={!canUpdate}
                           className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                         />
-                        <span className="text-sm text-slate-700">{opt.label}</span>
+                        <span className="text-sm text-foreground">{opt.label}</span>
                       </label>
                     ))}
                   </div>
@@ -296,18 +296,18 @@ export default function SecurityAccessPage() {
 
               {/* Right column: MFA for Users */}
               <Card className="p-6">
-                <h3 className="text-base font-semibold text-slate-900">MFA for Users</h3>
+                <h3 className="text-base font-semibold text-foreground">MFA for Users</h3>
                 <p className="mt-2 text-sm font-semibold text-primary-600">
                   Control whether Multi-Factor Authentication is required for non-administrator
                   users.
                 </p>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-muted-foreground">
                   You may enable MFA for all users or selectively enforce it for specific users
                   based on your organization&apos;s security needs. Account Administrators are
                   always protected by MFA and are not affected by this setting.
                 </p>
                 <div className="mt-4 flex items-center gap-3">
-                  <span className="text-sm font-medium text-slate-700">Enable MFA for all users</span>
+                  <span className="text-sm font-medium text-foreground">Enable MFA for all users</span>
                   <Toggle
                     checked={form.mfaRequiredForAllUsers}
                     onChange={() =>
@@ -321,13 +321,13 @@ export default function SecurityAccessPage() {
                 </div>
                 <div className="mt-4">
                   <div className="relative max-w-xs">
-                    <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                       type="text"
                       placeholder="Search user"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                      className="w-full rounded-lg border border-input py-2 pl-9 pr-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                     />
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export default function SecurityAccessPage() {
                     <TableBody>
                       {users.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={2} className="text-center text-sm text-slate-500">
+                          <TableCell colSpan={2} className="text-center text-sm text-muted-foreground">
                             No users found.
                           </TableCell>
                         </TableRow>
@@ -357,7 +357,7 @@ export default function SecurityAccessPage() {
                               <div>
                                 <div className="font-medium text-primary-600">{u.userName}</div>
                                 {u.roleName && (
-                                  <div className="text-xs text-slate-500">{u.roleName}</div>
+                                  <div className="text-xs text-muted-foreground">{u.roleName}</div>
                                 )}
                               </div>
                             </TableCell>
@@ -395,14 +395,14 @@ export default function SecurityAccessPage() {
 
           {/* Session Management section - two-column grid */}
           <section>
-            <h2 className="mb-4 text-lg font-semibold text-slate-900">Session Management</h2>
+            <h2 className="mb-4 text-lg font-semibold text-foreground">Session Management</h2>
             <div className="grid gap-6 lg:grid-cols-2">
               <Card className="p-6">
-                <h3 className="text-base font-semibold text-slate-900">Inactivity Timeout</h3>
+                <h3 className="text-base font-semibold text-foreground">Inactivity Timeout</h3>
                 <p className="mt-2 text-sm font-semibold text-primary-600">
                   Automatically log users out after a period of inactivity.
                 </p>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-muted-foreground">
                   If no activity is detected for the selected time period, the user will be logged
                   out and required to sign in again. This helps prevent unauthorized access if a
                   device is left unattended.
@@ -422,18 +422,18 @@ export default function SecurityAccessPage() {
                         disabled={!canUpdate}
                         className="h-4 w-4 text-primary-600 focus:ring-primary-500"
                       />
-                      <span className="text-sm text-slate-700">{opt.label}</span>
+                      <span className="text-sm text-foreground">{opt.label}</span>
                     </label>
                   ))}
                 </div>
               </Card>
 
               <Card className="p-6">
-                <h3 className="text-base font-semibold text-slate-900">Daily Session Reset</h3>
+                <h3 className="text-base font-semibold text-foreground">Daily Session Reset</h3>
                 <p className="mt-2 text-sm font-semibold text-primary-600">
                   Require all users to log in again once per day.
                 </p>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-muted-foreground">
                   All active sessions are automatically ended at midnight based on your
                   organization&apos;s time zone. Users must sign in again the next time they access
                   the system.
@@ -450,7 +450,7 @@ export default function SecurityAccessPage() {
                       disabled={!canUpdate}
                       aria-label="Daily session reset"
                     />
-                    <span className="text-sm text-slate-600">
+                    <span className="text-sm text-muted-foreground">
                       {form.dailySessionResetEnabled ? "Enabled" : "Disabled"}
                     </span>
                   </div>

@@ -80,10 +80,10 @@ function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-6">
       <Card className="w-full max-w-md animate-fade-in-up overflow-hidden border border-border bg-card p-8 shadow-none">
         <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white font-semibold shadow-md shadow-primary-600/25">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold shadow-sm">
             E
           </div>
-          <span className="text-xl font-semibold tracking-tight text-slate-800">EzRCM360</span>
+          <span className="text-xl font-semibold tracking-tight text-foreground">EzRCM360</span>
         </div>
         <h2 className="font-aileron text-2xl font-semibold tracking-tight text-foreground">Sign in</h2>
         <p className="mt-2 text-base text-muted-foreground">
@@ -96,7 +96,7 @@ function LoginForm() {
             </div>
           )}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground">
               Email
             </label>
             <input
@@ -111,7 +111,7 @@ function LoginForm() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="password" className="block text-sm font-medium text-foreground">
               Password
             </label>
             <input
@@ -138,7 +138,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-4">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     }>
       <LoginForm />

@@ -77,7 +77,7 @@ export default function InsuranceArAnalysisReportPage() {
     return (
       <div className="flex min-h-[20rem] flex-col items-center justify-center gap-4 py-16">
         <Loader variant="inline" size="lg" label="Loading report…" />
-        <p className="text-sm text-neutral-500">Preparing your analysis results</p>
+        <p className="text-sm text-muted-foreground">Preparing your analysis results</p>
       </div>
     );
   }
@@ -99,34 +99,34 @@ export default function InsuranceArAnalysisReportPage() {
       }
     >
       <Card className="mb-6">
-        <h3 className="mb-4 text-base font-semibold text-neutral-900">Analysis Summary</h3>
+        <h3 className="mb-4 text-base font-semibold text-foreground">Analysis Summary</h3>
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-neutral-500">Session Name</dt>
+            <dt className="text-muted-foreground">Session Name</dt>
             <dd className="font-medium">{analysisSummary.sessionName}</dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Practice Name</dt>
+            <dt className="text-muted-foreground">Practice Name</dt>
             <dd className="font-medium">{analysisSummary.practiceName}</dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Uploaded by</dt>
+            <dt className="text-muted-foreground">Uploaded by</dt>
             <dd className="font-medium">{analysisSummary.uploadedBy}</dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Uploaded at</dt>
+            <dt className="text-muted-foreground">Uploaded at</dt>
             <dd className="font-medium">{formatDate(analysisSummary.uploadedAt)}</dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Source Type</dt>
+            <dt className="text-muted-foreground">Source Type</dt>
             <dd className="font-medium">{analysisSummary.sourceType}</dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Intake Template File</dt>
+            <dt className="text-muted-foreground">Intake Template File</dt>
             <dd className="font-medium">{analysisSummary.intakeTemplateFile ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-neutral-500">PM Source Report File</dt>
+            <dt className="text-muted-foreground">PM Source Report File</dt>
             <dd className="font-medium">
               {analysisSummary.pmSourceReportFiles?.length
                 ? analysisSummary.pmSourceReportFiles.join(", ")
@@ -134,28 +134,28 @@ export default function InsuranceArAnalysisReportPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Total Rows</dt>
+            <dt className="text-muted-foreground">Total Rows</dt>
             <dd className="font-medium">{analysisSummary.totalRows ?? "—"} Rows</dd>
           </div>
         </dl>
       </Card>
 
-      <h3 className="mb-3 text-base font-semibold text-neutral-900">Analysis Report</h3>
+      <h3 className="mb-3 text-base font-semibold text-foreground">Analysis Report</h3>
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card elevated className="animate-fade-in-up [animation-delay:0.05s] [animation-fill-mode:forwards] opacity-0">
-          <p className="text-sm font-medium text-neutral-500">Total Claims Analyzed</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-neutral-900">
+          <p className="text-sm font-medium text-muted-foreground">Total Claims Analyzed</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
             {totalClaimsAnalyzed.toLocaleString()}
           </p>
         </Card>
         <Card elevated className="animate-fade-in-up [animation-delay:0.1s] [animation-fill-mode:forwards] opacity-0">
-          <p className="text-sm font-medium text-neutral-500">Total Underpayment</p>
+          <p className="text-sm font-medium text-muted-foreground">Total Underpayment</p>
           <p className="mt-2 text-2xl font-bold tracking-tight text-red-600">
             {formatCurrency(totalUnderpayment)}
           </p>
         </Card>
         <Card elevated className="animate-fade-in-up [animation-delay:0.15s] [animation-fill-mode:forwards] opacity-0">
-          <p className="text-sm font-medium text-neutral-500">Risk-Adjusted Recovery</p>
+          <p className="text-sm font-medium text-muted-foreground">Risk-Adjusted Recovery</p>
           <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-600">
             {formatCurrency(riskAdjustedRecovery)}
           </p>
@@ -164,13 +164,13 @@ export default function InsuranceArAnalysisReportPage() {
 
       {report.claimCategorisationBreakdown?.length > 0 && (
         <Card className="mb-6">
-          <h3 className="mb-4 text-base font-semibold text-neutral-900">
+          <h3 className="mb-4 text-base font-semibold text-foreground">
             Claim Categorisation Breakdown
           </h3>
           <div className="grid gap-3 sm:grid-cols-2">
             {report.claimCategorisationBreakdown.map((item, i) => (
-              <div key={i} className="flex justify-between border-b border-neutral-100 pb-2">
-                <span className="text-neutral-700">{item.category}</span>
+              <div key={i} className="flex justify-between border-b border-border pb-2">
+                <span className="text-foreground">{item.category}</span>
                 <span className="font-medium">{item.count}</span>
               </div>
             ))}
@@ -180,7 +180,7 @@ export default function InsuranceArAnalysisReportPage() {
 
       {report.underpaymentByPriority?.length > 0 && (
         <Card className="mb-6">
-          <h3 className="mb-4 text-base font-semibold text-neutral-900">
+          <h3 className="mb-4 text-base font-semibold text-foreground">
             Underpayment Analysis by Priority
           </h3>
           <div className="space-y-2">
@@ -215,13 +215,13 @@ export default function InsuranceArAnalysisReportPage() {
 
       {report.recoveryProjectionSummary && (
         <Card>
-          <h3 className="mb-4 text-base font-semibold text-neutral-900">
+          <h3 className="mb-4 text-base font-semibold text-foreground">
             Recovery Projection Summary
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-neutral-200 p-4">
-              <p className="text-sm text-neutral-500">Maximum Potential Recovery (100%)</p>
-              <p className="mt-1 text-xl font-bold text-neutral-900">
+            <div className="rounded-lg border border-border p-4">
+              <p className="text-sm text-muted-foreground">Maximum Potential Recovery (100%)</p>
+              <p className="mt-1 text-xl font-bold text-foreground">
                 {formatCurrency(report.recoveryProjectionSummary.maxPotentialRecovery)}
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function InsuranceArAnalysisReportPage() {
             </div>
           </div>
           {report.recoveryProjectionSummary.historicalCollectionRatePct != null && (
-            <p className="mt-3 text-xs text-neutral-500">
+            <p className="mt-3 text-xs text-muted-foreground">
               Historical Collection Rate: {report.recoveryProjectionSummary.historicalCollectionRatePct}% (based on 3-year rolling average)
             </p>
           )}
@@ -246,19 +246,19 @@ export default function InsuranceArAnalysisReportPage() {
 
       {report.contingencyFeeByClaimAge?.length > 0 && (
         <Card className="mt-6">
-          <h3 className="mb-4 text-base font-semibold text-neutral-900">
+          <h3 className="mb-4 text-base font-semibold text-foreground">
             Contingency Fee Application by Claim Age
           </h3>
           <div className="space-y-2">
             {report.contingencyFeeByClaimAge.map((item, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between border-b border-neutral-100 pb-3 last:border-0"
+                className="flex items-center justify-between border-b border-border pb-3 last:border-0"
               >
-                <span className="text-sm text-neutral-700">
+                <span className="text-sm text-foreground">
                   {item.ageBand} ({item.feePct}% fee)
                 </span>
-                <span className="font-medium text-neutral-900">
+                <span className="font-medium text-foreground">
                   {formatCurrency(item.amount)}
                 </span>
               </div>

@@ -157,30 +157,30 @@ export default function EntityProvidersPage() {
         {data && (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Entity</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Provider name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">NPI</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Primary specialty</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Secondary specialty</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Active</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Entity</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Provider name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">NPI</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Type</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Primary specialty</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Secondary specialty</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Active</th>
                     {(canUpdate || canDelete) && (
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-500">Actions</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Actions</th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {data.items.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.entityDisplayName}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{row.providerName}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.npi}</td>
+                    <tr key={row.id} className="hover:bg-muted">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.entityDisplayName}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">{row.providerName}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.npi}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{providerTypeLabel(row.providerType)}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.primarySpecialty ?? "—"}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{row.secondarySpecialty ?? "—"}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.primarySpecialty ?? "—"}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">{row.secondarySpecialty ?? "—"}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">{row.isActive ? "Yes" : "No"}</td>
                       {(canUpdate || canDelete) && (
                         <td className="min-w-[180px] whitespace-nowrap px-5 py-4 text-right">
@@ -197,8 +197,8 @@ export default function EntityProvidersPage() {
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-600">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">Page {data.pageNumber} of {data.totalPages} ({data.totalCount} total)</p>
               <div className="flex gap-2">
                 <Button variant="secondary" disabled={!data.hasPreviousPage} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
                 <Button variant="secondary" disabled={!data.hasNextPage} onClick={() => setPage((p) => p + 1)}>Next</Button>
@@ -206,7 +206,7 @@ export default function EntityProvidersPage() {
             </div>
           </>
         )}
-        {!data && !error && <div className="py-8 text-center text-sm text-slate-500">Loading…</div>}
+        {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit provider" : "Add provider"} size="lg">
@@ -214,8 +214,8 @@ export default function EntityProvidersPage() {
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Entity *</label>
-              <select value={form.entityId} onChange={(e) => setForm((f) => ({ ...f, entityId: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required>
+              <label className="mb-1 block text-sm font-medium text-foreground">Entity *</label>
+              <select value={form.entityId} onChange={(e) => setForm((f) => ({ ...f, entityId: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" required>
                 <option value="">Select</option>
                 {entities.map((e) => (
                   <option key={e.id} value={e.id}>{e.displayName}</option>
@@ -223,37 +223,37 @@ export default function EntityProvidersPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Provider name *</label>
-              <input type="text" value={form.providerName} onChange={(e) => setForm((f) => ({ ...f, providerName: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Provider name *</label>
+              <input type="text" value={form.providerName} onChange={(e) => setForm((f) => ({ ...f, providerName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">NPI *</label>
-              <input type="text" value={form.npi} onChange={(e) => setForm((f) => ({ ...f, npi: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">NPI *</label>
+              <input type="text" value={form.npi} onChange={(e) => setForm((f) => ({ ...f, npi: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Provider type</label>
-              <select value={form.providerType} onChange={(e) => setForm((f) => ({ ...f, providerType: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <label className="mb-1 block text-sm font-medium text-foreground">Provider type</label>
+              <select value={form.providerType} onChange={(e) => setForm((f) => ({ ...f, providerType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {PROVIDER_TYPES.map((p) => (
                   <option key={p.value} value={p.value}>{p.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">SSN</label>
-              <input type="text" value={form.ssn ?? ""} onChange={(e) => setForm((f) => ({ ...f, ssn: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">SSN</label>
+              <input type="text" value={form.ssn ?? ""} onChange={(e) => setForm((f) => ({ ...f, ssn: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Primary specialty</label>
-              <input type="text" value={form.primarySpecialty ?? ""} onChange={(e) => setForm((f) => ({ ...f, primarySpecialty: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Primary specialty</label>
+              <input type="text" value={form.primarySpecialty ?? ""} onChange={(e) => setForm((f) => ({ ...f, primarySpecialty: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Secondary specialty</label>
-              <input type="text" value={form.secondarySpecialty ?? ""} onChange={(e) => setForm((f) => ({ ...f, secondarySpecialty: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">Secondary specialty</label>
+              <input type="text" value={form.secondarySpecialty ?? ""} onChange={(e) => setForm((f) => ({ ...f, secondarySpecialty: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
             </div>
             <div className="flex items-center sm:col-span-2">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-slate-300" />
-                <span className="text-sm text-slate-700">Active</span>
+                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-input" />
+                <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>

@@ -108,13 +108,13 @@ export default function MfaVerifyPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-primary-50/20 p-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-muted/50 via-background to-primary/10 p-6">
       <div className="mb-8 flex w-full max-w-md items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-600 text-white font-semibold shadow-md shadow-primary-600/25">
             E
           </div>
-          <span className="text-xl font-semibold tracking-tight text-slate-800">EzRCM360</span>
+          <span className="text-xl font-semibold tracking-tight text-foreground">EzRCM360</span>
         </div>
         <Button variant="secondary" onClick={handleBackToLogin}>
           Back to Login
@@ -122,16 +122,16 @@ export default function MfaVerifyPage() {
       </div>
 
       <Card className="w-full max-w-md overflow-hidden p-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Multi-Factor Authentication
         </h1>
-        <p className="mt-3 text-base leading-relaxed text-slate-600">
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground">
           For security, verify your identity using your authenticator app.
         </p>
 
-        <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50/50 p-6">
-          <p className="text-sm font-medium text-slate-700">Steps to verify</p>
-          <ol className="mt-4 space-y-3 text-sm text-slate-600">
+        <div className="mt-8 rounded-xl border border-border bg-muted/50 p-6">
+          <p className="text-sm font-medium text-foreground">Steps to verify</p>
+          <ol className="mt-4 space-y-3 text-sm text-muted-foreground">
             <li className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700">1</span>
               Open your authenticator app (Google Authenticator, Authy, etc.)
@@ -148,7 +148,7 @@ export default function MfaVerifyPage() {
         </div>
 
         <div className="mt-6 flex items-center gap-2">
-          <span className="text-sm text-slate-500">Prefer email?</span>
+          <span className="text-sm text-muted-foreground">Prefer email?</span>
           <button
             type="button"
             onClick={handleSendEmailOtp}
@@ -161,7 +161,7 @@ export default function MfaVerifyPage() {
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
-            <label htmlFor="code" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="code" className="block text-sm font-medium text-foreground">
               Verification Code
             </label>
             <input
