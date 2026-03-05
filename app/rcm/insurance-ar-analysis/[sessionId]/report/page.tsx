@@ -87,7 +87,7 @@ export default function InsuranceArAnalysisReportPage() {
 
   const handleExport = async () => {
     if (isDummy) {
-      toast.info("Export is not available for the dummy report.");
+      toast.success("Export is not available for the dummy report.");
       return;
     }
     setExporting(true);
