@@ -47,7 +47,7 @@ export default function UsersPage() {
   const [searchDebounced, setSearchDebounced] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState<CreateUserRequest & { password?: string; newPassword?: string }>({
+  const [form, setForm] = useState<CreateUserRequest & { password?: string; newPassword?: string; sendInviteEmail?: boolean }>({
     userName: "",
     email: "",
     password: "",
@@ -55,6 +55,7 @@ export default function UsersPage() {
     roleId: "",
     moduleIds: [],
     status: 1,
+    sendInviteEmail: true,
   });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -107,6 +108,7 @@ export default function UsersPage() {
       roleId: "",
       moduleIds: [],
       status: 1,
+      sendInviteEmail: true,
     });
     setFormError(null);
     setModalOpen(true);
@@ -156,10 +158,12 @@ export default function UsersPage() {
       } else {
         const statusVal =
           form.status != null ? (typeof form.status === "number" ? USER_STATUS_NAMES[form.status] : form.status) ?? "Active" : undefined;
+        const isInvite = form.sendInviteEmail === true;
+        const passwordToSend = isInvite ? undefined : (form.password?.trim() || undefined);
         await api.create({
           userName: form.userName,
           email: form.email,
-          password: form.password || undefined,
+          password: passwordToSend,
           organizationId: form.organizationId || undefined,
           roleId: form.roleId || undefined,
           moduleIds: form.moduleIds?.length ? form.moduleIds : undefined,
@@ -451,15 +455,31 @@ export default function UsersPage() {
               />
             </div>
             {!editId && (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Password (optional)</label>
-                <input
-                  type="password"
-                  value={form.password ?? ""}
-                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                  className="input-enterprise"
-                />
-              </div>
+              <>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="sendInviteEmail"
+                    checked={form.sendInviteEmail ?? true}
+                    onChange={(e) => setForm((f) => ({ ...f, sendInviteEmail: e.target.checked, ...(e.target.checked ? { password: "" } : {}) }))}
+                    className="h-4 w-4 rounded border-border"
+                  />
+                  <label htmlFor="sendInviteEmail" className="text-sm font-medium text-foreground">
+                    Send invite email (user will set password via link)
+                  </label>
+                </div>
+                {!(form.sendInviteEmail ?? true) && (
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Password</label>
+                    <input
+                      type="password"
+                      value={form.password ?? ""}
+                      onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                      className="input-enterprise"
+                    />
+                  </div>
+                )}
+              </>
             )}
             {editId && (
               <div>
