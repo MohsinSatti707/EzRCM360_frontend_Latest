@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
@@ -13,6 +13,42 @@ import {
   insuranceArAnalysisApi,
   type ArAnalysisReportDto,
 } from "@/lib/services/insuranceArAnalysis";
+
+/** Dummy successful report for "Skip (dummy)" preview. */
+const DUMMY_REPORT: ArAnalysisReportDto = {
+  analysisSummary: {
+    sessionName: "AR Analysis – Sample Session",
+    practiceName: "Sample Medical Group",
+    uploadedBy: "Demo User",
+    uploadedAt: new Date().toISOString(),
+    sourceType: "Insurance",
+    pmSourceReportFiles: [],
+    totalRows: 20,
+  },
+  totalClaimsAnalyzed: 18,
+  totalUnderpayment: 12500,
+  riskAdjustedRecovery: 10000,
+  claimCategorisationBreakdown: [
+    { category: "Commercial OON", count: 8 },
+    { category: "Commercial IN", count: 6 },
+    { category: "Government", count: 4 },
+  ],
+  underpaymentByPriority: [
+    { priority: "High", amount: 7500 },
+    { priority: "Medium", amount: 3500 },
+    { priority: "Low", amount: 1500 },
+  ],
+  recoveryProjectionSummary: {
+    maxPotentialRecovery: 12500,
+    riskAdjustedRecovery: 10000,
+    historicalCollectionRatePct: 80,
+  },
+  contingencyFeeByClaimAge: [
+    { ageBand: "0–90 days", feePct: 25, amount: 2500 },
+    { ageBand: "91–180 days", feePct: 30, amount: 1800 },
+    { ageBand: "181–365 days", feePct: 35, amount: 1200 },
+  ],
+};
 
 function formatCurrency(n: number) {
   if (n >= 1000) return `$${(n / 1000).toFixed(0)}K`;
@@ -26,7 +62,9 @@ function formatCurrency(n: number) {
 
 export default function InsuranceArAnalysisReportPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const sessionId = params.sessionId as string;
+  const isDummy = searchParams.get("dummy") === "1";
   const toast = useToast();
   const apiRef = useRef(insuranceArAnalysisApi());
   const [report, setReport] = useState<ArAnalysisReportDto | null>(null);
@@ -35,14 +73,23 @@ export default function InsuranceArAnalysisReportPage() {
 
   useEffect(() => {
     if (!sessionId) return;
+    if (isDummy) {
+      setReport(DUMMY_REPORT);
+      setLoading(false);
+      return;
+    }
     apiRef.current
       .getReport(sessionId)
       .then(setReport)
       .catch(() => toast.error("Failed to load report."))
       .finally(() => setLoading(false));
-  }, [sessionId]);
+  }, [sessionId, isDummy]);
 
   const handleExport = async () => {
+    if (isDummy) {
+      toast.info("Export is not available for the dummy report.");
+      return;
+    }
     setExporting(true);
     try {
       const blob = await apiRef.current.downloadReportExport(sessionId);
@@ -96,7 +143,7 @@ export default function InsuranceArAnalysisReportPage() {
       actions={
         <Button
           onClick={handleExport}
-          disabled={exporting}
+          disabled={exporting || isDummy}
           className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px] font-medium"
         >
           {exporting ? "Exporting…" : "Export Full Report"}
@@ -104,6 +151,11 @@ export default function InsuranceArAnalysisReportPage() {
         </Button>
       }
     >
+      {isDummy && (
+        <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <strong>Dummy report (preview).</strong> This is sample data for UI preview. Use &quot;Refresh status&quot; or complete the pipeline to see the real report.
+        </div>
+      )}
       <div className="space-y-8 pb-10">
         <Card className="border border-[#E2E8F0] overflow-hidden p-6 sm:p-8">
           <h2 className="mb-5 text-[16px] font-['Aileron'] font-bold text-foreground">Analysis Summary</h2>

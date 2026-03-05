@@ -678,15 +678,26 @@ export default function InsuranceArAnalysisProcessingPage() {
                       : status?.overallMessage ?? ""}
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefreshStatus}
-              disabled={refreshingStatus}
-              className="shrink-0 border-[#E2E8F0] font-['Aileron'] text-[14px]"
-            >
-              {refreshingStatus ? "Refreshing…" : "Refresh status"}
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefreshStatus}
+                disabled={refreshingStatus}
+                className="border-[#E2E8F0] font-['Aileron'] text-[14px]"
+              >
+                {refreshingStatus ? "Refreshing…" : "Refresh status"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/rcm/insurance-ar-analysis/${sessionId}/report?dummy=1`)}
+                className="border-amber-300 font-['Aileron'] text-[14px] text-amber-800 hover:bg-amber-50"
+                title="Show a sample successful report (for UI preview only)"
+              >
+                Skip (dummy)
+              </Button>
+            </div>
           </div>
           </div>
 
