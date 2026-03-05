@@ -67,10 +67,12 @@ function PipelineStep({
   step,
   index,
   isLast,
+  onSkip,
 }: {
   step: { name: string; status: string; message?: string | null; count?: number | null };
   index: number;
   isLast: boolean;
+  onSkip?: () => void;
 }) {
   const completed = step.status === "Completed";
   const inProgress = step.status === "InProgress";
@@ -148,6 +150,17 @@ function PipelineStep({
               className="h-full w-3/5 rounded-full bg-primary-500 animate-pulse-soft"
             />
           </div>
+        )}
+        {onSkip && (failed || inProgress) && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSkip}
+            className="mt-2 h-8 text-xs border-amber-300 text-amber-800 hover:bg-amber-50"
+            title="Show sample report (preview)"
+          >
+            Skip
+          </Button>
         )}
       </div>
     </div>
@@ -678,26 +691,15 @@ export default function InsuranceArAnalysisProcessingPage() {
                       : status?.overallMessage ?? ""}
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefreshStatus}
-                disabled={refreshingStatus}
-                className="border-[#E2E8F0] font-['Aileron'] text-[14px]"
-              >
-                {refreshingStatus ? "Refreshing…" : "Refresh status"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push(`/rcm/insurance-ar-analysis/${sessionId}/report?dummy=1`)}
-                className="border-amber-300 font-['Aileron'] text-[14px] text-amber-800 hover:bg-amber-50"
-                title="Show a sample successful report (for UI preview only)"
-              >
-                Skip (dummy)
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshStatus}
+              disabled={refreshingStatus}
+              className="shrink-0 border-[#E2E8F0] font-['Aileron'] text-[14px]"
+            >
+              {refreshingStatus ? "Refreshing…" : "Refresh status"}
+            </Button>
           </div>
           </div>
 
@@ -720,6 +722,7 @@ export default function InsuranceArAnalysisProcessingPage() {
                     step={s}
                     index={i}
                     isLast={i === status.steps.length - 1}
+                    onSkip={s.name === "Payer & Plan Validation" ? () => router.push(`/rcm/insurance-ar-analysis/${sessionId}/report?dummy=1`) : undefined}
                   />
                 ))}
               </div>
