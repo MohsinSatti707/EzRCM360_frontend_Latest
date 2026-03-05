@@ -106,7 +106,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-30 flex h-full flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${collapsed ? "w-12" : "w-64"}`}
+      className={`fixed left-0 top-0 z-30 flex h-full flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-200 ease-in-out ${collapsed ? "w-12" : "w-64"}`}
     >
       {/* Logo / Brand + Toggle */}
       <div className={`flex h-14 shrink-0 items-center border-b border-sidebar-border ${collapsed ? "justify-center px-0" : "px-4"}`}>

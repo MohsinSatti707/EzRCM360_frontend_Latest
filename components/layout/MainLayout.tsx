@@ -11,7 +11,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
   const collapsed = sidebar?.collapsed ?? false;
   return (
     <div
-      className={`flex min-h-screen flex-col transition-[padding] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${collapsed ? "pl-12" : "pl-64"}`}
+      className={`flex min-h-screen flex-col transition-[padding] duration-200 ease-in-out ${collapsed ? "pl-12" : "pl-64"}`}
     >
       <Header />
       <main className="flex-1 pt-4 px-6 pb-6 flex flex-col">{children}</main>
