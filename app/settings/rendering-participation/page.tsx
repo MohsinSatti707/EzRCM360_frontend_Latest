@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, ArrowRight } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
@@ -147,6 +147,16 @@ export default function RenderingParticipationPage() {
   };
 
   const statusLabel = (n: number) => participationStatuses.find((o) => Number(o.value) === n)?.label ?? String(n);
+  const providerNameById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of entityProviders) m.set(p.id, p.displayName);
+    return m;
+  }, [entityProviders]);
+  const planNameById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of plans) m.set(p.id, p.displayName);
+    return m;
+  }, [plans]);
 
   if (!canView) {
     return (
@@ -217,8 +227,14 @@ export default function RenderingParticipationPage() {
               <tbody className="divide-y divide-border">
                 {data.items.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
-                    <td className="px-4 py-3 text-sm">{row.providerName ?? row.entityProviderId}</td>
-                    <td className="px-4 py-3 text-sm">{row.planName ?? row.planId}</td>
+                    <td className="px-4 py-3 text-sm">
+                      {row.providerName ??
+                        providerNameById.get(row.entityProviderId) ??
+                        row.entityProviderId}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {row.planName ?? planNameById.get(row.planId) ?? row.planId}
+                    </td>
                     <td className="px-4 py-3 text-sm">{statusLabel(row.participationStatus)}</td>
                     <td className="px-4 py-3 text-sm">{row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"}</td>
                     <td className="px-4 py-3 text-sm">{row.effectiveTo ? toDateInput(row.effectiveTo) : "—"}</td>
