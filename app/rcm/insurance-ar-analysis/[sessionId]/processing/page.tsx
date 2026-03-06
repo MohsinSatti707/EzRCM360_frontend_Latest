@@ -426,9 +426,9 @@ export default function InsuranceArAnalysisProcessingPage() {
     try {
       await apiRef.current.uploadClaimIntegrityConflicts(sessionId, conflictFile);
       setConflictFile(null);
-      toast.success("File uploaded. Pipeline resuming—page will update when ready.");
+      toast.success("File uploaded. Resuming analysis…");
       await refreshStatus();
-      pollUntilSettled(); // poll in background; don't await
+      pollUntilSettled(); // poll until Completed/Failed so UI updates
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed.");
     } finally {
@@ -471,9 +471,9 @@ export default function InsuranceArAnalysisProcessingPage() {
     try {
       await uploadFn(file);
       setFile(null);
-      toast.success("File uploaded. Pipeline resuming—page will update when ready.");
+      toast.success("File uploaded. Resuming analysis…");
       await refreshStatus();
-      pollUntilSettled(); // poll in background; don't await
+      pollUntilSettled(); // poll until Completed/Failed so UI updates
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed.");
     } finally {
@@ -537,9 +537,9 @@ export default function InsuranceArAnalysisProcessingPage() {
     setSkipping(true);
     try {
       await skipFn();
-      toast.success(`${name} skipped. Pipeline resuming—page will update when ready.`);
+      toast.success(`${name} skipped. Resuming analysis…`);
       await refreshStatus();
-      pollUntilSettled();
+      pollUntilSettled(); // poll until Completed/Failed so UI updates
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Skip failed.");
     } finally {
@@ -572,6 +572,11 @@ export default function InsuranceArAnalysisProcessingPage() {
     !isFailed &&
     (status?.sessionStatus === "Processing" ||
       (status?.sessionStatus !== "Completed" && status?.sessionStatus !== "Failed"));
+  /** Backend sets CurrentStage to "Resuming" when pipeline is resuming after Skip or Upload. */
+  const isResuming =
+    status?.sessionStatus === "Processing" &&
+    (status?.currentStage?.toLowerCase() === "resuming" ||
+      (status?.overallMessage?.toLowerCase().includes("resuming") ?? false));
 
   /** When session has already failed (or completed), do not show resolution blocks—nothing to resolve. */
   const showResolutionBlocks = !isFailed && !(status?.sessionStatus === "Completed");
@@ -676,9 +681,11 @@ export default function InsuranceArAnalysisProcessingPage() {
                   ? "Analysis failed"
                   : isEnrichmentPending
                     ? "Action required"
-                    : isProcessing
-                      ? "Processing AR Data..."
-                      : status?.overallMessage ?? "Processing"}
+                    : isResuming
+                      ? "Resuming analysis"
+                      : isProcessing
+                        ? "Processing AR Data..."
+                        : status?.overallMessage ?? "Processing"}
               </h2>
               <p className={`text-[13px] font-['Aileron'] ${isFailed ? "text-red-800" : isEnrichmentPending ? "text-amber-800" : "text-[#0066CC]"}`}>
                 {isFailed
@@ -686,9 +693,11 @@ export default function InsuranceArAnalysisProcessingPage() {
                   : isEnrichmentPending
                     ? status?.overallMessage ??
                       "Pending your action: Pending Payer Enrollment. Download the file for this step, resolve or exclude, then re-upload."
-                    : isProcessing
-                      ? "This may take a few minutes. Please do not close this window."
-                      : status?.overallMessage ?? ""}
+                    : isResuming
+                      ? "Pipeline is resuming. This may take a minute—page will update when ready."
+                      : isProcessing
+                        ? "This may take a few minutes. Please do not close this window."
+                        : status?.overallMessage ?? ""}
               </p>
             </div>
             <Button
