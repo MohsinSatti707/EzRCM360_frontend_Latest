@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/authentication/verify", "/authentication/setup"];
+const PUBLIC_PATHS = ["/login", "/set-password", "/authentication/verify", "/authentication/setup"];
 const AUTH_COOKIE = "ezrcm_signed_in";
 
 function isPublicPath(pathname: string): boolean {

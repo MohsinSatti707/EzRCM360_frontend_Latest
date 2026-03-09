@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
@@ -21,8 +21,10 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const hasShownActivatedToast = useRef(false);
   useEffect(() => {
-    if (searchParams.get("activated") === "1") {
+    if (searchParams.get("activated") === "1" && !hasShownActivatedToast.current) {
+      hasShownActivatedToast.current = true;
       toast.success("Password Set Successfully. Your account has been activated successfully!");
       router.replace("/login");
     }
