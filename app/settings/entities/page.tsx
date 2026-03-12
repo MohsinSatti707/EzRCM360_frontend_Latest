@@ -19,6 +19,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { EntityFormModal } from "./EntityFormModal";
 import { entitiesApi } from "@/lib/services/entities";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
@@ -54,6 +55,7 @@ export default function EntitiesPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = entitiesApi();
   const toast = useToast();
@@ -92,6 +94,7 @@ export default function EntitiesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form as UpdateEntityRequest);
@@ -99,7 +102,7 @@ export default function EntitiesPage() {
         await api.create(form);
       }
       setModalOpen(false);
-      reload();
+      await reload();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -107,21 +110,24 @@ export default function EntitiesPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   }, [editId, form, api]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -172,6 +178,7 @@ export default function EntitiesPage() {
               apiBase="/api/Entities"
               templateFileName="Entities_Import_Template.xlsx"
               onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
             />
             <Button
               onClick={openCreate}
@@ -264,6 +271,7 @@ export default function EntitiesPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

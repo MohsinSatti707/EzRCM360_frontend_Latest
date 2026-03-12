@@ -22,6 +22,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { plansApi } from "@/lib/services/plans";
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { usePaginatedList } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
@@ -68,6 +69,7 @@ export default function PlansPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = plansApi();
   const toast = useToast();
@@ -153,6 +155,7 @@ export default function PlansPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form as UpdatePlanRequest);
@@ -160,7 +163,7 @@ export default function PlansPage() {
         await api.create(form);
       }
       setModalOpen(false);
-      reload();
+      await reload();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -168,21 +171,24 @@ export default function PlansPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -235,6 +241,7 @@ export default function PlansPage() {
               apiBase="/api/Plans"
               templateFileName="Plans_Import_Template.xlsx"
               onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
             />
             <Button
               onClick={openCreate}
@@ -423,6 +430,7 @@ export default function PlansPage() {
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete plan" message="Are you sure you want to delete this plan?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

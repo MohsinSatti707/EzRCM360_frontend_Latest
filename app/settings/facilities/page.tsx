@@ -22,6 +22,7 @@ import { FacilityFormModal } from "./FacilityFormModal";
 import { facilitiesApi } from "@/lib/services/facilities";
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { usePaginatedList } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
@@ -51,6 +52,7 @@ export default function FacilitiesPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = facilitiesApi();
   const toast = useToast();
@@ -99,6 +101,7 @@ export default function FacilitiesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, { ...form, isActive: form.isActive ?? true } as UpdateFacilityRequest);
@@ -106,7 +109,7 @@ export default function FacilitiesPage() {
         await api.create(form);
       }
       setModalOpen(false);
-      reload();
+      await reload();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -114,21 +117,24 @@ export default function FacilitiesPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   }, [editId, form, api, reload]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -177,6 +183,7 @@ export default function FacilitiesPage() {
               apiBase="/api/Facilities"
               templateFileName="Facilities_Import_Template.xlsx"
               onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
             />
             <Button
               onClick={openCreate}
@@ -270,6 +277,7 @@ export default function FacilitiesPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

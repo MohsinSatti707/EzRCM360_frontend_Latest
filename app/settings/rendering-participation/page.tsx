@@ -15,6 +15,7 @@ import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { useToast } from "@/lib/contexts/ToastContext";
 import type {
   RenderingProviderPlanParticipationListItemDto,
@@ -53,14 +54,15 @@ export default function RenderingParticipationPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = renderingParticipationsApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Rendering Provider Plan Participations");
 
-  const loadList = useCallback(() => {
+  const loadList = useCallback(async () => {
     setError(null);
-    api.getList({ pageNumber: page, pageSize }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
+    await api.getList({ pageNumber: page, pageSize }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
   }, [page, pageSize]);
 
   useEffect(() => {
@@ -114,6 +116,7 @@ export default function RenderingParticipationPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form as UpdateRenderingProviderPlanParticipationRequest);
@@ -121,7 +124,7 @@ export default function RenderingParticipationPage() {
         await api.create(form);
       }
       setModalOpen(false);
-      loadList();
+      await loadList();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -129,21 +132,24 @@ export default function RenderingParticipationPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      loadList();
+      await loadList();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -203,6 +209,7 @@ export default function RenderingParticipationPage() {
               apiBase="/api/RenderingProviderPlanParticipations"
               templateFileName="RenderingParticipation_Import_Template.xlsx"
               onImportSuccess={loadList}
+              onLoadingChange={setOverlayLoading}
             />
             <Button
               onClick={openCreate}
@@ -336,6 +343,7 @@ export default function RenderingParticipationPage() {
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete participation" message="Are you sure you want to delete this participation?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

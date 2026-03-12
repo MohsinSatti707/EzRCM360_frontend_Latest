@@ -12,10 +12,12 @@ interface BulkImportActionsProps {
   /** File name for the downloaded template, e.g. "Payers_Import_Template.xlsx" */
   templateFileName: string;
   /** Called after a successful import so the page can reload its data */
-  onImportSuccess: () => void;
+  onImportSuccess: () => void | Promise<void>;
+  /** Optional callback to control overlay loading state */
+  onLoadingChange?: (loading: boolean) => void;
 }
 
-export function BulkImportActions({ apiBase, templateFileName, onImportSuccess }: BulkImportActionsProps) {
+export function BulkImportActions({ apiBase, templateFileName, onImportSuccess, onLoadingChange }: BulkImportActionsProps) {
   const [downloading, setDownloading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,14 +41,16 @@ export function BulkImportActions({ apiBase, templateFileName, onImportSuccess }
     // Reset input so the same file can be re-selected
     e.target.value = "";
     setUploading(true);
+    onLoadingChange?.(true);
     try {
       const result = await uploadBulkImport(apiBase, file);
       toast.success(`${result.rowsImported} records imported successfully.`);
-      onImportSuccess();
+      await onImportSuccess();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Import failed.");
     } finally {
       setUploading(false);
+      onLoadingChange?.(false);
     }
   }, [apiBase, toast, onImportSuccess]);
 

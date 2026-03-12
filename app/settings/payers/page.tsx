@@ -19,6 +19,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { PayerFormModal } from "./PayerFormModal";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { payersApi } from "@/lib/services/payers";
@@ -61,6 +62,7 @@ export default function PayersPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = payersApi();
   const toast = useToast();
@@ -147,6 +149,7 @@ export default function PayersPage() {
       planIds: planIds.length ? planIds : undefined,
     };
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, { ...payload, status: form.status } as UpdatePayerRequest);
@@ -154,7 +157,7 @@ export default function PayersPage() {
         await api.create(payload);
       }
       setModalOpen(false);
-      reload();
+      await reload();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -162,21 +165,24 @@ export default function PayersPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   }, [editId, form, api, reload]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -228,6 +234,7 @@ export default function PayersPage() {
               apiBase="/api/Payers"
               templateFileName="Payers_Import_Template.xlsx"
               onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
             />
           )}
           {canCreate && (
@@ -320,6 +327,7 @@ export default function PayersPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

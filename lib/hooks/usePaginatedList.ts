@@ -11,7 +11,7 @@ export interface UsePaginatedListResult<T> {
   data: PaginatedList<T> | null;
   error: string | null;
   loading: boolean;
-  reload: () => void;
+  reload: () => Promise<void>;
 }
 
 export function usePaginatedList<T>({
@@ -28,7 +28,7 @@ export function usePaginatedList<T>({
   const load = useCallback(() => {
     setError(null);
     setLoading(true);
-    fetchRef.current({ pageNumber, pageSize })
+    return fetchRef.current({ pageNumber, pageSize })
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load"))
       .finally(() => setLoading(false));
