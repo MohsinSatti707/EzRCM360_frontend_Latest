@@ -5,13 +5,33 @@
 
 ---
 
+## Memory System (Git-Tracked)
+
+**Memory files live in `.claude/memory/` in this repo — NOT in the local `~/.claude/projects/` folder.**
+
+### At the start of every session:
+1. Read `.claude/MEMORY.md` (index)
+2. Load relevant topic files from `.claude/memory/`
+
+### When saving new memories:
+1. Write the memory file to `.claude/memory/<type>_<topic>.md` (with frontmatter)
+2. Update `.claude/MEMORY.md` with a pointer to it
+3. Commit and push:
+   ```bash
+   git add .claude/ && git commit -m "Update Claude memory: <topic>" && git push origin main
+   ```
+
+This keeps memory in sync across all machines via git.
+
+---
+
 ## Git Workflow (MANDATORY)
 
 **Always pull from remote before making any changes:**
 ```bash
 git pull origin main
 ```
-Apply this rule to every session — code edits, new components, service updates, etc.
+Apply to every session — code edits, new components, service updates, etc.
 
 ---
 
@@ -30,6 +50,8 @@ Apply this rule to every session — code edits, new components, service updates
 | AR Analysis service types | `lib/services/insuranceArAnalysis.ts` |
 | AR Analysis report page | `app/rcm/insurance-ar-analysis/[sessionId]/report/page.tsx` |
 | AR Analysis session list/upload | `app/rcm/insurance-ar-analysis/` |
+| Claude Memory Index | `.claude/MEMORY.md` |
+| Claude Memory Files | `.claude/memory/` |
 
 ---
 
