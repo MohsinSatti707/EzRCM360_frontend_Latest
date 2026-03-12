@@ -12,40 +12,41 @@ const root = path.resolve(__dirname, "..");
 const standalone = path.join(root, ".next", "standalone");
 const zipPath = path.join(root, "deploy.zip");
 
-// 1. Copy .next/static → .next/standalone/.next/static
+// 1. Copy .next/static -> .next/standalone/.next/static
 const srcStatic = path.join(root, ".next", "static");
 const destStatic = path.join(standalone, ".next", "static");
 if (fs.existsSync(srcStatic)) {
   copyDirSync(srcStatic, destStatic);
-  console.log("✔ Copied .next/static → standalone/.next/static");
+  console.log("Copied .next/static -> standalone/.next/static");
 } else {
-  console.warn("⚠ .next/static not found — skipping");
+  console.warn("WARNING: .next/static not found - skipping");
 }
 
-// 2. Copy public → .next/standalone/public
+// 2. Copy public -> .next/standalone/public
 const srcPublic = path.join(root, "public");
 const destPublic = path.join(standalone, "public");
 if (fs.existsSync(srcPublic)) {
   copyDirSync(srcPublic, destPublic);
-  console.log("✔ Copied public → standalone/public");
+  console.log("Copied public -> standalone/public");
 } else {
-  console.warn("⚠ public folder not found — skipping");
+  console.warn("WARNING: public folder not found - skipping");
 }
 
-// 3. Create deploy.zip using PowerShell (available on all Windows 10+)
+// 3. Create deploy.zip using Windows tar.exe (bsdtar, built into Windows 10+)
+//    tar with .zip extension auto-selects zip format via -a flag
 if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
 try {
-  execSync(
-    `powershell -NoProfile -Command "Compress-Archive -Path '${standalone}\\*' -DestinationPath '${zipPath}' -Force"`,
-    { stdio: "inherit" }
-  );
-  console.log(`✔ Created deploy.zip (${(fs.statSync(zipPath).size / 1024 / 1024).toFixed(1)} MB)`);
+  execSync(`tar.exe -a -cf "${zipPath}" -C "${standalone}" .`, {
+    stdio: "inherit",
+  });
+  const sizeMB = (fs.statSync(zipPath).size / 1024 / 1024).toFixed(1);
+  console.log(`Created deploy.zip (${sizeMB} MB)`);
 } catch (err) {
-  console.error("✖ Failed to create zip:", err.message);
+  console.error("Failed to create zip:", err.message);
   process.exit(1);
 }
 
-// ── helpers ──────────────────────────────────────────────────────────
+// -- helpers --
 function copyDirSync(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
