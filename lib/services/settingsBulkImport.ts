@@ -68,6 +68,9 @@ export async function uploadBulkImport(apiBase: string, file: File): Promise<Bul
   }
   const json = await res.json();
   // API wraps in { data: ..., success: true } envelope
-  const payload = json.data ?? json;
-  return payload as BulkImportResult;
+  const payload = (json.data ?? json) as BulkImportResult;
+  if (!payload.success && payload.errors?.length > 0) {
+    throw new Error(payload.errors.join("; "));
+  }
+  return payload;
 }
