@@ -29,9 +29,14 @@ const DUMMY_REPORT: ArAnalysisReportDto = {
   totalUnderpayment: 12500,
   riskAdjustedRecovery: 10000,
   claimCategorisationBreakdown: [
-    { category: "Commercial OON", count: 8 },
-    { category: "Commercial IN", count: 6 },
-    { category: "Government", count: 4 },
+    { category: "Insurance", count: 14, layer: 1 },
+    { category: "Attorney", count: 3, layer: 1 },
+    { category: "Other", count: 1, layer: 1 },
+    { category: "Commercial", count: 8, layer: 2 },
+    { category: "Medicare", count: 4, layer: 2 },
+    { category: "MVA", count: 2, layer: 2 },
+    { category: "Commercial OON", count: 6, layer: 3 },
+    { category: "Commercial IN", count: 2, layer: 3 },
   ],
   underpaymentByPriority: [
     { priority: "High", amount: 7500 },
@@ -225,28 +230,45 @@ export default function InsuranceArAnalysisReportPage() {
           <h2 className="mb-5 text-[16px] font-bold font-['Aileron'] text-foreground">
             Claim Categorisation Breakdown
           </h2>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-            {report.claimCategorisationBreakdown?.length
-              ? report.claimCategorisationBreakdown.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded"
-                  >
-                    <span className="text-[14px] font-['Aileron'] text-muted-foreground">
-                      {item.category}
-                    </span>
-                    <span className="text-[14px] font-['Aileron'] text-foreground font-medium text-right">
-                      {item.count}
-                    </span>
+          {report.claimCategorisationBreakdown?.length ? (
+            <div className="space-y-6">
+              {[
+                { layer: 1, title: "Layer 1 — Payer Entity Type" },
+                { layer: 2, title: "Layer 2 — Plan Category (Insurance Only)" },
+                { layer: 3, title: "Layer 3 — Commercial Sub-Categorization" },
+              ].map(({ layer, title }) => {
+                const items = report.claimCategorisationBreakdown.filter((x) => x.layer === layer);
+                if (!items.length) return null;
+                return (
+                  <div key={layer}>
+                    <p className="text-[12px] font-['Aileron'] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      {title}
+                    </p>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                      {items.map((item, i) => (
+                        <div
+                          key={i}
+                          className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded"
+                        >
+                          <span className="text-[14px] font-['Aileron'] text-muted-foreground">
+                            {item.category}
+                          </span>
+                          <span className="text-[14px] font-['Aileron'] text-foreground font-medium text-right">
+                            {item.count}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))
-              : (
-                  <div className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded col-span-2">
-                    <span className="text-[14px] font-['Aileron'] text-muted-foreground">No categorisation data</span>
-                    <span className="text-[14px] font-['Aileron'] text-foreground font-medium">—</span>
-                  </div>
-                )}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded">
+              <span className="text-[14px] font-['Aileron'] text-muted-foreground">No categorisation data</span>
+              <span className="text-[14px] font-['Aileron'] text-foreground font-medium">—</span>
+            </div>
+          )}
         </Card>
 
         {report.underpaymentByPriority?.length > 0 && (

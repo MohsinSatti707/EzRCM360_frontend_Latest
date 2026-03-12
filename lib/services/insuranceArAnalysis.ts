@@ -137,6 +137,7 @@ export interface ArAnalysisSummaryDto {
 export interface ClaimCategoryBreakdownDto {
   category: string;
   count: number;
+  layer: number;
 }
 
 export interface UnderpaymentByPriorityDto {
