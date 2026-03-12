@@ -285,6 +285,7 @@ export default function InsuranceArAnalysisProcessingPage() {
   const [skippingPayer, setSkippingPayer] = useState(false);
   const [skippingPlan, setSkippingPlan] = useState(false);
   const [skippingProvider, setSkippingProvider] = useState(false);
+  const [retrying, setRetrying] = useState(false);
   const [planDownloadError, setPlanDownloadError] = useState<string | null>(null);
   const [payerDownloadError, setPayerDownloadError] = useState<string | null>(null);
   const [providerDownloadError, setProviderDownloadError] = useState<string | null>(null);
@@ -480,6 +481,20 @@ export default function InsuranceArAnalysisProcessingPage() {
       setUploading(false);
     }
   };
+
+  const handleRetry = useCallback(async () => {
+    setRetrying(true);
+    try {
+      await apiRef.current.startAnalysis(sessionId);
+      toast.success("Analysis restarted.");
+      await refreshStatus();
+      pollUntilSettled();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Retry failed.");
+    } finally {
+      setRetrying(false);
+    }
+  }, [sessionId, refreshStatus, pollUntilSettled, toast]);
 
   const handleRefreshStatus = useCallback(async () => {
     setRefreshingStatus(true);
@@ -700,6 +715,17 @@ export default function InsuranceArAnalysisProcessingPage() {
                         : status?.overallMessage ?? ""}
               </p>
             </div>
+            {isFailed && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetry}
+                disabled={retrying}
+                className="shrink-0 border-red-300 text-red-700 hover:bg-red-50 font-['Aileron'] text-[14px]"
+              >
+                {retrying ? "Retrying…" : "Retry Analysis"}
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
