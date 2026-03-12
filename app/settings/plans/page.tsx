@@ -21,6 +21,7 @@ import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { plansApi } from "@/lib/services/plans";
 import { lookupsApi } from "@/lib/services/lookups";
+import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { usePaginatedList } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
@@ -229,12 +230,19 @@ export default function PlansPage() {
           </div>
         </div>
         {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Plan <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
+          <div className="flex items-center gap-3">
+            <BulkImportActions
+              apiBase="/api/Plans"
+              templateFileName="Plans_Import_Template.xlsx"
+              onImportSuccess={reload}
+            />
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Plan <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          </div>
         )}
       </div>
 

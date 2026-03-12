@@ -20,6 +20,7 @@ import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
 import { PayerFormModal } from "./PayerFormModal";
+import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { payersApi } from "@/lib/services/payers";
 import { lookupsApi } from "@/lib/services/lookups";
 import { usePaginatedList } from "@/lib/hooks";
@@ -221,14 +222,23 @@ export default function PayersPage() {
             />
           </div>
         </div>
-        {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Payer <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canCreate && (
+            <BulkImportActions
+              apiBase="/api/Payers"
+              templateFileName="Payers_Import_Template.xlsx"
+              onImportSuccess={reload}
+            />
+          )}
+          {canCreate && (
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Payer <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          )}
+        </div>
       </div>
 
       {error && (

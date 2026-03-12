@@ -20,6 +20,7 @@ import {
 import { Pagination } from "@/components/ui/Pagination";
 import { entityProvidersApi } from "@/lib/services/entityProviders";
 import { lookupsApi } from "@/lib/services/lookups";
+import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -186,12 +187,19 @@ export default function EntityProvidersPage() {
           </div>
         </div>
         {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Entity Provider <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
+          <div className="flex items-center gap-3">
+            <BulkImportActions
+              apiBase="/api/EntityProviders"
+              templateFileName="EntityProviders_Import_Template.xlsx"
+              onImportSuccess={loadList}
+            />
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Entity Provider <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          </div>
         )}
       </div>
 
