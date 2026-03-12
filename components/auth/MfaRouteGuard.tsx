@@ -9,7 +9,7 @@ import {
   MFA_VERIFIED_KEY,
 } from "@/lib/env";
 
-const PUBLIC_PATHS = ["/login", "/authentication/verify", "/authentication/setup"];
+const PUBLIC_PATHS = ["/login", "/set-password", "/authentication/verify", "/authentication/setup"];
 const MFA_VERIFY_PATH = "/authentication/verify";
 const MFA_SETUP_PATH = "/authentication/setup";
 const LOGIN_PATH = "/login";

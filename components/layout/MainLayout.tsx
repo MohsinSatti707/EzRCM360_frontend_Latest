@@ -11,11 +11,11 @@ function MainContent({ children }: { children: React.ReactNode }) {
   const collapsed = sidebar?.collapsed ?? false;
   return (
     <div
-      className={`flex min-h-screen flex-col transition-[padding] duration-200 ease-in-out ${collapsed ? "pl-12" : "pl-64"}`}
+      className={`flex h-screen flex-col overflow-hidden transition-[padding] duration-200 ease-in-out ${collapsed ? "pl-12" : "pl-64"}`}
     >
       <Header />
-      <main className="flex-1 pt-4 px-6 pb-6 flex flex-col">
-        <div className="mx-auto w-full max-w-6xl">{children}</div>
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden pt-4 px-6 pb-2">
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col overflow-hidden">{children}</div>
       </main>
       <AppFooter />
     </div>

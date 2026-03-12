@@ -21,7 +21,9 @@ import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { plansApi } from "@/lib/services/plans";
 import { lookupsApi } from "@/lib/services/lookups";
-import { usePaginatedList } from "@/lib/hooks";
+import { BulkImportActions } from "@/components/settings/BulkImportActions";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -67,14 +69,19 @@ export default function PlansPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = plansApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
+    extraParams: { search: debouncedSearch || undefined },
     fetch: api.getList,
   });
 
@@ -152,6 +159,7 @@ export default function PlansPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form as UpdatePlanRequest);
@@ -159,7 +167,7 @@ export default function PlansPage() {
         await api.create(form);
       }
       setModalOpen(false);
-      reload();
+      await reload();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -167,21 +175,24 @@ export default function PlansPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -229,12 +240,20 @@ export default function PlansPage() {
           </div>
         </div>
         {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Plan <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
+          <div className="flex items-center gap-3">
+            <BulkImportActions
+              apiBase="/api/Plans"
+              templateFileName="Plans_Import_Template.xlsx"
+              onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
+            />
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Plan <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          </div>
         )}
       </div>
 
@@ -415,6 +434,7 @@ export default function PlansPage() {
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete plan" message="Are you sure you want to delete this plan?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

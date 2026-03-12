@@ -16,6 +16,7 @@ export interface OrganizationProfileDto {
   systemDateFormat?: string | null;
   systemTimeFormat?: string | null;
   logoUrl?: string | null;
+  phoneNumber?: string | null;
 }
 
 export interface UpdateCurrentOrganizationRequest {

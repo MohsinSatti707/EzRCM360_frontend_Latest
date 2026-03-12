@@ -199,6 +199,10 @@ export default function InsuranceArAnalysisReportPage() {
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Total Rows</span>
               <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%] pr-[10px]">{analysisSummary.totalRows ?? "—"} Rows</span>
             </div>
+            <div className="flex justify-between py-3 border-b border-border">
+              <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Claims passed</span>
+              <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%] pr-[10px]">{totalClaimsAnalyzed.toLocaleString()} Claims</span>
+            </div>
           </div>
         </Card>
 

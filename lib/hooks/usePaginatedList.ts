@@ -4,19 +4,21 @@ import type { PaginatedList } from "@/lib/types";
 export interface UsePaginatedListOptions<T> {
   pageNumber: number;
   pageSize?: number;
-  fetch: (params: { pageNumber: number; pageSize: number }) => Promise<PaginatedList<T>>;
+  extraParams?: Record<string, unknown>;
+  fetch: (params: { pageNumber: number; pageSize: number } & Record<string, unknown>) => Promise<PaginatedList<T>>;
 }
 
 export interface UsePaginatedListResult<T> {
   data: PaginatedList<T> | null;
   error: string | null;
   loading: boolean;
-  reload: () => void;
+  reload: () => Promise<void>;
 }
 
 export function usePaginatedList<T>({
   pageNumber,
   pageSize = 10,
+  extraParams,
   fetch: fetchFn,
 }: UsePaginatedListOptions<T>): UsePaginatedListResult<T> {
   const [data, setData] = useState<PaginatedList<T> | null>(null);
@@ -25,14 +27,17 @@ export function usePaginatedList<T>({
   const fetchRef = useRef(fetchFn);
   fetchRef.current = fetchFn;
 
+  const extraParamsKey = JSON.stringify(extraParams ?? {});
+
   const load = useCallback(() => {
     setError(null);
     setLoading(true);
-    fetchRef.current({ pageNumber, pageSize })
+    return fetchRef.current({ pageNumber, pageSize, ...(extraParams ?? {}) })
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load"))
       .finally(() => setLoading(false));
-  }, [pageNumber, pageSize]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageNumber, pageSize, extraParamsKey]);
 
   useEffect(() => {
     load();

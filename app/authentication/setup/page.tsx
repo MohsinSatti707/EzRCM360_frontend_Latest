@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { getApiUrl } from "@/lib/api";
 import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, MFA_SETUP_USER_ID_KEY, MFA_VERIFIED_KEY, APP_NAME, AUTH_COOKIE } from "@/lib/env";
 import { useToast } from "@/lib/contexts/ToastContext";
+import { usePermissionsOptional } from "@/lib/contexts/PermissionsContext";
 import { authenticator } from "@otplib/preset-default";
 import QRCode from "qrcode";
 
@@ -15,6 +16,7 @@ type MfaMethod = "authenticator" | "email";
 export default function MfaSetupPage() {
   const router = useRouter();
   const toast = useToast();
+  const permissions = usePermissionsOptional();
   const [method, setMethod] = useState<MfaMethod>("authenticator");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -118,6 +120,7 @@ export default function MfaSetupPage() {
           localStorage.setItem(AUTH_TOKEN_KEY, token);
           if (refresh) localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
           document.cookie = `${AUTH_COOKIE}=1; path=/; max-age=86400; SameSite=Lax`;
+          await permissions?.reload();
         }
         sessionStorage.removeItem(MFA_SETUP_USER_ID_KEY);
         sessionStorage.setItem(MFA_VERIFIED_KEY, "true");
@@ -169,6 +172,7 @@ export default function MfaSetupPage() {
       }
       sessionStorage.removeItem(MFA_SETUP_USER_ID_KEY);
       sessionStorage.setItem(MFA_VERIFIED_KEY, "true");
+      await permissions?.reload();
       toast.success("MFA set up successfully. You will be asked to verify on your next login.");
       const redirect = typeof window !== "undefined" ? sessionStorage.getItem("mfa_redirect") : null;
       if (typeof window !== "undefined") sessionStorage.removeItem("mfa_redirect");

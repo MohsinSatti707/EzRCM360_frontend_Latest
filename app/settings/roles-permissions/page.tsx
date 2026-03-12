@@ -14,9 +14,27 @@ import type { RoleDto, RoleDetailDto, CreateRoleRequest, UpdateRoleRequest } fro
 import type { PermissionDto, PermissionItemRequest } from "@/lib/services/permissions";
 import type { ModuleLookupDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
+import {
+  ChevronDown,
+  ChevronRight,
+  Pencil,
+  Trash2,
+  Plus,
+  ArrowRight
+} from "lucide-react";
+import {
+  DashboardIcon,
+  PatientsIcon,
+  ClaimsIcon,
+  OperationalModulesIcon,
+  RcmIntelligenceIcon,
+  SettingsIcon,
+  HelpSupportIcon,
+} from "@/components/icons/SidebarIcons";
+
 
 const defaultForm: CreateRoleRequest = { name: "", description: "" };
-const VISIBILITY_LEVELS = ["Team", "Individual", "Organization"];
+const VISIBILITY_LEVELS = ["Team", "Self"];
 
 /** Root order from Permission.xlsx: Dashboard, Patients, Claims, Operational Modules, RCM Intelligence, Settings & Configurations, Help & Support, then others */
 const ROOT_ORDER = [
@@ -125,87 +143,52 @@ function ModuleCell({
   depth: number;
   onToggle?: () => void;
 }) {
-  const iconClass = "h-5 w-5 shrink-0 text-muted-foreground";
-  const Chevron = () => (
-    <svg
-      className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  );
-  const Clock = () => (
-    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-  const Users = () => (
-    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-  );
-  const Document = () => (
-    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-  );
-  const ChartBar = () => (
-    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    </svg>
-  );
-  const Database = () => (
-    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-    </svg>
-  );
-  const Gear = () => (
-    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-  );
-  const Info = () => (
-    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-  const Folder = () => (
-    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-    </svg>
-  );
-
   const name = moduleName.toLowerCase();
-  let Icon = Folder;
-  if (name.includes("dashboard")) Icon = Clock;
-  else if (name.includes("patients")) Icon = Users;
-  else if (name.includes("claims")) Icon = Document;
-  else if (name.includes("operational modules")) Icon = ChartBar;
-  else if (name.includes("rcm intelligence")) Icon = Database;
-  else if (name.includes("settings") || name.includes("configurations")) Icon = Gear;
-  else if (name.includes("help") || name.includes("support")) Icon = Info;
+  let Icon = null;
+  
+  if (depth === 0) {
+    if (name.includes("dashboard")) Icon = DashboardIcon;
+    else if (name.includes("patients")) Icon = PatientsIcon;
+    else if (name.includes("claims")) Icon = ClaimsIcon;
+    else if (name.includes("operational modules")) Icon = OperationalModulesIcon;
+    else if (name.includes("rcm intelligence")) Icon = RcmIntelligenceIcon;
+    else if (name.includes("settings") || name.includes("configurations")) Icon = SettingsIcon;
+    else if (name.includes("help") || name.includes("support")) Icon = HelpSupportIcon;
+    else Icon = OperationalModulesIcon; // fallback
+  }
+
+  const isRoot = depth === 0;
+  
+  let textStyle = "";
+  if (isRoot && !hasChildren) {
+    textStyle = "font-aileron font-normal text-[16px] leading-none text-[#2A2C33]";
+  } else if (isRoot && hasChildren) {
+    textStyle = "font-aileron font-bold text-[16px] leading-none text-[#2A2C33]";
+  } else {
+    textStyle = "font-aileron font-normal text-[16px] leading-none text-[#64748B]";
+  }
 
   return (
     <div
-      className="flex items-center gap-2"
-      style={{ paddingLeft: depth * 16 }}
+      className={`flex items-center gap-2 ${textStyle}`}
+      style={{ paddingLeft: depth * 24 }}
     >
       {hasChildren ? (
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); onToggle?.(); }}
-          className="flex shrink-0 rounded p-0.5 hover:bg-muted"
-          aria-expanded={isExpanded}
+          className="flex shrink-0 items-center justify-center p-0.5 text-[#64748B] hover:text-[#1F2937]"
         >
-          <Chevron />
+          <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "" : "-rotate-90"}`} />
         </button>
       ) : (
-        <span className="w-5 shrink-0" />
+        depth > 0 ? (
+          <ChevronRight className="h-4 w-4 shrink-0 text-[#CBD5E1]" />
+        ) : (
+          <span className="w-5 shrink-0" />
+        )
       )}
-      <Icon />
+      {Icon && <Icon className="h-5 w-5 shrink-0 text-[#2A2C33]" />}
       <span className="truncate">{moduleName}</span>
     </div>
   );
@@ -434,13 +417,11 @@ export default function RolesPermissionsPage() {
     <PageShell
       breadcrumbs={[{ label: "Settings & Configurations", href: "/settings" }, { label: "Roles & Permissions" }]}
       title="Roles & Permissions"
-      description="Manage roles and assign module-level permissions."
+      titleWrapperClassName="items-center"
       actions={
-        <Button onClick={openCreate} className="inline-flex items-center gap-2">
+        <Button onClick={openCreate} className="inline-flex items-center gap-2 rounded-md bg-[#0066CC] px-4 py-2 text-sm font-medium text-white hover:bg-[#0052a3]">
           Create New Role
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+          <Plus className="h-4 w-4" />
         </Button>
       }
     >
@@ -450,177 +431,153 @@ export default function RolesPermissionsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(280px,360px)_1fr]">
+      <div className="flex flex-col xl:flex-row h-[calc(100vh-225px)] gap-2 bg-white mt-4">
         {/* Left: Roles list */}
-        <Card className="p-6" elevated>
-          <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <h2 className="text-base font-semibold text-foreground">Roles</h2>
+        <div className="w-full xl:w-[220px] shrink-0 border border-[#E2E8F0] bg-[#FFFFFF] rounded-[5px] flex flex-col">
+          <div className="border-b border-[#E2E8F0] px-6 py-4">
+            <h2 className="font-aileron text-[16px] font-bold leading-none text-[#2A2C33]">Role(s)</h2>
           </div>
           {rolesLoading ? (
             <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
           ) : (
-            <ul className="space-y-1.5">
+            <ul className="flex flex-col flex-1 overflow-y-auto custom-scrollbar">
               {roles.map((role) => (
                 <li key={role.id}>
                   <button
                     type="button"
                     onClick={() => onSelectRole(role)}
-                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-left text-sm font-medium transition-all duration-200 ${
+                    className={`flex w-full items-center rounded-[5px] px-4 py-3 text-left text-sm font-medium transition-colors ${
                       selectedRole?.id === role.id
-                        ? "bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-100"
-                        : "text-foreground hover:bg-muted"
+                        ? " bg-[#F0F7FF] text-[#0066CC]"
+                        : "text-[#64748B] hover:bg-[#F8FAFC]"
                     }`}
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold text-muted-foreground">
-                      {role.name.charAt(0).toUpperCase()}
-                    </span>
                     <span className="truncate">{role.name}</span>
                   </button>
                 </li>
               ))}
             </ul>
           )}
-        </Card>
+        </div>
 
         {/* Right: Permissions */}
-        <Card className="min-h-[420px] p-6" elevated>
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h2 className="text-base font-semibold text-foreground">Permissions</h2>
+        <div className="flex-1 shrink-0 rounded-[5px] border border-[#E2E8F0] bg-[#FFFFFF] ">
+          <div className="border-b border-[#E2E8F0] px-6 py-4 ">
+            <h2 className="font-aileron text-[16px] font-bold leading-none text-[#2A2C33]">Permissions</h2>
           </div>
-          {!selectedRole ? (
+          <div className="py-4">
+            {!selectedRole ? (
             <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/50 py-16">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                </svg>
-              </div>
               <p className="text-center text-sm font-medium text-muted-foreground">Select a role to view and edit permissions</p>
-              <p className="mt-1 text-center text-xs text-muted-foreground">Choose a role from the list on the left</p>
             </div>
           ) : permissionsLoading ? (
             <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
           ) : (
             <>
-              <div className="mb-4 flex items-start justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-foreground">
-                      {selectedRole.name.toUpperCase()}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={openEditRole}
-                      className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                      title="Edit role"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteId(selectedRole.id)}
-                      className="rounded p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-600"
-                      title="Delete role"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                  {selectedRole.description && (
-                    <p className="mt-1 text-sm text-muted-foreground">{selectedRole.description}</p>
-                  )}
+              <div className="mb-3 px-6">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-bold uppercase tracking-wide text-[#1F2937]">
+                    {selectedRole.name}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={openEditRole}
+                    className="text-[#64748B] hover:text-[#1F2937]"
+                    title="Edit role"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteId(selectedRole.id)}
+                    className="text-[#64748B] hover:text-red-600"
+                    title="Delete role"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
+                {selectedRole.description && (
+                  <p className="mt-1 text-sm text-[#64748B]">{selectedRole.description}</p>
+                )}
               </div>
 
-              <div className="overflow-x-auto rounded-lg border border-border">
-                <table className="w-full table-fixed divide-y divide-border">
+              <div className="overflow-x-auto h-[calc(100vh-412px)] overflow-y-auto custom-scrollbar">
+                <table className="w-full table-fixed border-collapse">
                   <colgroup>
-                    <col className="min-w-[200px]" />
-                    <col className="w-20" />
-                    <col className="w-20" />
-                    <col className="w-20" />
-                    <col className="w-20" />
-                    <col className="w-[140px]" />
+                    <col className="w-auto min-w-[240px]" />
+                    <col className="w-[100px]" />
+                    <col className="w-[100px]" />
+                    <col className="w-[100px]" />
+                    <col className="w-[100px]" />
+                    <col className="w-[160px]" />
                   </colgroup>
                   <thead>
-                    <tr className="bg-primary-50">
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-primary-900">
+                    <tr className="border-b border-border bg-[#F8FAFC] sticky top-0 z-10">
+                      <th className="pl-[44px] py-3 text-left font-aileron text-[12px] font-bold uppercase leading-none text-[#2A2C33]">
                         Module(s)
                       </th>
-                      <th className="px-2 py-3 text-center text-xs font-semibold uppercase tracking-wide text-primary-900">
-                        <label className="flex cursor-pointer items-center justify-center gap-1.5">
+                      <th className="px-2 py-3 text-left">
+                        <label className="flex cursor-pointer items-center gap-2 font-aileron text-[12px] font-bold uppercase leading-none text-[#2A2C33]">
                           <input
                             type="checkbox"
                             ref={headerViewRef}
                             checked={allView}
                             onChange={(e) => selectAllInColumn("canView", e.target.checked)}
-                            className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
+                            className="h-[24px] w-[24px] rounded-[6px] border border-[#E2E8F0] bg-white text-[#0066CC] focus:ring-[#0066CC] bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22%23CBD5E1%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] checked:bg-[#0066CC] checked:border-[#0066CC] checked:bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-center bg-no-repeat appearance-none"
                           />
                           <span>View</span>
                         </label>
                       </th>
-                      <th className="px-2 py-3 text-center text-xs font-semibold uppercase tracking-wide text-primary-900">
-                        <label className="flex cursor-pointer items-center justify-center gap-1.5">
+                      <th className="px-2 py-3 text-left">
+                        <label className="flex cursor-pointer items-center gap-2 font-aileron text-[12px] font-bold uppercase leading-none text-[#2A2C33]">
                           <input
                             type="checkbox"
                             ref={headerCreateRef}
                             checked={allCreate}
                             onChange={(e) => selectAllInColumn("canCreate", e.target.checked)}
-                            className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
+                            className="h-[24px] w-[24px] rounded-[6px] border border-[#E2E8F0] bg-white text-[#0066CC] focus:ring-[#0066CC] bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22%23CBD5E1%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] checked:bg-[#0066CC] checked:border-[#0066CC] checked:bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-center bg-no-repeat appearance-none"
                           />
                           <span>Create</span>
                         </label>
                       </th>
-                      <th className="px-2 py-3 text-center text-xs font-semibold uppercase tracking-wide text-primary-900">
-                        <label className="flex cursor-pointer items-center justify-center gap-1.5">
+                      <th className="px-2 py-3 text-left">
+                        <label className="flex cursor-pointer items-center gap-2 font-aileron text-[12px] font-bold uppercase leading-none text-[#2A2C33]">
                           <input
                             type="checkbox"
                             ref={headerUpdateRef}
                             checked={allUpdate}
                             onChange={(e) => selectAllInColumn("canUpdate", e.target.checked)}
-                            className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
+                            className="h-[24px] w-[24px] rounded-[6px] border border-[#E2E8F0] bg-white text-[#0066CC] focus:ring-[#0066CC] bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22%23CBD5E1%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] checked:bg-[#0066CC] checked:border-[#0066CC] checked:bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-center bg-no-repeat appearance-none"
                           />
                           <span>Update</span>
                         </label>
                       </th>
-                      <th className="px-2 py-3 text-center text-xs font-semibold uppercase tracking-wide text-primary-900">
-                        <label className="flex cursor-pointer items-center justify-center gap-1.5">
+                      <th className="px-2 py-3 text-left">
+                        <label className="flex cursor-pointer items-center gap-2 font-aileron text-[12px] font-bold uppercase leading-none text-[#2A2C33]">
                           <input
                             type="checkbox"
                             ref={headerDeleteRef}
                             checked={allDelete}
                             onChange={(e) => selectAllInColumn("canDelete", e.target.checked)}
-                            className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
+                            className="h-[24px] w-[24px] rounded-[6px] border border-[#E2E8F0] bg-white text-[#0066CC] focus:ring-[#0066CC] bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22%23CBD5E1%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] checked:bg-[#0066CC] checked:border-[#0066CC] checked:bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-center bg-no-repeat appearance-none"
                           />
                           <span>Delete</span>
                         </label>
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-primary-900">
+                      <th className="px-4 py-3 text-left font-aileron text-[12px] font-bold uppercase leading-none text-[#2A2C33]">
                         Visibility Level
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border bg-card">
+                  <tbody className="divide-y divide-border bg-white">
                     {rowsToRender.map(({ node, depth }) => {
                         const p = permissionByModuleId.get(node.id);
                         if (!p) return null;
                         const hasChildren = node.children.length > 0;
                         const isExpanded = expandedParentIds.has(node.id);
                         return (
-                          <tr key={p.moduleId} className="hover:bg-muted">
-                            <td className="overflow-hidden text-ellipsis whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">
+                          <tr key={p.moduleId} className="hover:bg-[#F8FAFC] transition-colors">
+                            <td className="overflow-hidden text-ellipsis whitespace-nowrap px-4 py-3 text-sm">
                               <ModuleCell
                                 moduleName={p.moduleName}
                                 hasChildren={hasChildren}
@@ -629,45 +586,45 @@ export default function RolesPermissionsPage() {
                                 onToggle={() => toggleExpand(node.id)}
                               />
                             </td>
-                            <td className="px-2 py-2 text-center">
+                            <td className="px-2 py-3">
                               <input
                                 type="checkbox"
                                 checked={p.canView}
                                 onChange={(e) => updatePermission(p.moduleId, { canView: e.target.checked })}
-                                className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
+                                className="h-[24px] w-[24px] rounded-[6px] border border-[#E2E8F0] bg-white text-[#0066CC] focus:ring-[#0066CC] bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22%23CBD5E1%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] checked:bg-[#0066CC] checked:border-[#0066CC] checked:bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-center bg-no-repeat appearance-none"
                               />
                             </td>
-                            <td className="px-2 py-2 text-center">
+                            <td className="px-2 py-3">
                               <input
                                 type="checkbox"
                                 checked={p.canCreate}
                                 onChange={(e) => updatePermission(p.moduleId, { canCreate: e.target.checked })}
-                                className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
+                                className="h-[24px] w-[24px] rounded-[6px] border border-[#E2E8F0] bg-white text-[#0066CC] focus:ring-[#0066CC] bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22%23CBD5E1%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] checked:bg-[#0066CC] checked:border-[#0066CC] checked:bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-center bg-no-repeat appearance-none"
                               />
                             </td>
-                            <td className="px-2 py-2 text-center">
+                            <td className="px-2 py-3">
                               <input
                                 type="checkbox"
                                 checked={p.canUpdate}
                                 onChange={(e) => updatePermission(p.moduleId, { canUpdate: e.target.checked })}
-                                className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
+                                className="h-[24px] w-[24px] rounded-[6px] border border-[#E2E8F0] bg-white text-[#0066CC] focus:ring-[#0066CC] bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22%23CBD5E1%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] checked:bg-[#0066CC] checked:border-[#0066CC] checked:bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-center bg-no-repeat appearance-none"
                               />
                             </td>
-                            <td className="px-2 py-2 text-center">
+                            <td className="px-2 py-3">
                               <input
                                 type="checkbox"
                                 checked={p.canDelete}
                                 onChange={(e) => updatePermission(p.moduleId, { canDelete: e.target.checked })}
-                                className="h-4 w-4 rounded border-input text-primary-600 focus:ring-primary-500"
+                                className="h-[24px] w-[24px] rounded-[6px] border border-[#E2E8F0] bg-white text-[#0066CC] focus:ring-[#0066CC] bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22%23CBD5E1%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] checked:bg-[#0066CC] checked:border-[#0066CC] checked:bg-[url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2210%22%20height%3D%228%22%20viewBox%3D%220%200%2014%2010%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%205L4.5%208.5L13%201.5%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-center bg-no-repeat appearance-none"
                               />
                             </td>
-                            <td className="px-3 py-2 align-middle">
+                            <td className="px-4 py-3">
                               <select
                                 value={p.visibilityLevel || "Team"}
                                 onChange={(e) =>
                                   updatePermission(p.moduleId, { visibilityLevel: e.target.value })
                                 }
-                                className="w-full min-w-0 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                className="w-full rounded-md border border-[#CBD5E1] bg-white px-2 py-1.5 text-sm text-[#1F2937] focus:border-[#0066CC] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
                               >
                                 {VISIBILITY_LEVELS.map((v) => (
                                   <option key={v} value={v}>
@@ -683,21 +640,20 @@ export default function RolesPermissionsPage() {
                 </table>
               </div>
 
-              <div className="mt-4 flex justify-end">
+              <div className="mt-2 mx-6">
                 <Button
                   onClick={handleSavePermissions}
                   disabled={!permissionDirty || savePermissionsLoading}
-                  className="inline-flex items-center gap-2"
+                  className="inline-flex items-center gap-2 rounded-md bg-[#0066CC] px-4 py-2 text-sm font-medium text-white hover:bg-[#0052a3]"
                 >
                   {savePermissionsLoading ? "Saving…" : "Save Permissions"}
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </>
           )}
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Create / Edit Role modal */}
@@ -706,6 +662,7 @@ export default function RolesPermissionsPage() {
         onClose={() => setModalOpen(false)}
         title={editId ? "Edit Role" : "Create Role"}
         size="md"
+        position="top-right"
       >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmitRole(); }}>
           {formError && (

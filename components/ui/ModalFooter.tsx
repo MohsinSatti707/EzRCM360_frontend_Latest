@@ -18,9 +18,6 @@ export function ModalFooter({
 }: ModalFooterProps) {
   return (
     <div className="flex justify-start gap-3 border-t border-border px-6 py-4">
-      <Button variant="secondary" onClick={onCancel} disabled={loading}>
-        Cancel
-      </Button>
       <Button
         type="submit"
         onClick={onSubmit}
@@ -28,6 +25,9 @@ export function ModalFooter({
         className="inline-flex items-center gap-2"
       >
         {loading ? "Saving…" : submitLabel}
+      </Button>
+      <Button variant="secondary" onClick={onCancel} disabled={loading}>
+        Cancel
       </Button>
     </div>
   );

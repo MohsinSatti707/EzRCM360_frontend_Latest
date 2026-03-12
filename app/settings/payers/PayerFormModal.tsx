@@ -64,6 +64,14 @@ export function PayerFormModal({
   loading,
   error,
 }: PayerFormModalProps) {
+  const insuranceEntityTypeValue = entityTypeOptions.find(
+    (opt) => opt.label.toLowerCase() === "insurance"
+  )?.value;
+
+  const isInsurance =
+    insuranceEntityTypeValue !== undefined &&
+    Number(insuranceEntityTypeValue) === Number(form.entityType);
+
   const addresses = form.addresses ?? [];
   const phoneNumbers = form.phoneNumbers ?? [];
   const emails = form.emails ?? [];
@@ -163,184 +171,193 @@ export function PayerFormModal({
             />
           </div>
 
-          {/* Addresses */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Addresses</h3>
-              <Button type="button" variant="outline" size="sm" onClick={addAddress}>
-                Add address
-              </Button>
-            </div>
-            {addresses.length === 0 && (
-              <p className="text-sm text-muted-foreground">No addresses. Click &quot;Add address&quot; to add one.</p>
-            )}
-            {addresses.map((addr, index) => (
-              <div
-                key={index}
-                className="rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-4 space-y-3"
-              >
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700"
-                    onClick={() => removeAddress(index)}
-                  >
-                    Remove
+          {!isInsurance && (
+            <>
+              {/* Addresses */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Addresses</h3>
+                  <Button type="button" variant="outline" size="sm" onClick={addAddress}>
+                    Add address
                   </Button>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Input
-                    label="Address line 1"
-                    value={addr.addressLine1}
-                    onChange={(e) => updateAddress(index, "addressLine1", e.target.value)}
-                  />
-                  <Input
-                    label="Address line 2"
-                    value={addr.addressLine2 ?? ""}
-                    onChange={(e) => updateAddress(index, "addressLine2", e.target.value)}
-                  />
-                  <Input
-                    label="City"
-                    value={addr.city}
-                    onChange={(e) => updateAddress(index, "city", e.target.value)}
-                  />
-                  <Input
-                    label="State"
-                    value={addr.state}
-                    onChange={(e) => updateAddress(index, "state", e.target.value)}
-                  />
-                  <Input
-                    label="ZIP"
-                    value={addr.zip}
-                    onChange={(e) => updateAddress(index, "zip", e.target.value)}
-                  />
-                  <Input
-                    label="Label (e.g. Billing)"
-                    value={addr.label ?? ""}
-                    onChange={(e) => updateAddress(index, "label", e.target.value)}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Phone numbers */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Phone numbers</h3>
-              <Button type="button" variant="outline" size="sm" onClick={addPhone}>
-                Add phone
-              </Button>
-            </div>
-            {phoneNumbers.length === 0 && (
-              <p className="text-sm text-muted-foreground">No phone numbers.</p>
-            )}
-            {phoneNumbers.map((ph, index) => (
-              <div
-                key={index}
-                className="flex flex-wrap items-end gap-3 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-4"
-              >
-                <div className="min-w-[200px] flex-1">
-                  <Input
-                    label="Phone number"
-                    value={ph.phoneNumber}
-                    onChange={(e) => updatePhone(index, "phoneNumber", e.target.value)}
-                  />
-                </div>
-                <div className="min-w-[120px] flex-1">
-                  <Input
-                    label="Label"
-                    value={ph.label ?? ""}
-                    onChange={(e) => updatePhone(index, "label", e.target.value)}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700"
-                  onClick={() => removePhone(index)}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {/* Emails */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Emails</h3>
-              <Button type="button" variant="outline" size="sm" onClick={addEmail}>
-                Add email
-              </Button>
-            </div>
-            {emails.length === 0 && (
-              <p className="text-sm text-muted-foreground">No emails.</p>
-            )}
-            {emails.map((em, index) => (
-              <div
-                key={index}
-                className="flex flex-wrap items-end gap-3 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-4"
-              >
-                <div className="min-w-[200px] flex-1">
-                  <Input
-                    label="Email address"
-                    type="email"
-                    value={em.emailAddress}
-                    onChange={(e) => updateEmail(index, "emailAddress", e.target.value)}
-                  />
-                </div>
-                <div className="min-w-[120px] flex-1">
-                  <Input
-                    label="Label"
-                    value={em.label ?? ""}
-                    onChange={(e) => updateEmail(index, "label", e.target.value)}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700"
-                  onClick={() => removeEmail(index)}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {/* Plans */}
-          <div className="space-y-3">
-            <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Linked plans</h3>
-            <p className="text-sm text-muted-foreground">
-              Select plans that belong to this payer. Plans are scoped to your organization.
-            </p>
-            {planOptions.length === 0 && (
-              <p className="text-sm text-muted-foreground">No plans available. Create plans first under Plan Configuration.</p>
-            )}
-            <div className="max-h-48 overflow-y-auto rounded-lg border border-[#E2E8F0] p-3">
-              <div className="space-y-2">
-                {planOptions.map((plan) => (
-                  <label
-                    key={plan.id}
-                    className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-[#F7F8F9]"
+                {addresses.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No addresses. Click &quot;Add address&quot; to add one.
+                  </p>
+                )}
+                {addresses.map((addr, index) => (
+                  <div
+                    key={index}
+                    className="rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-4 space-y-3"
                   >
-                    <input
-                      type="checkbox"
-                      checked={planIds.includes(plan.id)}
-                      onChange={() => togglePlan(plan.id)}
-                      className="rounded border-input"
-                    />
-                    <span className="text-sm text-foreground">{plan.displayName}</span>
-                  </label>
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => removeAddress(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Input
+                        label="Address line 1"
+                        value={addr.addressLine1}
+                        onChange={(e) => updateAddress(index, "addressLine1", e.target.value)}
+                      />
+                      <Input
+                        label="Address line 2"
+                        value={addr.addressLine2 ?? ""}
+                        onChange={(e) => updateAddress(index, "addressLine2", e.target.value)}
+                      />
+                      <Input
+                        label="City"
+                        value={addr.city}
+                        onChange={(e) => updateAddress(index, "city", e.target.value)}
+                      />
+                      <Input
+                        label="State"
+                        value={addr.state}
+                        onChange={(e) => updateAddress(index, "state", e.target.value)}
+                      />
+                      <Input
+                        label="ZIP"
+                        value={addr.zip}
+                        onChange={(e) => updateAddress(index, "zip", e.target.value)}
+                      />
+                      <Input
+                        label="Label (e.g. Billing)"
+                        value={addr.label ?? ""}
+                        onChange={(e) => updateAddress(index, "label", e.target.value)}
+                      />
+                    </div>
+                  </div>
                 ))}
               </div>
+
+              {/* Phone numbers */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Phone numbers</h3>
+                  <Button type="button" variant="outline" size="sm" onClick={addPhone}>
+                    Add phone
+                  </Button>
+                </div>
+                {phoneNumbers.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No phone numbers.</p>
+                )}
+                {phoneNumbers.map((ph, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-wrap items-end gap-3 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-4"
+                  >
+                    <div className="min-w-[200px] flex-1">
+                      <Input
+                        label="Phone number"
+                        value={ph.phoneNumber}
+                        onChange={(e) => updatePhone(index, "phoneNumber", e.target.value)}
+                      />
+                    </div>
+                    <div className="min-w-[120px] flex-1">
+                      <Input
+                        label="Label"
+                        value={ph.label ?? ""}
+                        onChange={(e) => updatePhone(index, "label", e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => removePhone(index)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Emails */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Emails</h3>
+                  <Button type="button" variant="outline" size="sm" onClick={addEmail}>
+                    Add email
+                  </Button>
+                </div>
+                {emails.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No emails.</p>
+                )}
+                {emails.map((em, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-wrap items-end gap-3 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-4"
+                  >
+                    <div className="min-w-[200px] flex-1">
+                      <Input
+                        label="Email address"
+                        type="email"
+                        value={em.emailAddress}
+                        onChange={(e) => updateEmail(index, "emailAddress", e.target.value)}
+                      />
+                    </div>
+                    <div className="min-w-[120px] flex-1">
+                      <Input
+                        label="Label"
+                        value={em.label ?? ""}
+                        onChange={(e) => updateEmail(index, "label", e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => removeEmail(index)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {isInsurance && (
+            <div className="space-y-3">
+              <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Linked plans</h3>
+              <p className="text-sm text-muted-foreground">
+                Select plans that belong to this payer. Plans are scoped to your organization.
+              </p>
+              {planOptions.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No plans available. Create plans first under Plan Configuration.
+                </p>
+              )}
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-[#E2E8F0] p-3">
+                <div className="space-y-2">
+                  {planOptions.map((plan) => (
+                    <label
+                      key={plan.id}
+                      className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-[#F7F8F9]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={planIds.includes(plan.id)}
+                        onChange={() => togglePlan(plan.id)}
+                        className="rounded border-input"
+                      />
+                      <span className="text-sm text-foreground">{plan.displayName}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </form>
     </DrawerForm>

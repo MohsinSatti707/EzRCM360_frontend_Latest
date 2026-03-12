@@ -1,19 +1,21 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, MoveRight } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { getApiUrl } from "@/lib/api";
 import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, MFA_USER_ID_KEY, MFA_SETUP_USER_ID_KEY, AUTH_COOKIE } from "@/lib/env";
 import { useToast } from "@/lib/contexts/ToastContext";
+import { usePermissionsOptional } from "@/lib/contexts/PermissionsContext";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const toast = useToast();
+  const permissions = usePermissionsOptional();
   const redirectTo = searchParams.get("redirect") ?? "/settings";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,8 +23,10 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const hasShownActivatedToast = useRef(false);
   useEffect(() => {
-    if (searchParams.get("activated") === "1") {
+    if (searchParams.get("activated") === "1" && !hasShownActivatedToast.current) {
+      hasShownActivatedToast.current = true;
       toast.success("Password Set Successfully. Your account has been activated successfully!");
       router.replace("/login");
     }
@@ -63,6 +67,7 @@ function LoginForm() {
         document.cookie = `${AUTH_COOKIE}=1; path=/; max-age=86400; SameSite=Lax`;
         sessionStorage.setItem(MFA_SETUP_USER_ID_KEY, userId);
         sessionStorage.setItem("mfa_redirect", redirectTo);
+        await permissions?.reload();
         toast.success("Please set up Multi-Factor Authentication.");
         router.push("/authentication/setup");
         router.refresh();
@@ -73,6 +78,7 @@ function LoginForm() {
         localStorage.setItem(AUTH_TOKEN_KEY, token);
         if (refresh) localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
         document.cookie = `${AUTH_COOKIE}=1; path=/; max-age=86400; SameSite=Lax`;
+        await permissions?.reload();
       }
       toast.success("Signed in successfully.");
       router.push(redirectTo.startsWith("/") ? redirectTo : "/settings");
@@ -91,23 +97,23 @@ function LoginForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-6">
       <Card className="w-full max-w-md animate-fade-in-up overflow-hidden border border-border bg-white p-8 shadow-sm rounded-lg">
-        <div className="mb-8 flex items-center gap-3">
+        <div className="mb-5 flex items-center gap-3">
           <Image src="/logo.png" alt="EzRCM360" width={147} height={32} className="h-10 w-auto shrink-0" priority />
-          <span className="text-xl font-semibold tracking-tight text-foreground">EzRCM360</span>
+          {/* <span className="text-xl font-semibold tracking-tight text-foreground">EzRCM360</span> */}
         </div>
-        <h2 className="font-aileron text-2xl font-semibold tracking-tight text-[#202830]">Sign in</h2>
-        <p className="mt-2 font-aileron text-base text-muted-foreground">
+        <h2 className="font-aileron text-2xl font-bold tracking-tight text-[#202830]">Login to your account</h2>
+        {/* <p className="mt-2 font-aileron text-base text-muted-foreground">
           Use your credentials to access the settings portal.
-        </p>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        </p> */}
+        <form onSubmit={handleSubmit} className="my-4 space-y-4">
           {error && (
             <div className="rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700 ring-1 ring-red-200/50 animate-fade-in">
               {error}
             </div>
           )}
           <div>
-            <label htmlFor="email" className="font-aileron font-normal text-[14px] leading-none text-[#2A2C33]">
-              Email
+            <label htmlFor="email" className="font-aileron font-semibold text-[14px] leading-none text-[#2A2C33]">
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               id="email"
@@ -121,8 +127,8 @@ function LoginForm() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="font-aileron font-normal text-[14px] leading-none text-[#2A2C33]">
-              Password
+            <label htmlFor="password" className="font-aileron font-semibold text-[14px] leading-none text-[#2A2C33]">
+              Password <span className="text-red-500">*</span>
             </label>
             <div className="relative mt-1.5">
               <input
@@ -144,13 +150,24 @@ function LoginForm() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            <div className="flex justify-between items-center mt-4 mb-1">
+
+              <div className="flex gap-2 items-center justify-center">
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 border-red-500 rounded cursor-pointer"
+                />
+                <label className="text-[#202830]">Remember me?</label>
+              </div>
+              <span className="text-[#0066CC] cursor-pointer">Forgot password</span>
+            </div>
           </div>
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-10 rounded-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            className="w-fit h-10 rounded-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
           >
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? "Logging in…" : "Log in"} <MoveRight/>
           </Button>
         </form>
       </Card>

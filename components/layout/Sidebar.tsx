@@ -140,7 +140,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <ScrollArea className="flex-1">
-        <nav className="py-4 pr-6">
+        <nav className="py-4 pr-2">
           {/* Main Nav Items */}
           <ul className="space-y-1">
             {visibleMain.map((item) => {
@@ -168,7 +168,7 @@ export function Sidebar() {
           </ul>
 
           {/* Separator */}
-          <div className="mt-[5px]">
+          <div className="mt-[5px] mb-5">
             <div className="w-full h-px bg-sidebar-border" />
           </div>
 
@@ -181,6 +181,10 @@ export function Sidebar() {
             pathname={pathname}
             defaultOpen={isModules}
           />
+                    {/* Separator */}
+                    <div className="mt-4 mb-4">
+            <div className="w-full h-px bg-sidebar-border" />
+          </div>
 
           {/* RCM Intelligence - Collapsible */}
           {visibleRcm.length > 0 && (
@@ -231,7 +235,7 @@ export function Sidebar() {
       <div className="mt-[5px] w-full h-px bg-sidebar-border" />
 
       {/* User section */}
-      <div className={`shrink-0 p-4 pt-6 ${collapsed ? "px-2" : ""}`}>
+      <div className={`shrink-0 p-4 pt-3 ${collapsed ? "px-2" : ""}`}>
         <div className="flex flex-col items-center gap-2">
           <Link href="/profile/edit" title={collapsed ? (userName ?? "Profile") : undefined}>
             <Avatar className="h-11 w-11 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all">
@@ -250,7 +254,7 @@ export function Sidebar() {
                 <p className="font-semibold text-base text-foreground">{userName ?? "User"}</p>
                 <p className="text-sm text-muted-foreground">{userEmail ?? "—"}</p>
               </div>
-              <LogoutButton className="w-full py-3 px-4 rounded-lg bg-[hsl(210,40%,96%)] text-primary font-medium text-base hover:bg-[hsl(210,40%,92%)] transition-colors" />
+              <LogoutButton className="w-full py-2 px-4 rounded-lg bg-[hsl(210,40%,96%)] text-primary font-medium text-base hover:bg-[hsl(210,40%,92%)] transition-colors" />
             </>
           )}
         </div>
@@ -318,7 +322,7 @@ function CollapsibleNavGroup({
       <CollapsiblePrimitive.Trigger asChild>
         <button
           type="button"
-          className={`sidebar-item-text w-full flex items-center justify-between ml-3 mr-0 pl-3 pr-3 py-2.5 rounded-lg transition-colors ${
+          className={`sidebar-item-text w-[95%] flex items-center justify-between ml-3 mr-0 pl-3 pr-3 py-2.5 rounded-lg transition-colors ${
             isGroupActive || isOpen
               ? "bg-[hsl(210,100%,96%)] text-primary font-medium"
               : "text-sidebar-foreground hover:bg-sidebar-accent/50"

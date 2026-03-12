@@ -67,7 +67,7 @@ export function Pagination({
   return (
     <div
       className={cn(
-        "mt-6 flex items-center justify-between",
+        "mt-0 flex items-center justify-between",
         className,
       )}
     >

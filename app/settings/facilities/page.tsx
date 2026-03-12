@@ -21,7 +21,9 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { FacilityFormModal } from "./FacilityFormModal";
 import { facilitiesApi } from "@/lib/services/facilities";
 import { lookupsApi } from "@/lib/services/lookups";
-import { usePaginatedList } from "@/lib/hooks";
+import { BulkImportActions } from "@/components/settings/BulkImportActions";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -50,14 +52,19 @@ export default function FacilitiesPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = facilitiesApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
+    extraParams: { search: debouncedSearch || undefined },
     fetch: api.getList,
   });
 
@@ -98,6 +105,7 @@ export default function FacilitiesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, { ...form, isActive: form.isActive ?? true } as UpdateFacilityRequest);
@@ -105,7 +113,7 @@ export default function FacilitiesPage() {
         await api.create(form);
       }
       setModalOpen(false);
-      reload();
+      await reload();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -113,21 +121,24 @@ export default function FacilitiesPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   }, [editId, form, api, reload]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -171,12 +182,20 @@ export default function FacilitiesPage() {
           </div>
         </div>
         {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Facility <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
+          <div className="flex items-center gap-3">
+            <BulkImportActions
+              apiBase="/api/Facilities"
+              templateFileName="Facilities_Import_Template.xlsx"
+              onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
+            />
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Facility <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          </div>
         )}
       </div>
 
@@ -262,6 +281,7 @@ export default function FacilitiesPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

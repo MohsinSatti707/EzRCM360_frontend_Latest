@@ -145,46 +145,47 @@ export default function InsuranceArAnalysisListPage() {
     >
       <div className="animate-fade-in-up space-y-6">
         {/* Toolbar */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-1 flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 flex-wrap items-center">
             <select
               id="status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ArAnalysisSessionStatus | "")}
-              className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] text-[#202830] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="h-10 rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
             >
               {STATUS_OPTIONS.map((o) => (
                 <option key={o.value || "_all"} value={o.value}>{o.label}</option>
               ))}
             </select>
-            <select
-              id="uploaded-by"
-              value={uploadedBy}
-              onChange={(e) => {
-                setUploadedBy(e.target.value);
-                setPage(1);
-              }}
-              className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] text-[#202830] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <option value="">Uploaded By</option>
-              {uniqueUploadedBy.map((u) => (
-                <option key={u} value={u}>{u}</option>
-              ))}
-            </select>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-              <input
-                type="text"
-                placeholder="Search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-10 w-[300px] rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] text-[#202830] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              />
-            </div>
+            
+              <select
+                id="uploaded-by"
+                value={uploadedBy}
+                onChange={(e) => {
+                  setUploadedBy(e.target.value);
+                  setPage(1);
+                }}
+                className="h-10 border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+              >
+                <option value="">Uploaded By</option>
+                {uniqueUploadedBy.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] text-[#202830] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+              </div>
           </div>
           {canCreate && (
-            <div className="flex shrink-0 items-center gap-3">
-              <Button variant="outline" onClick={handleDownloadTemplate} disabled={downloading} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] border-[#E2E8F0] font-['Aileron'] text-[14px] text-foreground">
+            <div className="flex shrink-0 items-center gap-2">
+              <Button onClick={handleDownloadTemplate} disabled={downloading} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
                 {downloading ? "Downloading…" : "Download AR Intake Template"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -204,108 +205,108 @@ export default function InsuranceArAnalysisListPage() {
 
         {data && (
           <>
-            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-[hsl(210,100%,97%)] hover:bg-[hsl(210,100%,97%)]">
-                  <TableHeaderCell className="first:rounded-bl-[5px] !bg-[hsl(210,100%,97%)] border-border">
-                    <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
-                      Session Name
-                      <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
-                    </div>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
-                    <div className="flex items-center gap-3 font-['Aileron'] font-normal text-[14px] leading-none text-[#0066CC]">
-                      Practice Name
-                      <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
-                    </div>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
-                    <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
-                      Status
-                      <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
-                    </div>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
-                    <div className="flex items-center gap-3 font-['Aileron'] font-normal text-[14px] leading-none text-[#0066CC]">
-                      Uploaded By
-                      <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
-                    </div>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
-                    <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
-                      Uploaded At
-                      <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
-                    </div>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
-                    <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
-                      Source Type
-                      <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
-                    </div>
-                  </TableHeaderCell>
-                  <TableHeaderCell className="border-r-0 !bg-[hsl(210,100%,97%)] border-border">
-                    <span className="font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
-                      Actions
-                    </span>
-                  </TableHeaderCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {displayedItems.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="py-16 text-center text-sm text-muted-foreground">
-                      {canCreate
-                        ? "No sessions found. Click \"Upload Data\" to create one."
-                        : "No sessions found."}
-                    </TableCell>
+            <div className="!mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+              <Table>
+                <TableHead>
+                  <TableRow className="bg-[hsl(210,100%,97%)] hover:bg-[hsl(210,100%,97%)]">
+                    <TableHeaderCell className="first:rounded-bl-[5px] !bg-[hsl(210,100%,97%)] border-border">
+                      <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
+                        Session Name
+                        <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
+                      </div>
+                    </TableHeaderCell>
+                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                      <div className="flex items-center gap-3 font-['Aileron'] font-normal text-[14px] leading-none text-[#0066CC]">
+                        Practice Name
+                        <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
+                      </div>
+                    </TableHeaderCell>
+                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                      <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
+                        Status
+                        <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
+                      </div>
+                    </TableHeaderCell>
+                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                      <div className="flex items-center gap-3 font-['Aileron'] font-normal text-[14px] leading-none text-[#0066CC]">
+                        Uploaded By
+                        <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
+                      </div>
+                    </TableHeaderCell>
+                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                      <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
+                        Uploaded At
+                        <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
+                      </div>
+                    </TableHeaderCell>
+                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                      <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
+                        Source Type
+                        <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
+                      </div>
+                    </TableHeaderCell>
+                    <TableHeaderCell className="border-r-0 !bg-[hsl(210,100%,97%)] border-border">
+                      <span className="font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
+                        Actions
+                      </span>
+                    </TableHeaderCell>
                   </TableRow>
-                ) : (
-                  displayedItems.map((row: ArAnalysisSessionListItemDto, idx: number) => (
-                    <TableRow
-                      key={row.id}
-                      className="animate-fade-in-up opacity-0"
-                      style={{
-                        animationDelay: `${Math.min(idx, 7) * 40}ms`,
-                        animationFillMode: "forwards",
-                      }}
-                    >
-                      <TableCell>
-                        {row.sessionName}
-                      </TableCell>
-                      <TableCell>{row.practiceName ?? "—"}</TableCell>
-                      <TableCell>{row.sessionStatus}</TableCell>
-                      <TableCell>{row.uploadedBy}</TableCell>
-                      <TableCell>{formatDate(row.uploadedAt)}</TableCell>
-                      <TableCell className="border-r-0">{row.sourceType}</TableCell>
-                      <TableCell className="border-r-0 border-l-0">
-                        {row.sessionStatus === "Completed" ? (
-                          <Link
-                            href={`/rcm/insurance-ar-analysis/${row.id}/report`}
-                            prefetch={false}
-                            className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
-                          >
-                            View Report
-                          </Link>
-                        ) : ["Processing", "ConflictResolution", "EnrichmentPending", "PmUploaded", "ValidationCompleted"].includes(
-                            row.sessionStatus
-                          ) ? (
-                          <Link
-                            href={`/rcm/insurance-ar-analysis/${row.id}/processing`}
-                            prefetch={false}
-                            className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
-                          >
-                            View Progress
-                          </Link>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">—</span>
-                        )}
+                </TableHead>
+                <TableBody>
+                  {displayedItems.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-16 text-center text-sm text-muted-foreground">
+                        {canCreate
+                          ? "No sessions found. Click \"Upload Data\" to create one."
+                          : "No sessions found."}
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    displayedItems.map((row: ArAnalysisSessionListItemDto, idx: number) => (
+                      <TableRow
+                        key={row.id}
+                        className="animate-fade-in-up opacity-0"
+                        style={{
+                          animationDelay: `${Math.min(idx, 7) * 40}ms`,
+                          animationFillMode: "forwards",
+                        }}
+                      >
+                        <TableCell>
+                          {row.sessionName}
+                        </TableCell>
+                        <TableCell>{row.practiceName ?? "—"}</TableCell>
+                        <TableCell>{row.sessionStatus}</TableCell>
+                        <TableCell>{row.uploadedBy}</TableCell>
+                        <TableCell>{formatDate(row.uploadedAt)}</TableCell>
+                        <TableCell className="border-r-0">{row.sourceType}</TableCell>
+                        <TableCell className="border-r-0 border-l-0">
+                          {row.sessionStatus === "Completed" ? (
+                            <Link
+                              href={`/rcm/insurance-ar-analysis/${row.id}/report`}
+                              prefetch={false}
+                              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                            >
+                              View Report
+                            </Link>
+                          ) : ["Processing", "ConflictResolution", "EnrichmentPending", "PmUploaded", "ValidationCompleted"].includes(
+                            row.sessionStatus
+                          ) ? (
+                            <Link
+                              href={`/rcm/insurance-ar-analysis/${row.id}/processing`}
+                              prefetch={false}
+                              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                            >
+                              View Progress
+                            </Link>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
 
             <Pagination

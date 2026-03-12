@@ -19,10 +19,12 @@ import { Pagination } from "@/components/ui/Pagination";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { PayerFormModal } from "./PayerFormModal";
+import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { payersApi } from "@/lib/services/payers";
 import { lookupsApi } from "@/lib/services/lookups";
-import { usePaginatedList } from "@/lib/hooks";
+import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -60,14 +62,19 @@ export default function PayersPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = payersApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
+    extraParams: { search: debouncedSearch || undefined },
     fetch: api.getList,
   });
 
@@ -146,6 +153,7 @@ export default function PayersPage() {
       planIds: planIds.length ? planIds : undefined,
     };
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, { ...payload, status: form.status } as UpdatePayerRequest);
@@ -153,7 +161,7 @@ export default function PayersPage() {
         await api.create(payload);
       }
       setModalOpen(false);
-      reload();
+      await reload();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -161,21 +169,24 @@ export default function PayersPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   }, [editId, form, api, reload]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -221,14 +232,24 @@ export default function PayersPage() {
             />
           </div>
         </div>
-        {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Payer <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canCreate && (
+            <BulkImportActions
+              apiBase="/api/Payers"
+              templateFileName="Payers_Import_Template.xlsx"
+              onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
+            />
+          )}
+          {canCreate && (
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Payer <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -310,6 +331,7 @@ export default function PayersPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { MainLayout } from "./MainLayout";
 import { MfaRouteGuard } from "@/components/auth/MfaRouteGuard";
 
 /** Routes that should NOT render the MainLayout (sidebar/header). */
-const NO_LAYOUT_PATHS = ["/login", "/authentication"];
+const NO_LAYOUT_PATHS = ["/login", "/set-password", "/authentication"];
 
 /**
  * Wraps children in MfaRouteGuard + MainLayout for all protected routes.

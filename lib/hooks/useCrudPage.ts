@@ -42,6 +42,7 @@ export interface UseCrudPageResult<TItem, TForm> {
   formError: string | null;
   deleteId: string | null;
   deleteLoading: boolean;
+  overlayLoading: boolean;
   openCreate: () => void;
   openEdit: (item: TItem) => void;
   closeModal: () => void;
@@ -67,6 +68,7 @@ export function useCrudPage<TItem extends { id: string }, TForm, TCreate = TForm
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const fetchFn = useCallback(
     (params: { pageNumber: number; pageSize: number }) =>
@@ -110,6 +112,7 @@ export function useCrudPage<TItem extends { id: string }, TForm, TCreate = TForm
         return;
       }
       setSubmitLoading(true);
+      setOverlayLoading(true);
       try {
         if (editId) {
           await api.update(editId, form as unknown as TUpdate);
@@ -117,13 +120,15 @@ export function useCrudPage<TItem extends { id: string }, TForm, TCreate = TForm
           await api.create(form as unknown as TCreate);
         }
         setModalOpen(false);
-        reload();
+        setSubmitLoading(false);
+        await reload();
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Save failed.";
         setFormError(msg);
+        setSubmitLoading(false);
         throw err;
       } finally {
-        setSubmitLoading(false);
+        setOverlayLoading(false);
       }
     },
     [api, editId, form, reload]
@@ -132,14 +137,17 @@ export function useCrudPage<TItem extends { id: string }, TForm, TCreate = TForm
   const handleDelete = useCallback(async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      setDeleteLoading(false);
+      await reload();
     } catch {
+      setDeleteLoading(false);
       throw new Error("Delete failed.");
     } finally {
-      setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   }, [api, deleteId, reload]);
 
@@ -155,6 +163,7 @@ export function useCrudPage<TItem extends { id: string }, TForm, TCreate = TForm
     formError,
     deleteId,
     deleteLoading,
+    overlayLoading,
     openCreate,
     openEdit,
     closeModal,

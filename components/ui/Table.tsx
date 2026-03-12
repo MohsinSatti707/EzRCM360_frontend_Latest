@@ -83,7 +83,7 @@ export function TableHeaderCell({
   return (
     <th
       className={cn(
-        "h-[44px] px-6 py-3 text-left align-middle bg-[#0066CC]/5 border-r border-[#E2E8F0] last:border-r-0 first:rounded-tl-[5px] last:rounded-tr-[5px] font-aileron font-bold text-[13px] leading-none text-[#0066CC]",
+        "h-[44px] px-6 py-3 text-left align-middle bg-[#0066CC0D]  border-r border-[#E2E8F0] last:border-r-0 first:rounded-tl-[5px] first:rounded-bl-[5px] first:min-w-[130px] last:rounded-tr-[5px] last:rounded-br-[5px] font-aileron font-bold text-[13px] leading-none text-[#0066CC]",
         align === "right" && "text-right",
         onClick && "cursor-pointer select-none",
         className,
@@ -110,7 +110,7 @@ export function TableCell({
     <td
       colSpan={colSpan}
       className={cn(
-        "h-[52px] px-6 py-4 align-middle font-aileron text-[14px] text-[#202830] border-b border-r border-[#E2E8F0] last:border-r-0",
+        "h-[52px] px-6 py-4 align-middle font-aileron text-[14px] leading-[1.5] text-[#64748B] border-b border-r border-[#E2E8F0] last:border-r-0 min-w-0 overflow-hidden",
         align === "right" && "text-right",
         className,
       )}

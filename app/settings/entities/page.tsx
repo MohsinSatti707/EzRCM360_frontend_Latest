@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Search, ArrowRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
@@ -19,9 +19,11 @@ import { Pagination } from "@/components/ui/Pagination";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { EntityFormModal } from "./EntityFormModal";
 import { entitiesApi } from "@/lib/services/entities";
-import { usePaginatedList } from "@/lib/hooks";
+import { BulkImportActions } from "@/components/settings/BulkImportActions";
+import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -53,14 +55,19 @@ export default function EntitiesPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = entitiesApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
+    extraParams: { search: debouncedSearch || undefined },
     fetch: api.getList,
   });
 
@@ -91,6 +98,7 @@ export default function EntitiesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form as UpdateEntityRequest);
@@ -98,7 +106,7 @@ export default function EntitiesPage() {
         await api.create(form);
       }
       setModalOpen(false);
-      reload();
+      await reload();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -106,21 +114,24 @@ export default function EntitiesPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   }, [editId, form, api]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      reload();
+      await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -166,12 +177,20 @@ export default function EntitiesPage() {
           </div>
         </div>
         {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Entity <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
+          <div className="flex items-center gap-3">
+            <BulkImportActions
+              apiBase="/api/Entities"
+              templateFileName="Entities_Import_Template.xlsx"
+              onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
+            />
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Entity <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          </div>
         )}
       </div>
 
@@ -256,6 +275,7 @@ export default function EntitiesPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

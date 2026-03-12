@@ -116,9 +116,9 @@ export default function SettingsPage() {
           if (!moduleName) return false;
           return permissions.canView(moduleName);
         });
-        // Always show NSA Configuration card with all links (permission checked on target pages)
+        // Always show NSA Configuration and Facilities Configurations card with all links (permission checked on target pages)
         const links =
-          section.title === "NSA Configuration"
+          section.title === "NSA Configuration" || section.title === "Facilities Configurations"
             ? section.links
             : filteredLinks;
         return { ...section, links };
@@ -140,7 +140,7 @@ export default function SettingsPage() {
           ))}
         </div>
       ) : filteredSections && filteredSections.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 h-[calc(100vh-172px)] overflow-y-auto custom-scrollbar pb-6">
           {filteredSections.map((section, i) => (
             <div
               key={section.title}

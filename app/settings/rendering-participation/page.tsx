@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, ArrowRight } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
@@ -14,6 +14,8 @@ import { renderingParticipationsApi } from "@/lib/services/renderingParticipatio
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import { lookupsApi } from "@/lib/services/lookups";
+import { BulkImportActions } from "@/components/settings/BulkImportActions";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { useToast } from "@/lib/contexts/ToastContext";
 import type {
   RenderingProviderPlanParticipationListItemDto,
@@ -23,6 +25,7 @@ import type {
 import type { EntityProviderLookupDto, PlanLookupDto } from "@/lib/services/lookups";
 import type { ValueLabelDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
+import { useDebounce } from "@/lib/hooks";
 import { toDateInput } from "@/lib/utils";
 
 const defaultForm: CreateRenderingProviderPlanParticipationRequest = {
@@ -52,15 +55,19 @@ export default function RenderingParticipationPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = renderingParticipationsApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Rendering Provider Plan Participations");
+  const debouncedSearch = useDebounce(searchTerm, 300);
 
-  const loadList = useCallback(() => {
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
+
+  const loadList = useCallback(async () => {
     setError(null);
-    api.getList({ pageNumber: page, pageSize }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize]);
+    await api.getList({ pageNumber: page, pageSize, search: debouncedSearch || undefined }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
+  }, [page, pageSize, debouncedSearch]);
 
   useEffect(() => {
     loadList();
@@ -113,6 +120,7 @@ export default function RenderingParticipationPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form as UpdateRenderingProviderPlanParticipationRequest);
@@ -120,7 +128,7 @@ export default function RenderingParticipationPage() {
         await api.create(form);
       }
       setModalOpen(false);
-      loadList();
+      await loadList();
       toast.success("Saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -128,25 +136,38 @@ export default function RenderingParticipationPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setDeleteId(null);
-      loadList();
+      await loadList();
       toast.success("Deleted successfully.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
   const statusLabel = (n: number) => participationStatuses.find((o) => Number(o.value) === n)?.label ?? String(n);
+  const providerNameById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of entityProviders) m.set(p.id, p.displayName);
+    return m;
+  }, [entityProviders]);
+  const planNameById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of plans) m.set(p.id, p.displayName);
+    return m;
+  }, [plans]);
 
   if (!canView) {
     return (
@@ -187,12 +208,20 @@ export default function RenderingParticipationPage() {
           </div>
         </div>
         {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Rendering Participation <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
+          <div className="flex items-center gap-3">
+            <BulkImportActions
+              apiBase="/api/RenderingProviderPlanParticipations"
+              templateFileName="RenderingParticipation_Import_Template.xlsx"
+              onImportSuccess={loadList}
+              onLoadingChange={setOverlayLoading}
+            />
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Rendering Participation <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          </div>
         )}
       </div>
 
@@ -217,8 +246,14 @@ export default function RenderingParticipationPage() {
               <tbody className="divide-y divide-border">
                 {data.items.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
-                    <td className="px-4 py-3 text-sm">{row.providerName ?? row.entityProviderId}</td>
-                    <td className="px-4 py-3 text-sm">{row.planName ?? row.planId}</td>
+                    <td className="px-4 py-3 text-sm">
+                      {row.providerName ??
+                        providerNameById.get(row.entityProviderId) ??
+                        row.entityProviderId}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {row.planName ?? planNameById.get(row.planId) ?? row.planId}
+                    </td>
                     <td className="px-4 py-3 text-sm">{statusLabel(row.participationStatus)}</td>
                     <td className="px-4 py-3 text-sm">{row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"}</td>
                     <td className="px-4 py-3 text-sm">{row.effectiveTo ? toDateInput(row.effectiveTo) : "—"}</td>
@@ -312,6 +347,7 @@ export default function RenderingParticipationPage() {
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete participation" message="Are you sure you want to delete this participation?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }
