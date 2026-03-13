@@ -194,9 +194,16 @@ export default function FeeSchedulesPage() {
     }
   };
 
-  const downloadTemplateForCategory = async (category: number) => {
-    const cat = Number(category);
-    const tpl = cat === 1 ? "UCR" : cat === 2 ? "MVA" : cat === 3 ? "WC" : "Medicare";
+  const downloadTemplateForCategory = async (category: number | string) => {
+    // Backend uses JsonStringEnumConverter, so category may be string "UCR" or number 1
+    const catStr = String(category);
+    const catMap: Record<string, string> = {
+      "0": "Medicare", "Medicare": "Medicare",
+      "1": "UCR", "UCR": "UCR",
+      "2": "MVA", "MVA": "MVA",
+      "3": "WC", "WC": "WC",
+    };
+    const tpl = catMap[catStr] ?? "Medicare";
     try {
       await api.downloadLinesTemplate(tpl);
     } catch (err) {
