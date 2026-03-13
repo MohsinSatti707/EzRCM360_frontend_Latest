@@ -93,7 +93,7 @@ export function geographyApi() {
       if (!res.ok) {
         const text = await res.text();
         let message = text;
-        try { const json = JSON.parse(text); message = json.message || json.title || json.detail || text; } catch { /* use text */ }
+        try { const json = JSON.parse(text); message = json.detail || json.message || json.title || text; } catch { /* use text */ }
         throw new Error(message || `HTTP ${res.status}`);
       }
       const json = await res.json();

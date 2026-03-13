@@ -139,7 +139,7 @@ export function feeSchedulesApi() {
         let message = text;
         try {
           const json = JSON.parse(text);
-          message = json.message || json.title || json.detail || text;
+          message = json.detail || json.message || json.title || text;
         } catch { /* use text */ }
         throw new Error(message || `HTTP ${res.status}`);
       }
