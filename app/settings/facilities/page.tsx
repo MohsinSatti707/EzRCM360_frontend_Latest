@@ -79,23 +79,23 @@ export default function FacilitiesPage() {
     setModalOpen(true);
   };
 
-  const openEdit = (row: FacilityListItemDto) => {
+  const openEdit = async (row: FacilityListItemDto) => {
     setEditId(row.id);
     setFormError(null);
-    setModalOpen(true);
-    api
-      .getById(row.id)
-      .then((detail) => {
-        setForm({
-          name: detail.name,
-          facilityType: detail.facilityType,
-          physicalAddress: detail.physicalAddress ?? "",
-          entityId: detail.entityId,
-          posCode: detail.posCode ?? "",
-          isActive: detail.isActive,
-        });
-      })
-      .catch(() => setFormError("Failed to load."));
+    try {
+      const detail = await api.getById(row.id);
+      setForm({
+        name: detail.name,
+        facilityType: detail.facilityType,
+        physicalAddress: detail.physicalAddress ?? "",
+        entityId: detail.entityId,
+        posCode: detail.posCode ?? "",
+        isActive: detail.isActive,
+      });
+      setModalOpen(true);
+    } catch {
+      setFormError("Failed to load.");
+    }
   };
 
   const handleSubmit = useCallback(async () => {

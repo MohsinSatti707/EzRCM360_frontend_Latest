@@ -22,6 +22,7 @@ import { entityProvidersApi } from "@/lib/services/entityProviders";
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { useDebounce } from "@/lib/hooks";
+import { resolveEnum, ENUMS } from "@/lib/utils";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -84,22 +85,25 @@ export default function EntityProvidersPage() {
     setFormError(null);
     setModalOpen(true);
   };
-  const openEdit = (row: EntityProviderListItemDto) => {
+  const openEdit = async (row: EntityProviderListItemDto) => {
     setEditId(row.id);
-    api.getById(row.id).then((detail) => {
+    setFormError(null);
+    try {
+      const detail = await api.getById(row.id);
       setForm({
         entityId: detail.entityId,
         providerName: detail.providerName,
         npi: detail.npi,
         ssn: detail.ssn ?? "",
-        providerType: detail.providerType,
+        providerType: resolveEnum(detail.providerType, ENUMS.ProviderType),
         primarySpecialty: detail.primarySpecialty ?? "",
         secondarySpecialty: detail.secondarySpecialty ?? "",
         isActive: detail.isActive,
       });
-    }).catch(() => setFormError("Failed to load."));
-    setFormError(null);
-    setModalOpen(true);
+      setModalOpen(true);
+    } catch {
+      setFormError("Failed to load.");
+    }
   };
 
   const handleSubmit = async () => {

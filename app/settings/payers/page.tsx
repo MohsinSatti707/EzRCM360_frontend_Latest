@@ -25,6 +25,7 @@ import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { payersApi } from "@/lib/services/payers";
 import { lookupsApi } from "@/lib/services/lookups";
 import { usePaginatedList, useDebounce } from "@/lib/hooks";
+import { resolveEnum, ENUMS } from "@/lib/utils";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -51,7 +52,7 @@ const defaultForm: CreatePayerRequest = {
 
 export default function PayersPage() {
   const [entityTypes, setEntityTypes] = useState<{ value: string; label: string }[]>([]);
-  const [planOptions, setPlanOptions] = useState<{ id: string; displayName: string }[]>([]);
+  const [planOptions, setPlanOptions] = useState<{ id: string; displayName: string; payerId: string }[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -90,48 +91,44 @@ export default function PayersPage() {
     setModalOpen(true);
   };
 
-  const openEdit = (row: PayerListItemDto) => {
+  const openEdit = async (row: PayerListItemDto) => {
     setEditId(row.id);
     setFormError(null);
-    setModalOpen(true);
-    api
-      .getById(row.id)
-      .then((detail) => {
-        const mapAddresses = (): PayerAddressRequest[] =>
-          detail.addresses?.map((a) => ({
-            addressLine1: a.addressLine1,
-            addressLine2: a.addressLine2 ?? "",
-            city: a.city,
-            state: a.state,
-            zip: a.zip,
-            label: a.label ?? "",
-          })) ?? [];
-        const mapPhones = (): PayerPhoneRequest[] =>
-          detail.phoneNumbers?.map((p) => ({
-            phoneNumber: p.phoneNumber,
-            label: p.label ?? "",
-          })) ?? [];
-        const mapEmails = (): PayerEmailRequest[] =>
-          detail.emails?.map((e) => ({
-            emailAddress: e.emailAddress,
-            label: e.label ?? "",
-          })) ?? [];
-        const statusNum =
-          detail.status === "Active" || detail.status === 1 ? 1
-            : detail.status === "Inactive" || detail.status === 0 ? 0
-            : 1;
-        setForm({
-          payerName: detail.payerName,
-          aliases: detail.aliases ?? "",
-          entityType: detail.entityType,
-          status: statusNum,
-          planIds: detail.planIds ?? [],
-          addresses: mapAddresses(),
-          phoneNumbers: mapPhones(),
-          emails: mapEmails(),
-        });
-      })
-      .catch(() => setFormError("Failed to load payer."));
+    try {
+      const detail = await api.getById(row.id);
+      const mapAddresses = (): PayerAddressRequest[] =>
+        detail.addresses?.map((a) => ({
+          addressLine1: a.addressLine1,
+          addressLine2: a.addressLine2 ?? "",
+          city: a.city,
+          state: a.state,
+          zip: a.zip,
+          label: a.label ?? "",
+        })) ?? [];
+      const mapPhones = (): PayerPhoneRequest[] =>
+        detail.phoneNumbers?.map((p) => ({
+          phoneNumber: p.phoneNumber,
+          label: p.label ?? "",
+        })) ?? [];
+      const mapEmails = (): PayerEmailRequest[] =>
+        detail.emails?.map((e) => ({
+          emailAddress: e.emailAddress,
+          label: e.label ?? "",
+        })) ?? [];
+      setForm({
+        payerName: detail.payerName,
+        aliases: detail.aliases ?? "",
+        entityType: resolveEnum(detail.entityType, ENUMS.PayerEntityType),
+        status: resolveEnum(detail.status, ENUMS.PayerStatus),
+        planIds: detail.planIds ?? [],
+        addresses: mapAddresses(),
+        phoneNumbers: mapPhones(),
+        emails: mapEmails(),
+      });
+      setModalOpen(true);
+    } catch {
+      setFormError("Failed to load payer.");
+    }
   };
 
   const handleSubmit = useCallback(async () => {
