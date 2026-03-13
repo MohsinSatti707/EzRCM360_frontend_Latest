@@ -23,11 +23,13 @@ export interface PayerLookupDto {
 export interface PlanLookupDto {
   id: string;
   displayName: string;
+  payerId: string;
 }
 
 export interface EntityProviderLookupDto {
   id: string;
   displayName: string;
+  entityId: string;
 }
 
 export interface ModuleLookupDto {

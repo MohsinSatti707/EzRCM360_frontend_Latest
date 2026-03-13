@@ -24,6 +24,7 @@ import { EntityFormModal } from "./EntityFormModal";
 import { entitiesApi } from "@/lib/services/entities";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { usePaginatedList, useDebounce } from "@/lib/hooks";
+import { resolveEnum, ENUMS } from "@/lib/utils";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -85,7 +86,7 @@ export default function EntitiesPage() {
       displayName: row.displayName,
       groupNpi: row.groupNpi,
       taxId: row.taxId,
-      status: row.status,
+      status: resolveEnum(row.status, ENUMS.EntityStatus),
     });
     setFormError(null);
     setModalOpen(true);

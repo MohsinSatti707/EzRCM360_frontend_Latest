@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, ArrowRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
@@ -27,11 +27,28 @@ import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
+import { resolveEnum, resolveEnumNullable, ENUMS } from "@/lib/utils";
 import type { PlanListItemDto, CreatePlanRequest, UpdatePlanRequest } from "@/lib/services/plans";
 import type { PayerLookupDto } from "@/lib/services/lookups";
 
 const MODULE_NAME = "Plans";
 const STATUS_OPTIONS = [{ value: 0, name: "Inactive" }, { value: 1, name: "Active" }];
+
+// Plan Category / Type enum values for parent-child dropdown filtering
+const CATEGORY = ENUMS.PlanCategory;
+const TYPE = ENUMS.PlanType;
+
+// Parent-child: which plan types are valid for each plan category
+const CATEGORY_TO_TYPES: Record<number, number[]> = {
+  [CATEGORY.Commercial]: [TYPE.Hmo, TYPE.Ppo, TYPE.Epo, TYPE.Pos, TYPE.Na],
+  [CATEGORY.Medicare]: [TYPE.PartA, TYPE.PartB, TYPE.PartC, TYPE.PartD],
+  [CATEGORY.RailroadMedicare]: [TYPE.PartA, TYPE.PartB, TYPE.PartC, TYPE.PartD],
+  [CATEGORY.Tricare]: [TYPE.CHAMPUS, TYPE.CHAMPVA],
+  [CATEGORY.Medicaid]: [TYPE.Na],
+  [CATEGORY.MVA]: [TYPE.Na],
+  [CATEGORY.WC]: [TYPE.Na],
+  [CATEGORY.HmoManaged]: [TYPE.Hmo, TYPE.Na],
+};
 
 export default function PlansPage() {
   const [payers, setPayers] = useState<PayerLookupDto[]>([]);
@@ -93,6 +110,13 @@ export default function PlansPage() {
     lookupsApi().getNsaCategories().then(setNsaCategories).catch(() => setNsaCategories([]));
   }, []);
 
+  // Filter plan types based on selected plan category
+  const filteredPlanTypes = useMemo(() => {
+    const allowedTypes = CATEGORY_TO_TYPES[form.planCategory];
+    if (!allowedTypes) return planTypes;
+    return planTypes.filter((t) => allowedTypes.includes(Number(t.value)));
+  }, [form.planCategory, planTypes]);
+
   const openCreate = () => {
     setEditId(null);
     setForm({
@@ -122,6 +146,7 @@ export default function PlansPage() {
 
   const openEdit = async (row: PlanListItemDto) => {
     setEditId(row.id);
+    setFormError(null);
     try {
       const detail = await api.getById(row.id);
       setForm({
@@ -129,27 +154,26 @@ export default function PlansPage() {
         planName: detail.planName,
         aliases: detail.aliases ?? "",
         planIdPrefix: detail.planIdPrefix ?? "",
-        planCategory: detail.planCategory,
-        planType: detail.planType,
-        marketType: detail.marketType ?? null,
+        planCategory: resolveEnum(detail.planCategory, ENUMS.PlanCategory),
+        planType: resolveEnum(detail.planType, ENUMS.PlanType),
+        marketType: resolveEnumNullable(detail.marketType, ENUMS.MarketType),
         oonBenefits: detail.oonBenefits,
         planResponsibilityPct: detail.planResponsibilityPct ?? null,
         patientResponsibilityPct: detail.patientResponsibilityPct ?? null,
         typicalDeductible: detail.typicalDeductible ?? null,
         oopMax: detail.oopMax ?? null,
         nsaEligible: detail.nsaEligible,
-        nsaCategory: detail.nsaCategory ?? null,
+        nsaCategory: resolveEnumNullable(detail.nsaCategory, ENUMS.NsaCategory),
         providerParticipationApplicable: detail.providerParticipationApplicable,
         timelyFilingInitialDays: detail.timelyFilingInitialDays,
         timelyFilingResubmissionDays: detail.timelyFilingResubmissionDays ?? null,
         timelyFilingAppealDays: detail.timelyFilingAppealDays,
-        status: detail.status,
+        status: resolveEnum(detail.status, ENUMS.PayerStatus),
       });
+      setModalOpen(true);
     } catch {
       setFormError("Failed to load plan.");
     }
-    setFormError(null);
-    setModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -346,7 +370,12 @@ export default function PlansPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Plan category</label>
-              <select value={form.planCategory} onChange={(e) => setForm((f) => ({ ...f, planCategory: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+              <select value={form.planCategory} onChange={(e) => {
+                const newCategory = Number(e.target.value);
+                const allowedTypes = CATEGORY_TO_TYPES[newCategory];
+                const defaultType = allowedTypes?.[0] ?? 0;
+                setForm((f) => ({ ...f, planCategory: newCategory, planType: defaultType }));
+              }} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {planCategories.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
@@ -355,7 +384,7 @@ export default function PlansPage() {
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Plan type</label>
               <select value={form.planType} onChange={(e) => setForm((f) => ({ ...f, planType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
-                {planTypes.map((t) => (
+                {filteredPlanTypes.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
               </select>
