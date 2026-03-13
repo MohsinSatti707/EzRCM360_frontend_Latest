@@ -1,4 +1,5 @@
-import { apiRequest } from "@/lib/api";
+import { apiRequest, apiRequestForm } from "@/lib/api";
+import { API_URL, AUTH_TOKEN_KEY } from "@/lib/env";
 import type { PaginatedList } from "@/lib/types";
 
 export interface FeeScheduleDto {
@@ -27,6 +28,33 @@ export interface FeeScheduleDetailDto {
   multiplierPct: number;
   fallbackCategory?: number | null;
   status: number;
+  source?: string | null;
+  notes?: string | null;
+}
+
+export interface FeeScheduleLineDto {
+  id: string;
+  feeScheduleId: string;
+  zip?: string | null;
+  cptHcpcs: string;
+  modifier?: string | null;
+  feeAmount: number;
+  rv?: number | null;
+  pctcIndicator?: number | null;
+  fee50th?: number | null;
+  fee60th?: number | null;
+  fee70th?: number | null;
+  fee75th?: number | null;
+  fee80th?: number | null;
+  fee85th?: number | null;
+  fee90th?: number | null;
+  fee95th?: number | null;
+}
+
+export interface FeeScheduleLineImportResult {
+  success: boolean;
+  importedCount: number;
+  errors: string[];
 }
 
 export interface CreateFeeScheduleCommand {
@@ -44,6 +72,8 @@ export interface CreateFeeScheduleCommand {
   multiplierPct: number;
   fallbackCategory?: number | null;
   status?: number;
+  source?: string | null;
+  notes?: string | null;
 }
 
 export function feeSchedulesApi() {
@@ -88,5 +118,52 @@ export function feeSchedulesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/FeeSchedules/${id}`, { method: "DELETE" }),
+    getLines: (feeScheduleId: string, params?: { pageNumber?: number; pageSize?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.pageNumber != null) q.set("pageNumber", String(params.pageNumber));
+      if (params?.pageSize != null) q.set("pageSize", String(params.pageSize));
+      return apiRequest<PaginatedList<FeeScheduleLineDto>>(`/api/FeeSchedules/${feeScheduleId}/lines?${q}`);
+    },
+    importLines: async (feeScheduleId: string, file: File): Promise<FeeScheduleLineImportResult> => {
+      const fd = new FormData();
+      fd.append("file", file);
+      const base = API_URL.replace(/\/$/, "");
+      const token = typeof window !== "undefined" ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
+      const res = await fetch(`${base}/api/FeeSchedules/${feeScheduleId}/lines/import`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        let message = text;
+        try {
+          const json = JSON.parse(text);
+          message = json.message || json.title || json.detail || text;
+        } catch { /* use text */ }
+        throw new Error(message || `HTTP ${res.status}`);
+      }
+      const json = await res.json();
+      return json.data ?? json;
+    },
+    downloadLinesTemplate: async (templateType: string) => {
+      const base = API_URL.replace(/\/$/, "");
+      const token = typeof window !== "undefined" ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
+      const res = await fetch(`${base}/api/FeeSchedules/templates/lines?templateType=${templateType}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Download failed: HTTP ${res.status}`);
+      const blob = await res.blob();
+      const cd = res.headers.get("content-disposition");
+      const match = cd?.match(/filename="?([^"]+)"?/);
+      const fileName = match?.[1] ?? `${templateType}FeeScheduleTemplate.xlsx`;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    },
+    deleteLine: (lineId: string) =>
+      apiRequest<void>(`/api/FeeSchedules/lines/${lineId}`, { method: "DELETE" }),
   };
 }

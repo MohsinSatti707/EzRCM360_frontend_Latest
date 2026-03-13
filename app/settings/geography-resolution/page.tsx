@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Search, ArrowRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Search, ArrowRight, Upload, Download } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -42,6 +42,10 @@ export default function GeographyResolutionPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [importLoading, setImportLoading] = useState(false);
+  const [importCategory, setImportCategory] = useState<number>(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -59,12 +63,16 @@ export default function GeographyResolutionPage() {
   const loadList = useCallback(() => {
     setError(null);
     api
-      .getList({ pageNumber: page, pageSize })
+      .getList({
+        pageNumber: page,
+        pageSize,
+        active: statusFilter === "all" ? undefined : statusFilter === "true",
+      })
       .then(setData)
       .catch((err) =>
         setError(err instanceof Error ? err.message : "Failed to load")
       );
-  }, [page, pageSize]);
+  }, [page, pageSize, statusFilter]);
 
   useEffect(() => {
     loadList();
@@ -143,12 +151,49 @@ export default function GeographyResolutionPage() {
     }
   };
 
+  const handleImport = async (file: File) => {
+    setImportLoading(true);
+    try {
+      const result = await api.importMappings(importCategory, file);
+      if (result.success) {
+        toast.success(`Imported ${result.importedCount} mappings.`);
+        loadList();
+      } else {
+        toast.error(result.errors?.join("; ") || "Import failed.");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed.");
+    } finally {
+      setImportLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      await api.downloadTemplate(importCategory);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Download failed.");
+    }
+  };
+
   const fsCategoryLabel = (n: number) =>
     lookups?.fsCategories?.find((c) => c.value === n)?.name ?? String(n);
   const mappingTypeLabel = (n: number) =>
     lookups?.mappingTypes?.find((m) => m.value === n)?.name ?? String(n);
   const sourceLabel = (n: number) =>
     lookups?.sources?.find((s) => s.value === n)?.name ?? String(n);
+
+  const filteredItems = data?.items.filter((row) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return row.mappingName.toLowerCase().includes(q) ||
+      row.state.toLowerCase().includes(q) ||
+      row.zip.toLowerCase().includes(q) ||
+      (row.geoCode?.toLowerCase().includes(q)) ||
+      (row.geoName?.toLowerCase().includes(q)) ||
+      fsCategoryLabel(row.fsCategory).toLowerCase().includes(q);
+  }) ?? [];
 
   if (!canView) {
     return (
@@ -168,17 +213,17 @@ export default function GeographyResolutionPage() {
         description="Zip-to-geography mappings for fee schedule resolution."
       />
 
-      {/* Toolbar: search + add button */}
-      <div className="mb-6 flex items-center justify-between gap-3">
+      {/* Toolbar: search + import + add button */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Select value="" onValueChange={() => {}}>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-[5px] font-aileron text-[14px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="true">Active</SelectItem>
+              <SelectItem value="false">Inactive</SelectItem>
             </SelectContent>
           </Select>
           <div className="relative">
@@ -192,14 +237,28 @@ export default function GeographyResolutionPage() {
             />
           </div>
         </div>
-        {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add Geography Resolution <ArrowRight className="ml-1 h-4 w-4" /></>
+        <div className="flex items-center gap-2">
+          <select value={importCategory} onChange={(e) => setImportCategory(Number(e.target.value))} className="h-9 rounded-lg border border-input px-2 text-sm">
+            {lookups?.fsCategories?.map((c) => (
+              <option key={c.value} value={c.value}>{c.name}</option>
+            ))}
+          </select>
+          <Button onClick={handleDownloadTemplate} variant="outline" className="h-9 text-sm gap-1.5">
+            <Download className="h-4 w-4" /> Template
           </Button>
-        )}
+          <Button onClick={() => fileInputRef.current?.click()} disabled={importLoading} variant="outline" className="h-9 text-sm gap-1.5">
+            <Upload className="h-4 w-4" /> {importLoading ? "Importing…" : "Import"}
+          </Button>
+          <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); }} />
+          {canCreate && (
+            <Button
+              onClick={openCreate}
+              className="h-9 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -239,7 +298,7 @@ export default function GeographyResolutionPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {data.items.map((row) => (
+                {filteredItems.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
                     <td className="px-4 py-3 text-sm">
                       {row.mappingName}

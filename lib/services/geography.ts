@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api";
+import { API_URL, AUTH_TOKEN_KEY } from "@/lib/env";
 import type { PaginatedList } from "@/lib/types";
 
 export interface ZipGeoMappingDto {
@@ -79,5 +80,41 @@ export function geographyApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/ZipGeoMappings/${id}`, { method: "DELETE" }),
+    importMappings: async (fsCategory: number, file: File) => {
+      const fd = new FormData();
+      fd.append("file", file);
+      const base = API_URL.replace(/\/$/, "");
+      const token = typeof window !== "undefined" ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
+      const res = await fetch(`${base}/api/ZipGeoMappings/import?fsCategory=${fsCategory}`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        let message = text;
+        try { const json = JSON.parse(text); message = json.message || json.title || json.detail || text; } catch { /* use text */ }
+        throw new Error(message || `HTTP ${res.status}`);
+      }
+      const json = await res.json();
+      return json.data ?? json;
+    },
+    downloadTemplate: async (fsCategory: number) => {
+      const base = API_URL.replace(/\/$/, "");
+      const token = typeof window !== "undefined" ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
+      const res = await fetch(`${base}/api/ZipGeoMappings/templates?fsCategory=${fsCategory}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Download failed: HTTP ${res.status}`);
+      const blob = await res.blob();
+      const cd = res.headers.get("content-disposition");
+      const match = cd?.match(/filename="?([^"]+)"?/);
+      const fileName = match?.[1] ?? `ZipGeoMappingTemplate.xlsx`;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    },
   };
 }

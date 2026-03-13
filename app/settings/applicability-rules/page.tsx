@@ -11,6 +11,7 @@ import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { applicabilityRulesApi } from "@/lib/services/applicabilityRules";
+import { feeSchedulesApi, type FeeScheduleDto } from "@/lib/services/feeSchedules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -86,6 +87,7 @@ export default function ApplicabilityRulesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -96,19 +98,36 @@ export default function ApplicabilityRulesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const [feeScheduleOptions, setFeeScheduleOptions] = useState<FeeScheduleDto[]>([]);
+  const [fsCategoryLookup, setFsCategoryLookup] = useState<Record<number, string>>({});
+
   const api = applicabilityRulesApi();
+  const fsApi = feeSchedulesApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Applicability Rules");
+
+  useEffect(() => {
+    fsApi.getList({ pageSize: 500, status: 0 }).then((res) => setFeeScheduleOptions(res.items)).catch(() => {});
+    fsApi.getLookups().then((lk) => {
+      const map: Record<number, string> = {};
+      lk.categories.forEach((c) => { map[c.value] = c.name; });
+      setFsCategoryLookup(map);
+    }).catch(() => {});
+  }, []);
 
   const loadList = useCallback(() => {
     setError(null);
     api
-      .getList({ pageNumber: page, pageSize })
+      .getList({
+        pageNumber: page,
+        pageSize,
+        isActive: statusFilter === "all" ? undefined : statusFilter === "true",
+      })
       .then(setData)
       .catch((err) =>
         setError(err instanceof Error ? err.message : "Failed to load")
       );
-  }, [page, pageSize]);
+  }, [page, pageSize, statusFilter]);
 
   useEffect(() => {
     loadList();
@@ -197,6 +216,16 @@ export default function ApplicabilityRulesPage() {
   const payerCategoryLabel = (n: number) =>
     PAYER_CATEGORY.find((c) => c.value === n)?.name ?? String(n);
 
+  const filteredItems = data?.items.filter((row) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return row.ruleSetName.toLowerCase().includes(q) ||
+      row.displayName.toLowerCase().includes(q) ||
+      row.payerEntityType.toLowerCase().includes(q) ||
+      row.planCategory.toLowerCase().includes(q) ||
+      payerCategoryLabel(row.payerCategory).toLowerCase().includes(q);
+  }) ?? [];
+
   if (!canView) {
     return (
       <div>
@@ -217,14 +246,14 @@ export default function ApplicabilityRulesPage() {
       {/* Toolbar: search + add button */}
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Select value="" onValueChange={() => {}}>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-[5px] font-aileron text-[14px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="true">Active</SelectItem>
+              <SelectItem value="false">Inactive</SelectItem>
             </SelectContent>
           </Select>
           <div className="relative">
@@ -279,7 +308,7 @@ export default function ApplicabilityRulesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {data.items.map((row) => (
+                {filteredItems.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
                     <td className="px-4 py-3 text-sm">
                       {row.sortOrder}
@@ -559,6 +588,28 @@ export default function ApplicabilityRulesPage() {
                 }
                 className="w-full rounded-lg border border-input px-3 py-2 text-sm"
               />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-foreground">
+                Primary fee schedule (optional override)
+              </label>
+              <select
+                value={form.primaryFeeScheduleId ?? ""}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    primaryFeeScheduleId: e.target.value || null,
+                  }))
+                }
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+              >
+                <option value="">Automatic selection</option>
+                {feeScheduleOptions.map((fs) => (
+                  <option key={fs.id} value={fs.id}>
+                    {fs.scheduleCode ?? "—"} — {fsCategoryLookup[fs.category] ?? fs.category} {fs.state ? `(${fs.state})` : ""} {fs.year}/Q{fs.quarter}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">

@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Search, ArrowRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Search, ArrowRight, Upload, Download, FileSpreadsheet } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -14,8 +14,10 @@ import { feeSchedulesApi } from "@/lib/services/feeSchedules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
-import type { FeeScheduleDto, FeeScheduleDetailDto, CreateFeeScheduleCommand } from "@/lib/services/feeSchedules";
+import type { FeeScheduleDto, FeeScheduleDetailDto, FeeScheduleLineDto, CreateFeeScheduleCommand } from "@/lib/services/feeSchedules";
 import type { PaginatedList } from "@/lib/types";
+
+const CATEGORY_TEMPLATE_MAP: Record<number, string> = { 0: "Medicare", 1: "UCR", 2: "MVA", 3: "WC" };
 
 const STATUS_OPTIONS = [{ value: 0, name: "Active" }, { value: 1, name: "Inactive" }];
 
@@ -31,9 +33,11 @@ const defaultForm: CreateFeeScheduleCommand = {
   quarter: 1,
   calculationModel: 0,
   adoptFeeScheduleId: null,
-  multiplierPct: 0,
+  multiplierPct: 1.0,
   fallbackCategory: null,
   status: 0,
+  source: "",
+  notes: "",
 };
 
 export default function FeeSchedulesPage() {
@@ -43,6 +47,7 @@ export default function FeeSchedulesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreateFeeScheduleCommand>(defaultForm);
@@ -51,20 +56,36 @@ export default function FeeSchedulesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // Fee schedule options for adoptFeeScheduleId dropdown
+  const [fsOptions, setFsOptions] = useState<FeeScheduleDto[]>([]);
+
+  // Lines modal state
+  const [linesSchedule, setLinesSchedule] = useState<FeeScheduleDto | null>(null);
+  const [linesData, setLinesData] = useState<PaginatedList<FeeScheduleLineDto> | null>(null);
+  const [linesPage, setLinesPage] = useState(1);
+  const [linesLoading, setLinesLoading] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const api = feeSchedulesApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Fee Schedules");
 
   const loadList = useCallback(() => {
     setError(null);
-    api.getList({ pageNumber: page, pageSize }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize]);
+    api.getList({
+      pageNumber: page,
+      pageSize,
+      status: statusFilter === "all" ? undefined : Number(statusFilter),
+    }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
+  }, [page, pageSize, statusFilter]);
 
   useEffect(() => {
     loadList();
   }, [loadList]);
   useEffect(() => {
     api.getLookups().then(setLookups).catch(() => setLookups(null));
+    api.getList({ pageSize: 500, status: 0 }).then((res) => setFsOptions(res.items)).catch(() => {});
   }, []);
 
   const openCreate = () => {
@@ -96,6 +117,8 @@ export default function FeeSchedulesPage() {
         multiplierPct: detail.multiplierPct,
         fallbackCategory: detail.fallbackCategory ?? null,
         status: detail.status,
+        source: detail.source ?? "",
+        notes: detail.notes ?? "",
       });
     }).catch(() => setFormError("Failed to load."));
   };
@@ -136,8 +159,61 @@ export default function FeeSchedulesPage() {
     }
   };
 
+  const openLines = (row: FeeScheduleDto) => {
+    setLinesSchedule(row);
+    setLinesPage(1);
+    setLinesData(null);
+    loadLines(row.id, 1);
+  };
+
+  const loadLines = (id: string, pg: number) => {
+    setLinesLoading(true);
+    api.getLines(id, { pageNumber: pg, pageSize: 20 })
+      .then(setLinesData)
+      .catch(() => toast.error("Failed to load lines."))
+      .finally(() => setLinesLoading(false));
+  };
+
+  const handleImportLines = async (file: File) => {
+    if (!linesSchedule) return;
+    setImportLoading(true);
+    try {
+      const result = await api.importLines(linesSchedule.id, file);
+      if (result.success) {
+        toast.success(`Imported ${result.importedCount} lines.`);
+        loadLines(linesSchedule.id, 1);
+        setLinesPage(1);
+      } else {
+        toast.error(result.errors?.join("; ") || "Import failed.");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed.");
+    } finally {
+      setImportLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    if (!linesSchedule) return;
+    const tpl = CATEGORY_TEMPLATE_MAP[linesSchedule.category] ?? "Medicare";
+    try {
+      await api.downloadLinesTemplate(tpl);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Download failed.");
+    }
+  };
+
   const categoryLabel = (n: number) => lookups?.categories?.find((c) => c.value === n)?.name ?? String(n);
   const statusLabel = (n: number) => STATUS_OPTIONS.find((o) => o.value === n)?.name ?? String(n);
+
+  const filteredItems = data?.items.filter((row) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return (row.scheduleCode?.toLowerCase().includes(q)) ||
+      (row.state?.toLowerCase().includes(q)) ||
+      categoryLabel(row.category).toLowerCase().includes(q);
+  }) ?? [];
 
   if (!canView) {
     return (
@@ -157,14 +233,14 @@ export default function FeeSchedulesPage() {
       {/* Toolbar: search + add button */}
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Select value="" onValueChange={() => {}}>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-[5px] font-aileron text-[14px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="0">Active</SelectItem>
+              <SelectItem value="1">Inactive</SelectItem>
             </SelectContent>
           </Select>
           <div className="relative">
@@ -206,7 +282,7 @@ export default function FeeSchedulesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {data.items.map((row) => (
+                {filteredItems.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
                     <td className="px-4 py-3 text-sm">{row.scheduleCode ?? "—"}</td>
                     <td className="px-4 py-3 text-sm">{categoryLabel(row.category)}</td>
@@ -215,12 +291,17 @@ export default function FeeSchedulesPage() {
                     <td className="px-4 py-3 text-sm">{statusLabel(row.status)}</td>
                     {(canUpdate || canDelete) && (
                       <td className="px-4 py-3 text-sm">
-                        <TableActionsCell
-                          canEdit={canUpdate}
-                          canDelete={canDelete}
-                          onEdit={() => openEdit(row)}
-                          onDelete={() => setDeleteId(row.id)}
-                        />
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => openLines(row)} className="text-xs text-blue-600 hover:underline" title="Manage lines">
+                            <FileSpreadsheet className="inline h-4 w-4 mr-0.5" />Lines
+                          </button>
+                          <TableActionsCell
+                            canEdit={canUpdate}
+                            canDelete={canDelete}
+                            onEdit={() => openEdit(row)}
+                            onDelete={() => setDeleteId(row.id)}
+                          />
+                        </div>
                       </td>
                     )}
                   </tr>
@@ -278,6 +359,14 @@ export default function FeeSchedulesPage() {
               </select>
             </div>
             <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Geo code</label>
+              <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 01, 99" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Geo name</label>
+              <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+            </div>
+            <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Billing type</label>
               <select value={form.billingType} onChange={(e) => setForm((f) => ({ ...f, billingType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                 {lookups?.billingTypes?.map((b) => (
@@ -317,12 +406,118 @@ export default function FeeSchedulesPage() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Fallback category</label>
+              <select value={form.fallbackCategory ?? ""} onChange={(e) => setForm((f) => ({ ...f, fallbackCategory: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <option value="">None</option>
+                {lookups?.categories?.map((c) => (
+                  <option key={c.value} value={c.value}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Adopt fee schedule</label>
+              <select value={form.adoptFeeScheduleId ?? ""} onChange={(e) => setForm((f) => ({ ...f, adoptFeeScheduleId: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <option value="">None</option>
+                {fsOptions.filter((fs) => fs.id !== editId).map((fs) => (
+                  <option key={fs.id} value={fs.id}>
+                    {fs.scheduleCode ?? "—"} — {categoryLabel(fs.category)} {fs.state ? `(${fs.state})` : ""} {fs.year}/Q{fs.quarter}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Source</label>
+              <input type="text" value={form.source ?? ""} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. CMS Medicare PFS" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-foreground">Notes</label>
+              <textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+            </div>
           </div>
           <ModalFooter onCancel={() => setModalOpen(false)} submitLabel={editId ? "Update" : "Create"} onSubmit={handleSubmit} loading={submitLoading} />
         </form>
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete fee schedule" message="Are you sure you want to delete this fee schedule?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+
+      {/* Lines management modal */}
+      <Modal open={!!linesSchedule} onClose={() => setLinesSchedule(null)} title={`Fee Schedule Lines — ${linesSchedule?.scheduleCode ?? ""} (${categoryLabel(linesSchedule?.category ?? 0)})`} size="xl">
+        <div className="mb-4 flex items-center gap-3">
+          <Button onClick={handleDownloadTemplate} variant="outline" className="h-9 text-sm gap-1.5">
+            <Download className="h-4 w-4" /> Download Template
+          </Button>
+          <Button onClick={() => fileInputRef.current?.click()} disabled={importLoading} className="h-9 text-sm gap-1.5 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
+            <Upload className="h-4 w-4" /> {importLoading ? "Importing…" : "Import Lines"}
+          </Button>
+          <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImportLines(f); }} />
+          {linesData && <span className="text-xs text-muted-foreground ml-auto">{linesData.totalCount} total lines</span>}
+        </div>
+        {linesLoading && <div className="py-6 text-center text-sm text-muted-foreground">Loading lines…</div>}
+        {!linesLoading && linesData && linesData.items.length === 0 && (
+          <div className="py-6 text-center text-sm text-muted-foreground">No lines yet. Import an Excel file to add lines.</div>
+        )}
+        {!linesLoading && linesData && linesData.items.length > 0 && (
+          <>
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+              <table className="min-w-full divide-y divide-border text-sm">
+                <thead className="sticky top-0 bg-background">
+                  <tr>
+                    {linesSchedule?.category === 1 && <th className="px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">ZIP</th>}
+                    <th className="px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">CPT/HCPCS</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">Modifier</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium uppercase text-muted-foreground">Fee Amount</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium uppercase text-muted-foreground">RV</th>
+                    {linesSchedule?.category === 3 && <th className="px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">PC/TC</th>}
+                    {linesSchedule?.category === 1 && (
+                      <>
+                        <th className="px-3 py-2 text-right text-xs font-medium uppercase text-muted-foreground">50th</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium uppercase text-muted-foreground">75th</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium uppercase text-muted-foreground">90th</th>
+                      </>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {linesData.items.map((line) => (
+                    <tr key={line.id} className="hover:bg-muted">
+                      {linesSchedule?.category === 1 && <td className="px-3 py-2">{line.zip ?? "—"}</td>}
+                      <td className="px-3 py-2 font-mono">{line.cptHcpcs}</td>
+                      <td className="px-3 py-2">{line.modifier ?? "—"}</td>
+                      <td className="px-3 py-2 text-right">{line.feeAmount.toFixed(2)}</td>
+                      <td className="px-3 py-2 text-right">{line.rv?.toFixed(4) ?? "—"}</td>
+                      {linesSchedule?.category === 3 && <td className="px-3 py-2">{line.pctcIndicator === 0 ? "P" : line.pctcIndicator === 1 ? "T" : "—"}</td>}
+                      {linesSchedule?.category === 1 && (
+                        <>
+                          <td className="px-3 py-2 text-right">{line.fee50th?.toFixed(2) ?? "—"}</td>
+                          <td className="px-3 py-2 text-right">{line.fee75th?.toFixed(2) ?? "—"}</td>
+                          <td className="px-3 py-2 text-right">{line.fee90th?.toFixed(2) ?? "—"}</td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {linesData.totalPages > 1 && (
+              <div className="mt-3">
+                <Pagination
+                  pageNumber={linesData.pageNumber}
+                  totalPages={linesData.totalPages}
+                  totalCount={linesData.totalCount}
+                  hasPreviousPage={linesData.hasPreviousPage}
+                  hasNextPage={linesData.hasNextPage}
+                  onPrevious={() => { const p = linesPage - 1; setLinesPage(p); loadLines(linesSchedule!.id, p); }}
+                  onNext={() => { const p = linesPage + 1; setLinesPage(p); loadLines(linesSchedule!.id, p); }}
+                  onPageChange={(p) => { setLinesPage(p); loadLines(linesSchedule!.id, p); }}
+                  pageSize={20}
+                  onPageSizeChange={() => {}}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 }
