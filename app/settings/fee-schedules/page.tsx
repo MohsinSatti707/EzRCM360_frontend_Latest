@@ -194,16 +194,15 @@ export default function FeeSchedulesPage() {
     }
   };
 
-  const handleDownloadTemplate = useCallback(async () => {
-    if (!linesSchedule) return;
-    const cat = Number(linesSchedule.category);
+  const downloadTemplateForCategory = async (category: number) => {
+    const cat = Number(category);
     const tpl = cat === 1 ? "UCR" : cat === 2 ? "MVA" : cat === 3 ? "WC" : "Medicare";
     try {
       await api.downloadLinesTemplate(tpl);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Download failed.");
     }
-  }, [linesSchedule]);
+  };
 
   const categoryLabel = (n: number) => lookups?.categories?.find((c) => c.value === n)?.name ?? String(n);
   const statusLabel = (n: number) => STATUS_OPTIONS.find((o) => o.value === n)?.name ?? String(n);
@@ -445,7 +444,7 @@ export default function FeeSchedulesPage() {
       {/* Lines management modal */}
       <Modal open={!!linesSchedule} onClose={() => setLinesSchedule(null)} title={`Fee Schedule Lines — ${linesSchedule?.scheduleCode ?? ""} (${categoryLabel(linesSchedule?.category ?? 0)})`} size="lg">
         <div className="mb-4 flex items-center gap-3">
-          <Button onClick={handleDownloadTemplate} variant="outline" className="h-9 text-sm gap-1.5">
+          <Button onClick={() => linesSchedule && downloadTemplateForCategory(linesSchedule.category)} variant="outline" className="h-9 text-sm gap-1.5">
             <Download className="h-4 w-4" /> Download Template
           </Button>
           <Button onClick={() => fileInputRef.current?.click()} disabled={importLoading} className="h-9 text-sm gap-1.5 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
