@@ -236,8 +236,8 @@ export default function InsuranceArAnalysisUploadPage() {
         <Stepper steps={steps} />
 
         {step === 1 && (
-          <Card className="animate-fade-in-up overflow-hidden border-none">
-          <div className="space-y-4">
+          <Card className="animate-fade-in-up overflow-hidden border-none ">
+          <div className="space-y-4 overflow-auto h-[calc(100vh-355px)]">
             <div className="space-y-3">
               <label className="block text-[14px] font-['Aileron'] font-medium text-foreground">Validation Mode</label>
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
@@ -274,7 +274,7 @@ export default function InsuranceArAnalysisUploadPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="block text-[14px] font-['Aileron'] font-semibold text-foreground">Practice Name</label>
               <input
                 type="text"
@@ -285,7 +285,7 @@ export default function InsuranceArAnalysisUploadPage() {
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-0">
               <label className="block text-[14px] font-['Aileron'] font-semibold text-foreground">
                 Upload AR Intake File
               </label>
@@ -352,7 +352,9 @@ export default function InsuranceArAnalysisUploadPage() {
               </div>
             )}
 
-            <div className="flex flex-wrap gap-3 border-t border-border pt-6">
+ 
+          </div>
+          <div className="flex flex-wrap gap-3 border-t border-border pt-3">
               <Button
                 onClick={validationResult?.success ? handleNextFromStep1 : handleCreateSession}
                 disabled={!practiceName.trim() || !intakeFile || submitLoading}
@@ -373,7 +375,6 @@ export default function InsuranceArAnalysisUploadPage() {
                 <Button variant="secondary">Cancel</Button>
               </Link>
             </div>
-          </div>
           </Card>
         )}
 
