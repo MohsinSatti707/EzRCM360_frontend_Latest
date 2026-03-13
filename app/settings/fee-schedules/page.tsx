@@ -196,7 +196,8 @@ export default function FeeSchedulesPage() {
 
   const handleDownloadTemplate = useCallback(async () => {
     if (!linesSchedule) return;
-    const tpl = CATEGORY_TEMPLATE_MAP[linesSchedule.category] ?? "Medicare";
+    const cat = Number(linesSchedule.category);
+    const tpl = cat === 1 ? "UCR" : cat === 2 ? "MVA" : cat === 3 ? "WC" : "Medicare";
     try {
       await api.downloadLinesTemplate(tpl);
     } catch (err) {
