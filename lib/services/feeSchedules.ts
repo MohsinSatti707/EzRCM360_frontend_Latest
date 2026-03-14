@@ -53,7 +53,7 @@ export interface FeeScheduleLineDto {
 
 export interface FeeScheduleLineImportResult {
   success: boolean;
-  importedCount: number;
+  rowsImported: number;
   errors: string[];
 }
 

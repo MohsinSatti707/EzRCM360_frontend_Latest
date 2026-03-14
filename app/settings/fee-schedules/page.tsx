@@ -204,7 +204,7 @@ export default function FeeSchedulesPage() {
     try {
       const result = await api.importLines(scheduleId, file);
       if (result.success) {
-        toast.success(`Imported ${result.importedCount} lines.`);
+        toast.success(`Imported ${result.rowsImported} lines.`);
         if (isWizard) {
           loadWizardLines(scheduleId);
         } else {
