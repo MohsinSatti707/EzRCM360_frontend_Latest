@@ -55,5 +55,10 @@ export function cptHcpcsCodesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/CptHcpcsCodes/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/CptHcpcsCodes/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

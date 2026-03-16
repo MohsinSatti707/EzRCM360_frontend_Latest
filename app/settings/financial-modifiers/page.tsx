@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Trash2 } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { Pagination } from "@/components/ui/Pagination";
 import { financialModifiersApi } from "@/lib/services/financialModifiers";
 import { useToast } from "@/lib/contexts/ToastContext";
@@ -43,6 +44,8 @@ export default function FinancialModifiersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   const api = financialModifiersApi();
   const toast = useToast();
@@ -118,6 +121,51 @@ export default function FinancialModifiersPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    const allOnPage = data.items.map((r) => r.id);
+    const allSelected = allOnPage.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteLoading(true);
+    setOverlayLoading(true);
+    try {
+      await api.bulkDelete(Array.from(selectedIds));
+      setBulkDeleteConfirm(false);
+      setSelectedIds(new Set());
+      loadList();
+      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setDeleteLoading(false);
+      setOverlayLoading(false);
+    }
+  };
+
   if (!canView) {
     return (
       <div>
@@ -158,6 +206,14 @@ export default function FinancialModifiersPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {canDelete && selectedIds.size > 0 && (
+            <Button
+              onClick={() => setBulkDeleteConfirm(true)}
+              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+            >
+              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+            </Button>
+          )}
           {canCreate && (
             <BulkImportActions
               apiBase="/api/FinancialModifiers"
@@ -184,6 +240,14 @@ export default function FinancialModifiersPage() {
             <table className="min-w-full divide-y divide-border">
               <thead>
                 <tr>
+                  {canDelete && (
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground" style={{ width: 50 }}>
+                      <Checkbox
+                        checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </th>
+                  )}
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Modifier code</th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Factor</th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Description</th>
@@ -198,6 +262,14 @@ export default function FinancialModifiersPage() {
               <tbody className="divide-y divide-border">
                 {data.items.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
+                    {canDelete && (
+                      <td className="px-4 py-3 text-sm">
+                        <Checkbox
+                          checked={selectedIds.has(row.id)}
+                          onCheckedChange={() => toggleSelect(row.id)}
+                        />
+                      </td>
+                    )}
                     <td className="px-4 py-3 text-sm">{row.modifierCode}</td>
                     <td className="px-4 py-3 text-sm">{row.factor}</td>
                     <td className="px-4 py-3 text-sm">{row.description ?? "—"}</td>
@@ -271,6 +343,16 @@ export default function FinancialModifiersPage() {
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete financial modifier" message="Are you sure you want to delete this financial modifier?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete selected financial modifiers"
+        message={`Are you sure you want to delete ${selectedIds.size} financial modifier(s)? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        variant="danger"
+        loading={deleteLoading}
+      />
       <OverlayLoader visible={overlayLoading} />
     </div>
   );

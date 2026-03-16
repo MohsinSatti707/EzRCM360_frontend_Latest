@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { Pagination } from "@/components/ui/Pagination";
 import { icdCodesApi } from "@/lib/services/icdCodes";
 import { useToast } from "@/lib/contexts/ToastContext";
@@ -56,6 +57,8 @@ export default function IcdCodesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   const api = icdCodesApi();
   const toast = useToast();
@@ -137,6 +140,51 @@ export default function IcdCodesPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    const allOnPage = data.items.map((r) => r.id);
+    const allSelected = allOnPage.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteLoading(true);
+    setOverlayLoading(true);
+    try {
+      await api.bulkDelete(Array.from(selectedIds));
+      setBulkDeleteConfirm(false);
+      setSelectedIds(new Set());
+      loadList();
+      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setDeleteLoading(false);
+      setOverlayLoading(false);
+    }
+  };
+
   if (!canView) {
     return (
       <div>
@@ -180,6 +228,14 @@ export default function IcdCodesPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {canDelete && selectedIds.size > 0 && (
+            <Button
+              onClick={() => setBulkDeleteConfirm(true)}
+              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+            >
+              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+            </Button>
+          )}
           {canCreate && (
             <BulkImportActions
               apiBase="/api/IcdCodes"
@@ -210,6 +266,14 @@ export default function IcdCodesPage() {
             <table className="min-w-full divide-y divide-border">
               <thead>
                 <tr>
+                  {canDelete && (
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground" style={{ width: 50 }}>
+                      <Checkbox
+                        checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </th>
+                  )}
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                     Code
                   </th>
@@ -235,6 +299,14 @@ export default function IcdCodesPage() {
               <tbody className="divide-y divide-border">
                 {data.items.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
+                    {canDelete && (
+                      <td className="px-4 py-3 text-sm">
+                        <Checkbox
+                          checked={selectedIds.has(row.id)}
+                          onCheckedChange={() => toggleSelect(row.id)}
+                        />
+                      </td>
+                    )}
                     <td className="px-4 py-3 text-sm">
                       {row.code}
                     </td>
@@ -418,6 +490,16 @@ export default function IcdCodesPage() {
         title="Delete ICD code"
         message="Are you sure you want to delete this ICD code? This cannot be undone."
         confirmLabel="Delete"
+        variant="danger"
+        loading={deleteLoading}
+      />
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete selected ICD codes"
+        message={`Are you sure you want to delete ${selectedIds.size} ICD code(s)? This action cannot be undone.`}
+        confirmLabel="Delete All"
         variant="danger"
         loading={deleteLoading}
       />

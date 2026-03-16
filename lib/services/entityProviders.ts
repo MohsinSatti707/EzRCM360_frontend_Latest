@@ -78,5 +78,10 @@ export function entityProvidersApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/EntityProviders/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/EntityProviders/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

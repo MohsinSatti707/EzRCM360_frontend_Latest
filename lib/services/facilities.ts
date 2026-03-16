@@ -74,5 +74,10 @@ export function facilitiesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/Facilities/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/Facilities/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

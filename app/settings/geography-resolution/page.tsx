@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Search, ArrowRight, Upload, Download } from "lucide-react";
+import { Search, ArrowRight, Upload, Download, Trash2 } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -10,6 +10,8 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { geographyApi } from "@/lib/services/geography";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
@@ -55,6 +57,9 @@ export default function GeographyResolutionPage() {
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const api = geographyApi();
   const toast = useToast();
@@ -151,6 +156,51 @@ export default function GeographyResolutionPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    const allOnPage = data.items.map((r) => r.id);
+    const allSelected = allOnPage.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteLoading(true);
+    setOverlayLoading(true);
+    try {
+      await api.bulkDelete(Array.from(selectedIds));
+      setBulkDeleteConfirm(false);
+      setSelectedIds(new Set());
+      loadList();
+      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setDeleteLoading(false);
+      setOverlayLoading(false);
+    }
+  };
+
   const handleImport = async (file: File) => {
     setImportLoading(true);
     try {
@@ -238,6 +288,14 @@ export default function GeographyResolutionPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {canDelete && selectedIds.size > 0 && (
+            <Button
+              onClick={() => setBulkDeleteConfirm(true)}
+              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+            >
+              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+            </Button>
+          )}
           <select value={importCategory} onChange={(e) => setImportCategory(Number(e.target.value))} className="h-9 rounded-lg border border-input px-2 text-sm">
             {lookups?.fsCategories?.map((c) => (
               <option key={c.value} value={c.value}>{c.name}</option>
@@ -272,6 +330,14 @@ export default function GeographyResolutionPage() {
             <table className="min-w-full divide-y divide-border">
               <thead>
                 <tr>
+                  {canDelete && (
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground" style={{ width: 50 }}>
+                      <Checkbox
+                        checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </th>
+                  )}
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                     Mapping Name
                   </th>
@@ -300,6 +366,14 @@ export default function GeographyResolutionPage() {
               <tbody className="divide-y divide-border">
                 {filteredItems.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
+                    {canDelete && (
+                      <td className="px-4 py-3 text-sm">
+                        <Checkbox
+                          checked={selectedIds.has(row.id)}
+                          onCheckedChange={() => toggleSelect(row.id)}
+                        />
+                      </td>
+                    )}
                     <td className="px-4 py-3 text-sm">
                       {row.mappingName}
                     </td>
@@ -576,6 +650,17 @@ export default function GeographyResolutionPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete selected geo mappings"
+        message={`Are you sure you want to delete ${selectedIds.size} geo mapping(s)? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        variant="danger"
+        loading={deleteLoading}
+      />
+      <OverlayLoader visible={overlayLoading} />
     </div>
   );
 }

@@ -71,5 +71,10 @@ export function entityLocationsApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/EntityLocations/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/EntityLocations/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

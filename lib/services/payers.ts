@@ -122,5 +122,10 @@ export function payersApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/Payers/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/Payers/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Trash2 } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -10,6 +10,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { renderingParticipationsApi } from "@/lib/services/renderingParticipations";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -60,6 +61,8 @@ export default function RenderingParticipationPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   const api = renderingParticipationsApi();
   const toast = useToast();
@@ -178,6 +181,51 @@ export default function RenderingParticipationPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    const allOnPage = data.items.map((r) => r.id);
+    const allSelected = allOnPage.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteLoading(true);
+    setOverlayLoading(true);
+    try {
+      await api.bulkDelete(Array.from(selectedIds));
+      setBulkDeleteConfirm(false);
+      setSelectedIds(new Set());
+      await loadList();
+      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setDeleteLoading(false);
+      setOverlayLoading(false);
+    }
+  };
+
   const statusLabel = (n: number) => participationStatuses.find((o) => Number(o.value) === n)?.label ?? String(n);
   const entityNameById = useMemo(() => {
     const m = new Map<string, string>();
@@ -248,22 +296,32 @@ export default function RenderingParticipationPage() {
             />
           </div>
         </div>
-        {canCreate && (
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
+          {canDelete && selectedIds.size > 0 && (
+            <Button
+              onClick={() => setBulkDeleteConfirm(true)}
+              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+            >
+              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+            </Button>
+          )}
+          {canCreate && (
             <BulkImportActions
               apiBase="/api/RenderingProviderPlanParticipations"
               templateFileName="RenderingParticipation_Import_Template.xlsx"
               onImportSuccess={loadList}
               onLoadingChange={setOverlayLoading}
             />
+          )}
+          {canCreate && (
             <Button
               onClick={openCreate}
               className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
             >
               <>Add Rendering Participation <ArrowRight className="ml-1 h-4 w-4" /></>
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {error && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
@@ -273,6 +331,14 @@ export default function RenderingParticipationPage() {
             <table className="min-w-full divide-y divide-border">
               <thead>
                 <tr>
+                  {canDelete && (
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground" style={{ width: 50 }}>
+                      <Checkbox
+                        checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </th>
+                  )}
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Entity</th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Provider</th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Payer</th>
@@ -289,6 +355,14 @@ export default function RenderingParticipationPage() {
               <tbody className="divide-y divide-border">
                 {data.items.map((row) => (
                   <tr key={row.id} className="hover:bg-muted">
+                    {canDelete && (
+                      <td className="px-4 py-3 text-sm">
+                        <Checkbox
+                          checked={selectedIds.has(row.id)}
+                          onCheckedChange={() => toggleSelect(row.id)}
+                        />
+                      </td>
+                    )}
                     <td className="px-4 py-3 text-sm">
                       {entityNameById.get(providerEntityIdById.get(row.entityProviderId) ?? "") ?? "—"}
                     </td>
@@ -414,6 +488,16 @@ export default function RenderingParticipationPage() {
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete participation" message="Are you sure you want to delete this participation?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete selected participations"
+        message={`Are you sure you want to delete ${selectedIds.size} participation(s)? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        variant="danger"
+        loading={deleteLoading}
+      />
       <OverlayLoader visible={overlayLoading} />
     </div>
   );

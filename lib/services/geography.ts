@@ -80,6 +80,11 @@ export function geographyApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/ZipGeoMappings/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/ZipGeoMappings/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
     importMappings: async (fsCategory: number, file: File) => {
       const fd = new FormData();
       fd.append("file", file);

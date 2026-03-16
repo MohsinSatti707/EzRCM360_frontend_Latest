@@ -80,5 +80,10 @@ export function groupParticipationsApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/GroupProviderPlanParticipations/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/GroupProviderPlanParticipations/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

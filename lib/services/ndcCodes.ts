@@ -55,5 +55,10 @@ export function ndcCodesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/NdcCodes/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/NdcCodes/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

@@ -63,5 +63,10 @@ export function bundlingReductionRulesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/BundlingReductionRules/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/BundlingReductionRules/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Search, ArrowRight, Play, ChevronDown } from "lucide-react";
+import { Search, ArrowRight, Play, ChevronDown, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Pagination } from "@/components/ui/Pagination";
@@ -19,6 +19,7 @@ import { TooltipProvider } from "@/components/ui/Tooltip";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { usersApi } from "@/lib/services/users";
 import { lookupsApi } from "@/lib/services/lookups";
 import { useToast } from "@/lib/contexts/ToastContext";
@@ -228,6 +229,9 @@ export default function UsersPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
@@ -366,6 +370,51 @@ export default function UsersPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    const allOnPage = data.items.map((r) => r.id);
+    const allSelected = allOnPage.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteLoading(true);
+    setOverlayLoading(true);
+    try {
+      await api.bulkDelete(Array.from(selectedIds));
+      setBulkDeleteConfirm(false);
+      setSelectedIds(new Set());
+      loadList();
+      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setDeleteLoading(false);
+      setOverlayLoading(false);
+    }
+  };
+
   const handleStatusChange = async (row: UserListItemDto, newStatus: number) => {
     setStatusUpdatingId(row.id);
     try {
@@ -498,14 +547,24 @@ export default function UsersPage() {
             ))}
           </select> */}
         </div>
-        {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-          >
-            <>Add User <ArrowRight className="ml-1 h-4 w-4" /></>
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canDelete && selectedIds.size > 0 && (
+            <Button
+              onClick={() => setBulkDeleteConfirm(true)}
+              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+            >
+              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+            </Button>
+          )}
+          {canCreate && (
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add User <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -520,6 +579,14 @@ export default function UsersPage() {
           <Table className="min-w-[1500px]">
               <TableHead>
                 <TableRow>
+                  {canDelete && (
+                    <TableHeaderCell className="!min-w-[50px] w-[50px]">
+                      <Checkbox
+                        checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHeaderCell>
+                  )}
                   <TableHeaderCell>
                     <div className="flex items-center gap-2">
                       User ID
@@ -567,6 +634,14 @@ export default function UsersPage() {
               <TableBody>
                 {displayItems.map((row) => (
                   <TableRow key={row.id}>
+                    {canDelete && (
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(row.id)}
+                          onCheckedChange={() => toggleSelect(row.id)}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <TruncatedWithTooltip className="max-w-[300px]">
                         {toUserDisplayId(row.id)}
@@ -804,6 +879,17 @@ export default function UsersPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete selected users"
+        message={`Are you sure you want to delete ${selectedIds.size} user(s)? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        variant="danger"
+        loading={deleteLoading}
+      />
+      <OverlayLoader visible={overlayLoading} />
       </TooltipProvider>
     </PageShell>
   );

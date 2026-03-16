@@ -53,5 +53,10 @@ export function financialModifiersApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/FinancialModifiers/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/FinancialModifiers/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

@@ -82,5 +82,10 @@ export function usersApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/Users/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/Users/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

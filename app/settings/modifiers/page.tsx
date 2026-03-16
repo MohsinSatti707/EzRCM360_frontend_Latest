@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -18,6 +18,7 @@ import {
 import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { ModifierFormModal } from "./ModifierFormModal";
 import { modifiersApi } from "@/lib/services/modifiers";
 import { usePaginatedList } from "@/lib/hooks";
@@ -54,6 +55,8 @@ export default function ModifiersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   const api = modifiersApi();
   const toast = useToast();
@@ -124,6 +127,51 @@ export default function ModifiersPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    const allOnPage = data.items.map((r) => r.id);
+    const allSelected = allOnPage.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteLoading(true);
+    setOverlayLoading(true);
+    try {
+      await api.bulkDelete(Array.from(selectedIds));
+      setBulkDeleteConfirm(false);
+      setSelectedIds(new Set());
+      await reload();
+      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setDeleteLoading(false);
+      setOverlayLoading(false);
+    }
+  };
+
   const modifierTypeLabel = (n: number) =>
     MODIFIER_TYPE_OPTIONS.find((o) => o.value === n)?.label ?? String(n);
 
@@ -167,6 +215,14 @@ export default function ModifiersPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {canDelete && selectedIds.size > 0 && (
+            <Button
+              onClick={() => setBulkDeleteConfirm(true)}
+              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+            >
+              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+            </Button>
+          )}
           {canCreate && (
             <BulkImportActions
               apiBase="/api/Modifiers"
@@ -196,6 +252,14 @@ export default function ModifiersPage() {
           <Table>
             <TableHead>
               <TableRow>
+                {canDelete && (
+                  <TableHeaderCell className="!min-w-[50px] w-[50px]">
+                    <Checkbox
+                      checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </TableHeaderCell>
+                )}
                 <TableHeaderCell>Modifier code</TableHeaderCell>
                 <TableHeaderCell>Description</TableHeaderCell>
                 <TableHeaderCell>Modifier type</TableHeaderCell>
@@ -206,6 +270,14 @@ export default function ModifiersPage() {
             <TableBody>
               {data.items.map((row) => (
                 <TableRow key={row.id}>
+                  {canDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(row.id)}
+                        onCheckedChange={() => toggleSelect(row.id)}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>{row.modifierCode}</TableCell>
                   <TableCell>{row.description}</TableCell>
                   <TableCell>{modifierTypeLabel(row.modifierType)}</TableCell>
@@ -260,6 +332,16 @@ export default function ModifiersPage() {
         title="Delete modifier"
         message="Are you sure you want to delete this modifier?"
         confirmLabel="Delete"
+        variant="danger"
+        loading={deleteLoading}
+      />
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete selected modifiers"
+        message={`Are you sure you want to delete ${selectedIds.size} modifier(s)? This action cannot be undone.`}
+        confirmLabel="Delete All"
         variant="danger"
         loading={deleteLoading}
       />

@@ -118,6 +118,11 @@ export function feeSchedulesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/FeeSchedules/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/FeeSchedules/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
     getLines: (feeScheduleId: string, params?: { pageNumber?: number; pageSize?: number }) => {
       const q = new URLSearchParams();
       if (params?.pageNumber != null) q.set("pageNumber", String(params.pageNumber));

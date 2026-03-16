@@ -82,5 +82,10 @@ export function renderingParticipationsApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/RenderingProviderPlanParticipations/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/RenderingProviderPlanParticipations/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

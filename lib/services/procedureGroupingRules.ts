@@ -57,5 +57,10 @@ export function procedureGroupingRulesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/ProcedureGroupingRules/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/ProcedureGroupingRules/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

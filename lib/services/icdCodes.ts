@@ -47,5 +47,10 @@ export function icdCodesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/IcdCodes/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/IcdCodes/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

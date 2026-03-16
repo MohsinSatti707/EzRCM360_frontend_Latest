@@ -71,5 +71,10 @@ export function applicabilityRulesApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/ApplicabilityRules/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/ApplicabilityRules/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

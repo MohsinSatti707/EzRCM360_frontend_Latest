@@ -97,5 +97,10 @@ export function plansApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/Plans/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/Plans/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }

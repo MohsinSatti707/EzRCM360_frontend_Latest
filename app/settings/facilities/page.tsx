@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Trash2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -53,6 +54,8 @@ export default function FacilitiesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   const api = facilitiesApi();
   const toast = useToast();
@@ -142,6 +145,51 @@ export default function FacilitiesPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    const allOnPage = data.items.map((r) => r.id);
+    const allSelected = allOnPage.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allOnPage.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteLoading(true);
+    setOverlayLoading(true);
+    try {
+      await api.bulkDelete(Array.from(selectedIds));
+      setBulkDeleteConfirm(false);
+      setSelectedIds(new Set());
+      await reload();
+      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setDeleteLoading(false);
+      setOverlayLoading(false);
+    }
+  };
+
   if (!canView) {
     return (
       <div>
@@ -181,22 +229,32 @@ export default function FacilitiesPage() {
             />
           </div>
         </div>
-        {canCreate && (
-          <div className="flex items-center gap-3">
-            <BulkImportActions
-              apiBase="/api/Facilities"
-              templateFileName="Facilities_Import_Template.xlsx"
-              onImportSuccess={reload}
-              onLoadingChange={setOverlayLoading}
-            />
+        <div className="flex items-center gap-3">
+          {canDelete && selectedIds.size > 0 && (
             <Button
-              onClick={openCreate}
-              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+              onClick={() => setBulkDeleteConfirm(true)}
+              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
             >
-              <>Add Facility <ArrowRight className="ml-1 h-4 w-4" /></>
+              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
             </Button>
-          </div>
-        )}
+          )}
+          {canCreate && (
+            <>
+              <BulkImportActions
+                apiBase="/api/Facilities"
+                templateFileName="Facilities_Import_Template.xlsx"
+                onImportSuccess={reload}
+                onLoadingChange={setOverlayLoading}
+              />
+              <Button
+                onClick={openCreate}
+                className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+              >
+                <>Add Facility <ArrowRight className="ml-1 h-4 w-4" /></>
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -209,6 +267,14 @@ export default function FacilitiesPage() {
           <Table>
             <TableHead>
               <TableRow>
+                {canDelete && (
+                  <TableHeaderCell className="!min-w-[50px] w-[50px]">
+                    <Checkbox
+                      checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </TableHeaderCell>
+                )}
                 <TableHeaderCell>Name</TableHeaderCell>
                 <TableHeaderCell>Type</TableHeaderCell>
                 <TableHeaderCell>Entity</TableHeaderCell>
@@ -221,6 +287,14 @@ export default function FacilitiesPage() {
             <TableBody>
               {data.items.map((row) => (
                 <TableRow key={row.id}>
+                  {canDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(row.id)}
+                        onCheckedChange={() => toggleSelect(row.id)}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>{row.name}</TableCell>
                   <TableCell>{row.facilityType}</TableCell>
                   <TableCell>{row.entityDisplayName ?? "—"}</TableCell>
@@ -278,6 +352,16 @@ export default function FacilitiesPage() {
         title="Delete facility"
         message="Are you sure you want to delete this facility?"
         confirmLabel="Delete"
+        variant="danger"
+        loading={deleteLoading}
+      />
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete selected facilities"
+        message={`Are you sure you want to delete ${selectedIds.size} facility(s)? This action cannot be undone.`}
+        confirmLabel="Delete All"
         variant="danger"
         loading={deleteLoading}
       />

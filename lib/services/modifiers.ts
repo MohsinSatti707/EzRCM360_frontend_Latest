@@ -51,5 +51,10 @@ export function modifiersApi() {
       }),
     delete: (id: string) =>
       apiRequest<void>(`/api/Modifiers/${id}`, { method: "DELETE" }),
+    bulkDelete: (ids: string[]) =>
+      apiRequest<void>("/api/Modifiers/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      }),
   };
 }
