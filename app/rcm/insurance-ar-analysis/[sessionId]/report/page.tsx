@@ -258,6 +258,7 @@ export default function InsuranceArAnalysisReportPage() {
                 { layer: 1, title: "Layer 1 — Payer Entity Type" },
                 { layer: 2, title: "Layer 2 — Plan Category (Insurance Only)" },
                 { layer: 3, title: "Layer 3 — Commercial Sub-Categorization" },
+                { layer: 4, title: "Layer 4 — Claim Service Type" },
               ].map(({ layer, title }) => {
                 const items = report.claimCategorisationBreakdown.filter((x) => x.layer === layer);
                 if (!items.length) return null;
