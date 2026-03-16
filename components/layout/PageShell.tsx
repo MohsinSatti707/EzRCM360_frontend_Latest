@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 interface Breadcrumb {
@@ -10,10 +11,10 @@ interface Breadcrumb {
 interface PageShellProps {
   breadcrumbs?: Breadcrumb[];
   title: string;
-  description?: string;
-  children: React.ReactNode;
+  description?: ReactNode;
+  children: ReactNode;
   /** Optional actions (e.g. Add button) */
-  actions?: React.ReactNode;
+  actions?: ReactNode;
   className?: string;
   /** Override title row spacing (e.g. "mb-0" to remove gap below title) */
   titleWrapperClassName?: string;

@@ -236,7 +236,7 @@ export default function InsuranceArAnalysisUploadPage() {
         <Stepper steps={steps} />
 
         {step === 1 && (
-          <Card className="animate-fade-in-up overflow-hidden border-none ">
+          <Card className="animate-fade-in-up overflow-hidden border-none">
           <div className="space-y-4 overflow-auto h-[calc(100vh-355px)]">
             <div className="space-y-3">
               <label className="block text-[14px] font-['Aileron'] font-medium text-foreground">Validation Mode</label>

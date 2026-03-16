@@ -559,9 +559,10 @@ export default function UsersPage() {
           {canCreate && (
             <Button
               onClick={openCreate}
-              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
             >
-              <>Add User <ArrowRight className="ml-1 h-4 w-4" /></>
+              Add User
+              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
             </Button>
           )}
         </div>
@@ -737,9 +738,7 @@ export default function UsersPage() {
               ) : (
                 <>
                   Add User
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                 </>
               )
             }

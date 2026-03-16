@@ -19,7 +19,6 @@ import {
   TableCell,
 } from "@/components/ui/Table";
 import { Loader } from "@/components/ui/Loader";
-import { Alert } from "@/components/ui/Alert";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { insuranceArAnalysisApi, type ArAnalysisSessionListItemDto, type ArAnalysisSessionStatus } from "@/lib/services/insuranceArAnalysis";
 import { usePaginatedList } from "@/lib/hooks";
@@ -129,7 +128,10 @@ export default function InsuranceArAnalysisListPage() {
   if (permLoading) {
     return (
       <PageShell title="Insurance AR Analysis">
-        <div className="h-72 animate-shimmer-bg rounded-xl" />
+        <div className="space-y-4">
+          <div className="h-12 w-full animate-shimmer-bg rounded-lg" />
+          <div className="h-72 animate-shimmer-bg rounded-xl" />
+        </div>
       </PageShell>
     );
   }
@@ -141,111 +143,110 @@ export default function InsuranceArAnalysisListPage() {
     <PageShell
       breadcrumbs={[{ label: "RCM Intelligence", href: "/rcm" }, { label: "Insurance AR Analysis" }]}
       title="Insurance AR Analysis"
-      description={undefined}
+      description="View and manage AR analysis sessions."
+      className="flex min-h-0 flex-1 flex-col overflow-hidden"
     >
-      <div className="animate-fade-in-up space-y-6">
-        {/* Toolbar */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-1 flex-wrap items-center">
-            <select
-              id="status"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as ArAnalysisSessionStatus | "")}
-              className="h-10 rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-            >
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value || "_all"} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-            
-              <select
-                id="uploaded-by"
-                value={uploadedBy}
-                onChange={(e) => {
-                  setUploadedBy(e.target.value);
-                  setPage(1);
-                }}
-                className="h-10 border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-              >
-                <option value="">Uploaded By</option>
-                {uniqueUploadedBy.map((u) => (
-                  <option key={u} value={u}>{u}</option>
-                ))}
-              </select>
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-                <input
-                  type="text"
-                  placeholder="Search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] text-[#202830] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                />
-              </div>
+      {/* Toolbar */}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0">
+          <select
+            id="status"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as ArAnalysisSessionStatus | "")}
+            className="h-10 min-w-[130px] rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value || "_all"} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <select
+            id="uploaded-by"
+            value={uploadedBy}
+            onChange={(e) => {
+              setUploadedBy(e.target.value);
+              setPage(1);
+            }}
+            className="h-10 min-w-[120px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="">Uploaded By</option>
+            {uniqueUploadedBy.map((u) => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 w-full min-w-0 rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] text-[#202830] placeholder:text-[#94A3B8] focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+            />
           </div>
-          {canCreate && (
-            <div className="flex shrink-0 items-center gap-2">
-              <Button onClick={handleDownloadTemplate} disabled={downloading} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
-                {downloading ? "Downloading…" : "Download AR Intake Template"}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button onClick={handleUploadData} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
-                Upload Data
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
         </div>
-
-        {error && (
-          <div className="mx-6 mt-4">
-            <Alert variant="error">{error}</Alert>
+        {canCreate && (
+          <div className="flex shrink-0 items-center gap-2">
+            <Button onClick={handleDownloadTemplate} disabled={downloading} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
+              {downloading ? "Downloading…" : "Download AR Intake Template"}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+            <Button onClick={handleUploadData} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
+              Upload Data
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         )}
+      </div>
 
-        {data && (
-          <>
-            <div className="!mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-              <Table>
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      {data && (
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px] border border-border bg-card shadow-sm">
+            <Table className="w-[1950px] table-fixed">
                 <TableHead>
                   <TableRow className="bg-[hsl(210,100%,97%)] hover:bg-[hsl(210,100%,97%)]">
-                    <TableHeaderCell className="first:rounded-bl-[5px] !bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[300px] min-w-[300px] first:rounded-bl-[5px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Session Name
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-normal text-[14px] leading-none text-[#0066CC]">
                         Practice Name
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Status
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-normal text-[14px] leading-none text-[#0066CC]">
                         Uploaded By
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Uploaded At
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="!bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Source Type
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="border-r-0 !bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[180px] min-w-[180px] border-r-0 !bg-[hsl(210,100%,97%)] border-border">
                       <span className="font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Actions
                       </span>
@@ -271,15 +272,13 @@ export default function InsuranceArAnalysisListPage() {
                           animationFillMode: "forwards",
                         }}
                       >
-                        <TableCell>
-                          {row.sessionName}
-                        </TableCell>
-                        <TableCell>{row.practiceName ?? "—"}</TableCell>
-                        <TableCell>{row.sessionStatus}</TableCell>
-                        <TableCell>{row.uploadedBy}</TableCell>
-                        <TableCell>{formatDate(row.uploadedAt)}</TableCell>
-                        <TableCell className="border-r-0">{row.sourceType}</TableCell>
-                        <TableCell className="border-r-0 border-l-0">
+                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sessionName}</TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.practiceName ?? "—"}</TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sessionStatus}</TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.uploadedBy}</TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{formatDate(row.uploadedAt)}</TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] border-r-0 truncate whitespace-nowrap">{row.sourceType}</TableCell>
+                        <TableCell className="w-[180px] min-w-[150px] border-r-0 border-l-0">
                           {row.sessionStatus === "Completed" ? (
                             <Link
                               href={`/rcm/insurance-ar-analysis/${row.id}/report`}
@@ -307,8 +306,8 @@ export default function InsuranceArAnalysisListPage() {
                   )}
                 </TableBody>
               </Table>
-            </div>
-
+          </div>
+          <div className="shrink-0 pt-4">
             <Pagination
               pageNumber={page}
               totalPages={data.totalPages}
@@ -321,26 +320,16 @@ export default function InsuranceArAnalysisListPage() {
               pageSize={pageSize}
               onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
             />
-          </>
-        )}
-
-        {loading && !data && (
-          <div className="animate-fade-in space-y-3 py-8">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="flex h-14 items-center gap-4 rounded-lg px-4"
-                style={{ animationDelay: `${i * 60}ms` }}
-              >
-                <div className="h-4 w-32 animate-shimmer-bg rounded" />
-                <div className="h-4 w-24 animate-shimmer-bg rounded" />
-                <div className="h-4 w-28 animate-shimmer-bg rounded" />
-                <div className="ml-auto h-4 w-20 animate-shimmer-bg rounded" />
-              </div>
-            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {!data && !error && loading && (
+        <div className="space-y-4">
+          <div className="h-12 w-full animate-shimmer-bg rounded-lg" />
+          <div className="h-72 animate-shimmer-bg rounded-xl" />
+        </div>
+      )}
     </PageShell>
   );
 }

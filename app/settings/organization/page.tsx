@@ -5,12 +5,13 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { getApiUrl } from "@/lib/api";
-import { PhoneCall, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import { organizationsApi } from "@/lib/services/organizations";
 import { OrganizationIcon } from "@/lib/icons/OrganizationIcon";
+import { PhoneIcon } from "@/lib/icons/PhoneIcon";
 import type {
   OrganizationProfileDto,
   UpdateCurrentOrganizationRequest,
@@ -39,7 +40,7 @@ function getAvatarInitials(name: string): string {
 function formatId(id: string | null | undefined): string {
   if (!id || !id.trim()) return "—";
   if (id.length <= 20) return id;
-  return `${id.slice(0, 8)}…`;
+  return `${id.slice(0, 25)}…`;
 }
 
 const DATE_FORMAT_OPTIONS: { value: string; label: string }[] = [
@@ -221,12 +222,12 @@ export default function OrganizationPage() {
             </span>
           </div>
           <div className="flex flex-1 flex-col justify-center min-h-[64px]">
-            <h2 className="font-aileron text-lg font-semibold leading-tight text-[#1F2937]">
+            <h2 className="font-aileron text-lg font-bold leading-tight text-[#1F2937]">
               {profile.name}
             </h2>
             {(profile.phoneNumber != null && profile.phoneNumber !== "") && (
               <p className="mt-1.5 flex items-center gap-1.5 text-sm font-normal text-[#6B7280]">
-                <PhoneCall className="h-4 w-4 shrink-0" aria-hidden />
+                <PhoneIcon className="h-4 w-4 shrink-0 text-[#64748B]" />
                 {profile.phoneNumber}
               </p>
             )}
@@ -244,60 +245,58 @@ export default function OrganizationPage() {
         </div>
         <div className="grid gap-x-10 gap-y-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-[#6B7280]">
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
               Organization Name
             </dt>
-            <dd className="mt-1 text-sm font-medium text-[#1F2937]">{profile.name}</dd>
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">{profile.name}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-[#6B7280]">
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
               Primary Administrator
             </dt>
-            <dd className="mt-1 text-sm font-medium text-[#1F2937]" title={profile.primaryAdministratorUserId ?? undefined}>
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black" title={profile.primaryAdministratorUserId ?? undefined}>
               {formatId(profile.primaryAdministratorUserId)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-[#6B7280]">
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
               Default Time Zone
             </dt>
-            <dd className="mt-1 text-sm text-[#1F2937]">
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
               {profile.defaultTimeZone ?? "Not set"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-[#6B7280]">
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
               System Date Format
             </dt>
-            <dd className="mt-1 text-sm text-[#1F2937]">
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
               {profile.systemDateFormat
                 ? `${profile.systemDateFormat} → ${formatDateExample(profile.systemDateFormat)}`
                 : "Not set"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-[#6B7280]">
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
               System Time Format
             </dt>
-            <dd className="mt-1 text-sm text-[#1F2937]">
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
               {profile.systemTimeFormat
                 ? `${profile.systemTimeFormat} → ${formatTimeExample(profile.systemTimeFormat)}`
                 : "Not set"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-[#6B7280]">
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
               Organization Status
             </dt>
-            <dd className="mt-1">
-              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${profile.isActive ? "bg-emerald-50 text-emerald-700" : "bg-[#F3F4F6] text-[#6B7280]"}`}>
-                {profile.isActive ? "Active" : "Inactive"}
-              </span>
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
+              {profile.isActive ? "Active" : "Inactive"}
             </dd>
           </div>
         </div>
         {canUpdate && (
-          <div className="border-t border-border px-6 py-5">
+          <div className="px-6 py-5">
             <Button
               onClick={openEdit}
               className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8]"
@@ -333,19 +332,19 @@ export default function OrganizationPage() {
           )}
           <div className="space-y-5">
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
                 Organization Name
               </label>
               <input
                 type="text"
                 value={form.name ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="input-enterprise"
+                className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
                 placeholder="e.g. PrimeCare Billing Solutions"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
                 Primary Administrator
               </label>
               <input
@@ -362,7 +361,7 @@ export default function OrganizationPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
                 Default Time Zone
               </label>
               <select
@@ -373,7 +372,7 @@ export default function OrganizationPage() {
                     defaultTimeZone: e.target.value || undefined,
                   }))
                 }
-                className="input-enterprise"
+                className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
               >
                 {TIME_ZONE_OPTIONS.map((opt) => (
                   <option key={opt.value || "empty"} value={opt.value}>
@@ -387,7 +386,7 @@ export default function OrganizationPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
                 System Date Format
               </label>
               <div className="flex flex-wrap items-baseline gap-2">
@@ -399,7 +398,7 @@ export default function OrganizationPage() {
                       systemDateFormat: e.target.value || undefined,
                     }))
                   }
-                  className="input-enterprise"
+                  className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
                 >
                   <option value="">—</option>
                   {DATE_FORMAT_OPTIONS.map((opt) => (
@@ -414,7 +413,7 @@ export default function OrganizationPage() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
                 System Time Format
               </label>
               <div className="flex flex-wrap items-baseline gap-2">
@@ -426,7 +425,7 @@ export default function OrganizationPage() {
                       systemTimeFormat: e.target.value || undefined,
                     }))
                   }
-                  className="input-enterprise"
+                  className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
                 >
                   <option value="">—</option>
                   {TIME_FORMAT_OPTIONS.map((opt) => (
@@ -441,7 +440,7 @@ export default function OrganizationPage() {
               </div>
             </div>
             <div>
-              <h3 className="mb-1.5 text-sm font-semibold text-foreground">
+              <h3 className="mb-1.5 font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
                 Upload Logo
               </h3>
               <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">

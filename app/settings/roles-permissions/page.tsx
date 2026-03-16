@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { PageShell } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/Button";
-import { Modal, ModalFooter } from "@/components/ui/Modal";
+import { Modal } from "@/components/ui/Modal";
+import { DrawerFooter } from "@/components/ui/ModalFooter";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { rolesApi } from "@/lib/services/roles";
 import { permissionsApi } from "@/lib/services/permissions";
@@ -662,47 +663,59 @@ export default function RolesPermissionsPage() {
         onClose={() => setModalOpen(false)}
         title={editId ? "Edit Role" : "Create Role"}
         size="md"
-        position="top-right"
-      >
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmitRole(); }}>
-          {formError && (
-            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>
-          )}
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Role Name</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="e.g., System Administrator"
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Description</label>
-              <textarea
-                value={form.description ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                placeholder="Write description here..."
-                rows={4}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              />
-            </div>
-          </div>
-          <ModalFooter
+        position="right"
+        footer={
+          <DrawerFooter
             onCancel={() => setModalOpen(false)}
             submitLabel={
               <>
-                Save Role
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                {editId ? "Save Role" : "Save Role"}
+                {/* <ArrowRight className="ml-1 h-4 w-4" aria-hidden /> */}
               </>
             }
             onSubmit={handleSubmitRole}
             loading={submitLoading}
           />
+        }
+      >
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleSubmitRole(); }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+              e.preventDefault();
+              handleSubmitRole();
+            }
+          }}
+        >
+          {formError && (
+            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>
+          )}
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+                Role Name
+              </label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="e.g., System Administrator"
+                className="input-enterprise w-full rounded-lg border border-[#E2E8F0] bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+                Description
+              </label>
+              <textarea
+                value={form.description ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                placeholder="Write description here..."
+                rows={4}
+                className="w-full rounded-lg border border-[#E2E8F0] bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              />
+            </div>
+          </div>
         </form>
       </Modal>
 

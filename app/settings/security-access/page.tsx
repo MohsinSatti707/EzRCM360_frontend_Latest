@@ -35,9 +35,6 @@ const MFA_FREQUENCY_OPTIONS = [
 const INACTIVITY_OPTIONS = [
   { value: 15, label: "15 minutes" },
   { value: 30, label: "30 minutes (default)" },
-  { value: 60, label: "1 hour" },
-  { value: 120, label: "2 hours" },
-  { value: 240, label: "4 hours" },
 ] as const;
 
 /** Toggle switch styled as a switch control */
@@ -229,7 +226,11 @@ export default function SecurityAccessPage() {
     <PageShell
       breadcrumbs={[{ label: "Settings & Configurations", href: "/settings" }, { label: "Security Access" }]}
       title="Security Access"
-      description="Manage how users authenticate and how long sessions remain active. These controls help protect your organization while maintaining usability."
+      description={
+        <span className="font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#64748B]">
+          Manage how users authenticate and how long sessions remain active. These controls help protect your organization while maintaining usability.
+        </span>
+      }
     >
       {error && (
         <div className="mb-6">
@@ -241,33 +242,35 @@ export default function SecurityAccessPage() {
         <div className="space-y-6">
           {/* Multi-Factor Authentication (MFA) section - two-column grid */}
           <section>
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
+            <h2 className="mb-4 font-['Aileron'] text-[20px] font-bold leading-[100%] tracking-normal text-[#202830]">
               Multi-Factor Authentication (MFA)
             </h2>
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-2 items-start">
               {/* Left column: MFA for Account Administrator + MFA Frequency */}
               <div className="flex flex-col gap-6">
                 <Card className="p-6">
-                  <h3 className="text-base font-semibold text-foreground">
+                  <h3 className="font-['Aileron'] text-[18px] font-bold leading-[100%] tracking-normal text-[#202830]">
                     MFA for Account Administrator
                   </h3>
-                  <p className="mt-2 text-sm font-semibold text-primary-600">
+                  <p className="mt-2 mb-3 border-b border-[#E2E8F0] pb-3 font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#64748B]">
                     Multi-Factor Authentication is mandatory for all Account Administrators and
                     cannot be disabled.
                   </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#202830]">
                     Account Administrators have elevated permissions that affect system security,
                     user access, and configuration. MFA is always required for these roles to reduce
                     the risk of unauthorized access.
                   </p>
                 </Card>
 
-                <Card className="p-6">
-                  <h3 className="text-base font-semibold text-foreground">MFA Frequency</h3>
-                  <p className="mt-2 text-sm font-semibold text-primary-600">
+                <Card className="p-6 pb-[131px]">
+                  <h3 className="font-['Aileron'] text-[18px] font-bold leading-[100%] tracking-normal text-[#202830]">
+                    MFA Frequency
+                  </h3>
+                  <p className="mt-2 mb-3 border-b border-[#E2E8F0] pb-3 font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#64748B]">
                     Define how often users must re-confirm their identity using MFA
                   </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#202830]">
                     By default, users are required to complete MFA at least once every 24 hours. You
                     may choose to require MFA at every login for stricter security.
                   </p>
@@ -296,12 +299,14 @@ export default function SecurityAccessPage() {
 
               {/* Right column: MFA for Users */}
               <Card className="p-6">
-                <h3 className="text-base font-semibold text-foreground">MFA for Users</h3>
-                <p className="mt-2 text-sm font-semibold text-primary-600">
+                <h3 className="font-['Aileron'] text-[18px] font-bold leading-[100%] tracking-normal text-[#202830]">
+                  MFA for Users
+                </h3>
+                <p className="mt-2 mb-3 border-b border-[#E2E8F0] pb-3 font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#64748B]">
                   Control whether Multi-Factor Authentication is required for non-administrator
                   users.
                 </p>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#202830]">
                   You may enable MFA for all users or selectively enforce it for specific users
                   based on your organization&apos;s security needs. Account Administrators are
                   always protected by MFA and are not affected by this setting.
@@ -331,37 +336,47 @@ export default function SecurityAccessPage() {
                     />
                   </div>
                 </div>
-                <div className="mt-4 overflow-x-auto">
-                  <Table>
+                <div className="mt-4 max-h-64 overflow-x-auto overflow-y-auto">
+                  <Table className="border-b border-[#E2E8F0]">
                     <TableHead>
-                      <TableRow>
-                        <TableHeaderCell className="font-semibold text-primary-600">
+                      <TableRow className="border-b border-[#E2E8F0] !bg-white">
+                        <TableHeaderCell className="border-none px-0 font-['Aileron'] text-[14px] font-normal leading-[130%] tracking-normal text-[#0066CC]">
                           User(s)
                         </TableHeaderCell>
-                        <TableHeaderCell align="right" className="font-semibold text-primary-600">
+                        <TableHeaderCell
+                          align="right"
+                          className="border-none px-0 font-['Aileron'] text-[14px] font-normal leading-[130%] tracking-normal text-[#0066CC]"
+                        >
                           MFA Status
                         </TableHeaderCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {users.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={2} className="text-center text-sm text-muted-foreground">
+                        <TableRow className="border-b border-[#E2E8F0]">
+                          <TableCell
+                            colSpan={2}
+                            className="border-none px-0 text-center font-['Aileron'] text-[14px] font-normal leading-[130%] tracking-normal text-[#64748B]"
+                          >
                             No users found.
                           </TableCell>
                         </TableRow>
                       ) : (
                         users.map((u) => (
-                          <TableRow key={u.id}>
-                            <TableCell>
+                          <TableRow key={u.id} className="border-b border-[#E2E8F0]">
+                            <TableCell className="border-none px-0">
                               <div>
-                                <div className="font-medium text-primary-600">{u.userName}</div>
+                                <div className="font-['Aileron'] text-[15px] font-normal leading-[130%] tracking-normal text-[#202830]">
+                                  {u.userName}
+                                </div>
                                 {u.roleName && (
-                                  <div className="text-xs text-muted-foreground">{u.roleName}</div>
+                                  <div className="font-['Aileron'] text-[14px] font-normal leading-[130%] tracking-normal text-[#64748B]">
+                                    {u.roleName}
+                                  </div>
                                 )}
                               </div>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="border-none px-0 text-right">
                               {u.isTwoFactorEnabled ? (
                                 <div className="flex items-center justify-end gap-2">
                                   <Toggle
@@ -395,14 +410,18 @@ export default function SecurityAccessPage() {
 
           {/* Session Management section - two-column grid */}
           <section>
-            <h2 className="mb-4 text-lg font-semibold text-foreground">Session Management</h2>
+            <h2 className="mb-4 font-['Aileron'] text-[20px] font-bold leading-[100%] tracking-normal text-[#202830]">
+              Session Management
+            </h2>
             <div className="grid gap-6 lg:grid-cols-2">
               <Card className="p-6">
-                <h3 className="text-base font-semibold text-foreground">Inactivity Timeout</h3>
-                <p className="mt-2 text-sm font-semibold text-primary-600">
+                <h3 className="font-['Aileron'] text-[18px] font-bold leading-[100%] tracking-normal text-[#202830]">
+                  Inactivity Timeout
+                </h3>
+                <p className="mt-2 mb-3 border-b border-[#E2E8F0] pb-3 font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#64748B]">
                   Automatically log users out after a period of inactivity.
                 </p>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#202830]">
                   If no activity is detected for the selected time period, the user will be logged
                   out and required to sign in again. This helps prevent unauthorized access if a
                   device is left unattended.
@@ -429,16 +448,18 @@ export default function SecurityAccessPage() {
               </Card>
 
               <Card className="p-6">
-                <h3 className="text-base font-semibold text-foreground">Daily Session Reset</h3>
-                <p className="mt-2 text-sm font-semibold text-primary-600">
+                <h3 className="font-['Aileron'] text-[18px] font-bold leading-[100%] tracking-normal text-[#202830]">
+                  Daily Session Reset
+                </h3>
+                <p className="mt-2 mb-3 border-b border-[#E2E8F0] pb-3 font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#64748B]">
                   Require all users to log in again once per day.
                 </p>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#202830]">
                   All active sessions are automatically ended at midnight based on your
                   organization&apos;s time zone. Users must sign in again the next time they access
                   the system.
                 </p>
-                {canUpdate && (
+                {/* {canUpdate && (
                   <div className="mt-4 flex items-center gap-3">
                     <Toggle
                       checked={form.dailySessionResetEnabled ?? false}
@@ -454,7 +475,7 @@ export default function SecurityAccessPage() {
                       {form.dailySessionResetEnabled ? "Enabled" : "Disabled"}
                     </span>
                   </div>
-                )}
+                )} */}
               </Card>
             </div>
           </section>
