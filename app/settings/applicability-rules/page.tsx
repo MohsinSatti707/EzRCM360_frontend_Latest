@@ -71,6 +71,7 @@ const defaultForm: CreateApplicabilityRuleCommand = {
   modifier: null,
   effectiveStartDate: null,
   effectiveEndDate: null,
+  multiplierPct: null,
 };
 
 function toDateInput(value: string | null | undefined): string {
@@ -166,6 +167,7 @@ export default function ApplicabilityRulesPage() {
       modifier: row.modifier ?? null,
       effectiveStartDate: row.effectiveStartDate ?? null,
       effectiveEndDate: row.effectiveEndDate ?? null,
+      multiplierPct: row.multiplierPct ?? null,
     });
     setFormError(null);
     setModalOpen(true);
@@ -375,6 +377,9 @@ export default function ApplicabilityRulesPage() {
                     Payer category
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
+                    Multiplier
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                     Active
                   </th>
                   {(canUpdate || canDelete) && (
@@ -403,6 +408,9 @@ export default function ApplicabilityRulesPage() {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {payerCategoryLabel(row.payerCategory)}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {row.multiplierPct != null ? `${(row.multiplierPct * 100).toFixed(0)}%` : "—"}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {row.isActive ? "Yes" : "No"}
@@ -695,6 +703,25 @@ export default function ApplicabilityRulesPage() {
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">
+                Multiplier % (e.g. 1.00 = 100%, 1.50 = 150%)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.multiplierPct ?? ""}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    multiplierPct: e.target.value ? Number(e.target.value) : null,
+                  }))
+                }
+                placeholder="Leave empty for fee schedule default"
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+              />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">

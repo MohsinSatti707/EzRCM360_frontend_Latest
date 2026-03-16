@@ -20,6 +20,7 @@ export interface ApplicabilityRuleDto {
   modifier?: string | null;
   effectiveStartDate?: string | null;
   effectiveEndDate?: string | null;
+  multiplierPct?: number | null;
 }
 
 export interface CreateApplicabilityRuleCommand {
@@ -40,6 +41,7 @@ export interface CreateApplicabilityRuleCommand {
   modifier?: string | null;
   effectiveStartDate?: string | null;
   effectiveEndDate?: string | null;
+  multiplierPct?: number | null;
 }
 
 export function applicabilityRulesApi() {
