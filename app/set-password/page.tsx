@@ -75,18 +75,17 @@ function SetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-6">
-        <Card className="w-full max-w-md border border-border bg-card p-8 shadow-none">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-muted/50 via-background to-primary/10 p-6">
+        <Card className="w-full max-w-md border border-border bg-card p-8 shadow-sm">
           <div className="mb-6 flex items-center gap-3">
             <Image src="/logo.png" alt="EzRCM360" width={147} height={32} className="h-10 w-auto shrink-0" priority />
-            <span className="text-xl font-semibold tracking-tight text-foreground">EzRCM360</span>
           </div>
           <h2 className="font-aileron text-2xl font-semibold tracking-tight text-foreground">Invalid or missing link</h2>
-          <p className="mt-2 text-base text-muted-foreground">
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
             This set-password link is invalid or has expired. Please request a new invitation or contact your
             administrator.
           </p>
-          <Link href="/login" className="mt-6 inline-block">
+          <Link href="/login" className="mt-8 inline-block">
             <Button variant="primary">Go to sign in</Button>
           </Link>
         </Card>
@@ -95,14 +94,13 @@ function SetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-6">
-      <Card className="w-full max-w-md animate-fade-in-up overflow-hidden border border-border bg-card p-8 shadow-none">
-        <div className="mb-8 flex items-center gap-3">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-muted/50 via-background to-primary/10 p-6">
+      <Card className="w-full max-w-md animate-fade-in-up overflow-hidden border border-border bg-card p-8 shadow-sm">
+        <div className="mb-6 flex items-center gap-3">
           <Image src="/logo.png" alt="EzRCM360" width={147} height={32} className="h-10 w-auto shrink-0" priority />
-          <span className="text-xl font-semibold tracking-tight text-foreground">EzRCM360</span>
         </div>
         <h2 className="font-aileron text-2xl font-semibold tracking-tight text-foreground">Set Your Password</h2>
-        <p className="mt-2 text-base text-muted-foreground">
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground">
           Create a password to activate your account and sign in.
         </p>
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
@@ -174,7 +172,7 @@ export default function SetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-4">
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-muted/50 via-background to-primary/10 p-4">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       }

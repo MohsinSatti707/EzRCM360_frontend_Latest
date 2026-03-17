@@ -112,7 +112,7 @@ export default function MfaVerifyPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-muted/50 via-background to-primary/10 p-6">
-      <div className="mb-8 flex w-full max-w-md items-center justify-between">
+      <div className="mb-8 flex w-full max-w-lg items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-600 text-white font-semibold shadow-md shadow-primary-600/25">
             E
@@ -124,7 +124,7 @@ export default function MfaVerifyPage() {
         </Button>
       </div>
 
-      <Card className="w-full max-w-md overflow-hidden p-8">
+      <Card className="w-full max-w-lg overflow-hidden p-8">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Multi-Factor Authentication
         </h1>

@@ -92,27 +92,21 @@ function LoginForm() {
     }
   }
 
-  const inputClass = "flex h-[39px] w-full rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] ring-offset-background transition-colors placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-6">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-muted/50 via-background to-primary/10 p-6">
       <Card className="w-full max-w-md animate-fade-in-up overflow-hidden border border-border bg-white p-8 shadow-sm rounded-lg">
-        <div className="mb-5 flex items-center gap-3">
+        <div className="mb-6 flex items-center gap-3">
           <Image src="/logo.png" alt="EzRCM360" width={147} height={32} className="h-10 w-auto shrink-0" priority />
-          {/* <span className="text-xl font-semibold tracking-tight text-foreground">EzRCM360</span> */}
         </div>
-        <h2 className="font-aileron text-2xl font-bold tracking-tight text-[#202830]">Login to your account</h2>
-        {/* <p className="mt-2 font-aileron text-base text-muted-foreground">
-          Use your credentials to access the settings portal.
-        </p> */}
-        <form onSubmit={handleSubmit} className="my-4 space-y-4">
+        <h2 className="font-aileron text-2xl font-bold tracking-tight text-foreground">Login to your account</h2>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           {error && (
             <div className="rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700 ring-1 ring-red-200/50 animate-fade-in">
               {error}
             </div>
           )}
           <div>
-            <label htmlFor="email" className="font-aileron font-semibold text-[14px] leading-none text-[#2A2C33]">
+            <label htmlFor="email" className="block text-sm font-semibold text-foreground">
               Email <span className="text-red-500">*</span>
             </label>
             <input
@@ -123,14 +117,14 @@ function LoginForm() {
               required
               autoComplete="email"
               placeholder="you@company.com"
-              className={`${inputClass} mt-1.5`}
+              className="input-enterprise mt-2"
             />
           </div>
           <div>
-            <label htmlFor="password" className="font-aileron font-semibold text-[14px] leading-none text-[#2A2C33]">
+            <label htmlFor="password" className="block text-sm font-semibold text-foreground">
               Password <span className="text-red-500">*</span>
             </label>
-            <div className="relative mt-1.5">
+            <div className="relative mt-2">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -139,27 +133,26 @@ function LoginForm() {
                 required
                 autoComplete="current-password"
                 placeholder="Enter your password"
-                className={`${inputClass} pr-10`}
+                className="input-enterprise w-full pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#64748B] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <div className="flex justify-between items-center mt-4 mb-1">
-
-              <div className="flex gap-2 items-center justify-center">
+            <div className="flex justify-between items-center mt-4">
+              <div className="flex gap-2 items-center">
                 <input
                   type="checkbox"
-                  className="h-5 w-5 border-red-500 rounded cursor-pointer"
+                  className="h-4 w-4 rounded border-border cursor-pointer accent-primary-600"
                 />
-                <label className="text-[#202830]">Remember me?</label>
+                <label className="text-sm text-foreground">Remember me</label>
               </div>
-              <span className="text-[#0066CC] cursor-pointer">Forgot password</span>
+              <span className="text-sm font-medium text-primary-600 hover:text-primary-700 cursor-pointer">Forgot password</span>
             </div>
           </div>
           <Button
@@ -178,7 +171,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-muted/50 via-background to-primary/10 p-4">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     }>

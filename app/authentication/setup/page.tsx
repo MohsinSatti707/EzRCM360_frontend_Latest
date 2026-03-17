@@ -189,40 +189,40 @@ export default function MfaSetupPage() {
   if (!mounted) return null;
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-surface p-4">
-      <div className="mb-4 flex w-full max-w-md items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-muted/50 via-background to-primary/10 p-6">
+      <div className="mb-8 flex w-full max-w-lg items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-600 text-white font-semibold shadow-md shadow-primary-600/25">
             E
           </div>
-          <span className="text-xl font-semibold text-foreground">EzRCM360</span>
+          <span className="text-xl font-semibold tracking-tight text-foreground">EzRCM360</span>
         </div>
         <Button variant="secondary" onClick={handleBackToLogin}>
           Back to Login
         </Button>
       </div>
 
-      <Card className="w-full max-w-md">
-        <h1 className="text-xl font-semibold text-foreground">
+      <Card className="w-full max-w-lg overflow-hidden p-8">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Multi-Factor Authentication Setup
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground">
           {method === "email" && emailCodeSent
             ? "Enter the 6-digit code sent to your email."
             : "Set up MFA using an authenticator app or receive codes by email."}
         </p>
 
         {method === "authenticator" && !emailCodeSent && (
-          <div className="mt-6 rounded-lg bg-muted p-4">
+          <div className="mt-8 rounded-xl border border-border bg-muted/50 p-6">
             <h2 className="text-sm font-semibold text-foreground">Scan the QR Code</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               Open your authenticator app (Google Authenticator, Authy, etc.) and scan this code.
             </p>
-            <div className="mt-4 flex justify-center bg-card p-4 rounded-lg">
+            <div className="mt-5 flex justify-center rounded-lg bg-white p-5">
               {qrDataUrl ? (
-                <img src={qrDataUrl} alt="QR Code" className="h-48 w-48" />
+                <img src={qrDataUrl} alt="QR Code" className="h-44 w-44" />
               ) : (
-                <div className="flex h-48 w-48 items-center justify-center rounded bg-muted text-sm text-muted-foreground">
+                <div className="flex h-44 w-44 items-center justify-center rounded bg-muted text-sm text-muted-foreground">
                   Loading…
                 </div>
               )}
@@ -231,13 +231,13 @@ export default function MfaSetupPage() {
         )}
 
         {method === "authenticator" && !emailCodeSent && (
-          <div className="mt-4 flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Or</span>
+          <div className="mt-5 flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Prefer email?</span>
             <button
               type="button"
               onClick={handleSendEmailCode}
               disabled={loading}
-              className="text-sm font-medium text-primary-600 hover:text-primary-700 underline"
+              className="text-sm font-medium text-primary-600 hover:text-primary-700 disabled:opacity-50"
             >
               Send code to my email instead
             </button>
@@ -245,12 +245,14 @@ export default function MfaSetupPage() {
         )}
 
         {(method === "email" && emailCodeSent) && (
-          <p className="mt-4 text-sm text-muted-foreground">
-            Check your inbox and enter the 6-digit code below. The code expires in 10 minutes.
-          </p>
+          <div className="mt-8 rounded-xl border border-border bg-muted/50 p-6">
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Check your inbox and enter the 6-digit code below. The code expires in 10 minutes.
+            </p>
+          </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
             <label htmlFor="code" className="block text-sm font-medium text-foreground">
               Verification Code
@@ -263,12 +265,12 @@ export default function MfaSetupPage() {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="000000"
-              className="mt-1 block w-full rounded-lg border border-input px-3 py-2 text-center text-lg tracking-[0.5em] shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+              className="input-enterprise mt-2 text-center text-lg tracking-[0.5em]"
               autoComplete="one-time-code"
             />
           </div>
-          <Button type="submit" disabled={loading || code.length !== 6}>
-            {loading ? "Setting up…" : "Complete setup"}
+          <Button type="submit" className="w-full" disabled={loading || code.length !== 6}>
+            {loading ? "Setting up…" : "Complete Setup"}
           </Button>
         </form>
       </Card>
