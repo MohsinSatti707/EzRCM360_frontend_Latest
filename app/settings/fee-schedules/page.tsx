@@ -493,22 +493,16 @@ export default function FeeSchedulesPage() {
         {!editId && wizardStep === 1 && (
           <div>
             <p className="mb-4 text-sm text-muted-foreground">Select the fee schedule category to configure.</p>
-            <div className="grid grid-cols-2 gap-3">
-              {lookups?.categories?.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, category: c.value }))}
-                  className={`rounded-lg border-2 p-4 text-left transition-colors ${
-                    form.category === c.value ? "border-[#0066CC] bg-blue-50" : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="text-sm font-medium">{c.name}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {CATEGORY_DESCRIPTIONS[c.name] ?? ""}
-                  </div>
-                </button>
-              ))}
+            <div>
+              <select
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: Number(e.target.value) }))}
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+              >
+                {lookups?.categories?.map((c) => (
+                  <option key={c.value} value={c.value}>{c.name} — {CATEGORY_DESCRIPTIONS[c.name] ?? ""}</option>
+                ))}
+              </select>
             </div>
             <div className="mt-6 flex justify-end">
               <Button onClick={() => setWizardStep(2)} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
