@@ -48,9 +48,18 @@ function resolveCategoryStr(category: number | string): string {
     "1": "UCR", "UCR": "UCR",
     "2": "MVA", "MVA": "MVA",
     "3": "WC", "WC": "WC",
+    "4": "Custom", "Custom": "Custom",
   };
   return catMap[catStr] ?? "Medicare";
 }
+
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  Medicare: "CMS Medicare Physician Fee Schedule",
+  UCR: "Usual, Customary & Reasonable (percentile-based)",
+  MVA: "Motor Vehicle Accident fee schedule",
+  WC: "Workers' Compensation fee schedule",
+  Custom: "Custom fee schedule (v1.1)",
+};
 
 export default function FeeSchedulesPage() {
   const [data, setData] = useState<PaginatedList<FeeScheduleDto> | null>(null);
@@ -75,6 +84,8 @@ export default function FeeSchedulesPage() {
 
   // Fee schedule options for adoptFeeScheduleId dropdown
   const [fsOptions, setFsOptions] = useState<FeeScheduleDto[]>([]);
+  // Zip mapping type: 0 = ZipExact, 1 = ZipRange (local UI state only)
+  const [zipMappingType, setZipMappingType] = useState<number>(0);
 
   // Lines modal state
   const [linesSchedule, setLinesSchedule] = useState<FeeScheduleDto | null>(null);
@@ -483,7 +494,7 @@ export default function FeeSchedulesPage() {
           <div>
             <p className="mb-4 text-sm text-muted-foreground">Select the fee schedule category to configure.</p>
             <div className="grid grid-cols-2 gap-3">
-              {lookups?.categories?.filter((c) => c.name !== "Custom").map((c) => (
+              {lookups?.categories?.map((c) => (
                 <button
                   key={c.value}
                   type="button"
@@ -494,10 +505,7 @@ export default function FeeSchedulesPage() {
                 >
                   <div className="text-sm font-medium">{c.name}</div>
                   <div className="mt-1 text-xs text-muted-foreground">
-                    {c.name === "Medicare" && "CMS Medicare Physician Fee Schedule"}
-                    {c.name === "UCR" && "Usual, Customary & Reasonable (percentile-based)"}
-                    {c.name === "MVA" && "Motor Vehicle Accident fee schedule"}
-                    {c.name === "WC" && "Workers' Compensation fee schedule"}
+                    {CATEGORY_DESCRIPTIONS[c.name] ?? ""}
                   </div>
                 </button>
               ))}
@@ -536,7 +544,19 @@ export default function FeeSchedulesPage() {
               )}
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">State</label>
-                <select value={form.state ?? ""} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select
+                  value={form.state ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setForm((f) => ({
+                      ...f,
+                      state: val,
+                      // Auto-select State geo type when a state is chosen
+                      ...(val ? { geoType: 0 } : {}),
+                    }));
+                  }}
+                  className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                >
                   <option value="">—</option>
                   {lookups?.states?.map((s) => (
                     <option key={s} value={s}>{s}</option>
@@ -545,20 +565,77 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Geo type</label>
-                <select value={form.geoType} onChange={(e) => setForm((f) => ({ ...f, geoType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select
+                  value={form.geoType}
+                  onChange={(e) => {
+                    const gt = Number(e.target.value);
+                    setForm((f) => ({ ...f, geoType: gt, geoCode: "", geoName: "" }));
+                    setZipMappingType(0);
+                  }}
+                  disabled={!!form.state}
+                  className="w-full rounded-lg border border-input px-3 py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                >
                   {lookups?.geoTypes?.map((g) => (
                     <option key={g.value} value={g.value}>{g.name}</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Geo code</label>
-                <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 01, 99" />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Geo name</label>
-                <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
-              </div>
+              {/* State geo type (0): Geo code + Geo name */}
+              {form.geoType === 0 && (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Geo code</label>
+                    <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 01, 99" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Geo name</label>
+                    <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+                  </div>
+                </>
+              )}
+              {/* Area geo type (1): Region field */}
+              {form.geoType === 1 && (
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-sm font-medium text-foreground">Region</label>
+                  <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. Northeast, Pacific" />
+                </div>
+              )}
+              {/* Zip geo type (2): Mapping type + conditional inputs */}
+              {form.geoType === 2 && (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Mapping type</label>
+                    <select
+                      value={zipMappingType}
+                      onChange={(e) => {
+                        setZipMappingType(Number(e.target.value));
+                        setForm((f) => ({ ...f, geoCode: "", geoName: "" }));
+                      }}
+                      className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                    >
+                      <option value={0}>ZipExact</option>
+                      <option value={1}>ZipRange</option>
+                    </select>
+                  </div>
+                  {zipMappingType === 0 ? (
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-foreground">Zip code</label>
+                      <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 10001" />
+                    </div>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-foreground">Zip from</label>
+                        <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 10001" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-foreground">Zip to</label>
+                        <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 10099" />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Billing type</label>
                 <select value={form.billingType} onChange={(e) => setForm((f) => ({ ...f, billingType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">

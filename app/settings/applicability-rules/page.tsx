@@ -24,6 +24,21 @@ import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { Checkbox } from "@/components/ui/Checkbox";
 
+const PAYER_ENTITY_TYPES = [
+  { value: "Insurance", name: "Insurance" },
+  { value: "Attorney", name: "Attorney" },
+  { value: "Employer", name: "Employer" },
+  { value: "Other", name: "Other" },
+];
+const CLAIM_CATEGORIES = [
+  { value: "Medicare", name: "Medicare" },
+  { value: "Medicaid", name: "Medicaid" },
+  { value: "Tricare", name: "Tricare" },
+  { value: "Railroad Medicare", name: "Railroad Medicare" },
+  { value: "Commercial", name: "Commercial" },
+  { value: "MVA", name: "MVA" },
+  { value: "WC", name: "Workers' Compensation" },
+];
 const PROVIDER_PARTICIPATION = [
   { value: 0, name: "In Network" },
   { value: 1, name: "Out of Network" },
@@ -515,14 +530,18 @@ export default function ApplicabilityRulesPage() {
               <label className="mb-1 block text-sm font-medium text-foreground">
                 Payer entity type *
               </label>
-              <input
-                type="text"
+              <select
                 value={form.payerEntityType}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, payerEntityType: e.target.value }))
                 }
                 className="w-full rounded-lg border border-input px-3 py-2 text-sm"
-              />
+              >
+                <option value="">— Select —</option>
+                {PAYER_ENTITY_TYPES.map((o) => (
+                  <option key={o.value} value={o.value}>{o.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
@@ -541,14 +560,18 @@ export default function ApplicabilityRulesPage() {
               <label className="mb-1 block text-sm font-medium text-foreground">
                 Claim category *
               </label>
-              <input
-                type="text"
+              <select
                 value={form.claimCategory}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, claimCategory: e.target.value }))
                 }
                 className="w-full rounded-lg border border-input px-3 py-2 text-sm"
-              />
+              >
+                <option value="">— Select —</option>
+                {CLAIM_CATEGORIES.map((o) => (
+                  <option key={o.value} value={o.value}>{o.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
