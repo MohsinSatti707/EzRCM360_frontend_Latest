@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "./Button";
 
 export interface ModalFooterProps {
@@ -8,6 +9,7 @@ export interface ModalFooterProps {
   submitLabel?: React.ReactNode;
   onSubmit: () => void;
   loading?: boolean;
+  className?: string;
 }
 
 export function ModalFooter({
@@ -39,9 +41,10 @@ export function DrawerFooter({
   submitLabel = "Save",
   onSubmit,
   loading,
+  className,
 }: ModalFooterProps) {
   return (
-    <div className="flex flex-1 justify-start gap-3 border-t border-[#E2E8F0] px-6 py-4">
+    <div className={cn("flex flex-1 justify-start gap-3", className ?? "px-6 py-4")}>
       <Button
         type="submit"
         onClick={onSubmit}

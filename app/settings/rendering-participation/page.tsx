@@ -6,6 +6,14 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+} from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -28,6 +36,11 @@ import type { ValueLabelDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
 import { useDebounce } from "@/lib/hooks";
 import { toDateInput, resolveEnum, ENUMS } from "@/lib/utils";
+
+const ACTIVE_OPTIONS = [
+  { value: 0, name: "Inactive" },
+  { value: 1, name: "Active" },
+];
 
 const defaultForm: CreateRenderingProviderPlanParticipationRequest = {
   entityProviderId: "",
@@ -63,6 +76,7 @@ export default function RenderingParticipationPage() {
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
 
   const api = renderingParticipationsApi();
   const toast = useToast();
@@ -226,6 +240,29 @@ export default function RenderingParticipationPage() {
     }
   };
 
+  const handleStatusChange = async (row: RenderingProviderPlanParticipationListItemDto, isActiveValue: number) => {
+    if (!canUpdate) return;
+    setStatusUpdatingId(row.id);
+    try {
+      const detail = await api.getById(row.id);
+      await api.update(row.id, {
+        entityProviderId: detail.entityProviderId,
+        planId: detail.planId,
+        participationStatus: detail.participationStatus,
+        effectiveFrom: detail.effectiveFrom ?? null,
+        effectiveTo: detail.effectiveTo ?? null,
+        source: detail.source,
+        isActive: isActiveValue === 1,
+      });
+      await loadList();
+      toast.success("Status updated.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  };
+
   const statusLabel = (n: number) => participationStatuses.find((o) => Number(o.value) === n)?.label ?? String(n);
   const entityNameById = useMemo(() => {
     const m = new Map<string, string>();
@@ -270,13 +307,13 @@ export default function RenderingParticipationPage() {
   }
 
   return (
-    <div>
+    <div className="flex min-h-0 flex-1 flex-col">
       <PageHeader title="Rendering Provider-Plan Participation" description="Network participation status." />
       {/* Toolbar: search + add button */}
       <div className="mb-6 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-1 items-center">
           <Select value="" onValueChange={() => {}}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-[5px] font-aileron text-[14px]">
+            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
@@ -285,14 +322,14 @@ export default function RenderingParticipationPage() {
               <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
-          <div className="relative">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-[300px] rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
         </div>
@@ -326,99 +363,147 @@ export default function RenderingParticipationPage() {
 
       {error && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
       {data && (
-        <>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
-              <thead>
-                <tr>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
+            <Table className="min-w-[1600px] table-fixed">
+              <TableHead>
+                <TableRow>
                   {canDelete && (
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground" style={{ width: 50 }}>
+                    <TableHeaderCell className="!min-w-[50px] w-[50px]">
                       <Checkbox
                         checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
                         onCheckedChange={toggleSelectAll}
                       />
-                    </th>
+                    </TableHeaderCell>
                   )}
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Entity</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Provider</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Payer</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Plan</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Effective from</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Effective to</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Active</th>
+                  <TableHeaderCell className="w-[180px] min-w-[180px]">Entity</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Provider</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px]">Payer</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Plan</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Status</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Effective from</TableHeaderCell>
+                  <TableHeaderCell className="w-[120px] min-w-[120px]">Effective to</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px]">Active</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Actions</th>
+                    <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
                   )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {data.items.map((row) => (
-                  <tr key={row.id} className="hover:bg-muted">
+                  <TableRow key={row.id}>
                     {canDelete && (
-                      <td className="px-4 py-3 text-sm">
+                      <TableCell>
                         <Checkbox
                           checked={selectedIds.has(row.id)}
                           onCheckedChange={() => toggleSelect(row.id)}
                         />
-                      </td>
+                      </TableCell>
                     )}
-                    <td className="px-4 py-3 text-sm">
-                      {entityNameById.get(providerEntityIdById.get(row.entityProviderId) ?? "") ?? "—"}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {row.providerName ??
-                        providerNameById.get(row.entityProviderId) ??
-                        row.entityProviderId}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {payerNameById.get(planPayerIdById.get(row.planId) ?? "") ?? "—"}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {row.planName ?? planNameById.get(row.planId) ?? row.planId}
-                    </td>
-                    <td className="px-4 py-3 text-sm">{statusLabel(row.participationStatus)}</td>
-                    <td className="px-4 py-3 text-sm">{row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"}</td>
-                    <td className="px-4 py-3 text-sm">{row.effectiveTo ? toDateInput(row.effectiveTo) : "—"}</td>
-                    <td className="px-4 py-3 text-sm">{row.isActive ? "Yes" : "No"}</td>
+                    <TableCell className="w-[180px] min-w-[180px]">
+                      <div className="max-w-[140px] truncate">
+                        {entityNameById.get(providerEntityIdById.get(row.entityProviderId) ?? "") ?? "—"}
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[200px] min-w-[200px]">
+                      <div className="max-w-xs truncate">
+                        {row.providerName ??
+                          providerNameById.get(row.entityProviderId) ??
+                          row.entityProviderId}
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[160px] min-w-[160px]">
+                      <div className="max-w-[140px] truncate">
+                        {payerNameById.get(planPayerIdById.get(row.planId) ?? "") ?? "—"}
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[200px] min-w-[200px]">
+                      <div className="max-w-xs truncate">
+                        {row.planName ?? planNameById.get(row.planId) ?? row.planId}
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[140px] min-w-[140px]">
+                      <div className="max-w-[120px] truncate">{statusLabel(row.participationStatus)}</div>
+                    </TableCell>
+                    <TableCell className="w-[120px] min-w-[120px]">
+                      <div className="max-w-[100px] truncate">{row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"}</div>
+                    </TableCell>
+                    <TableCell className="w-[120px] min-w-[120px]">
+                      <div className="max-w-[100px] truncate">{row.effectiveTo ? toDateInput(row.effectiveTo) : "—"}</div>
+                    </TableCell>
+                    <TableCell className="w-[160px] min-w-[160px]">
+                      <select
+                        value={row.isActive ? 1 : 0}
+                        onChange={(e) => handleStatusChange(row, Number(e.target.value))}
+                        disabled={!canUpdate || statusUpdatingId === row.id}
+                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                      >
+                        {ACTIVE_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.name}
+                          </option>
+                        ))}
+                      </select>
+                    </TableCell>
                     {(canUpdate || canDelete) && (
-                      <td className="px-4 py-3 text-sm">
+                      <TableCell className="!w-[120px] min-w-[120px]">
                         <TableActionsCell
                           canEdit={canUpdate}
                           canDelete={canDelete}
                           onEdit={() => openEdit(row)}
                           onDelete={() => setDeleteId(row.id)}
                         />
-                      </td>
+                      </TableCell>
                     )}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-          <Pagination
-            pageNumber={data.pageNumber}
-            totalPages={data.totalPages}
-            totalCount={data.totalCount}
-            hasPreviousPage={data.hasPreviousPage}
-            hasNextPage={data.hasNextPage}
-            onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-            onNext={() => setPage((p) => p + 1)}
-            onPageChange={setPage}
-            pageSize={pageSize}
-            onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
-          />
-        </>
+          <div className="shrink-0 pt-4">
+            <Pagination
+              pageNumber={data.pageNumber}
+              totalPages={data.totalPages}
+              totalCount={data.totalCount}
+              hasPreviousPage={data.hasPreviousPage}
+              hasNextPage={data.hasNextPage}
+              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => p + 1)}
+              onPageChange={setPage}
+              pageSize={pageSize}
+              onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+            />
+          </div>
+        </div>
       )}
       {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit participation" : "Add participation"} size="lg">
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editId ? "Edit participation" : "Add participation"}
+        size="lg"
+        position="right"
+        footer={
+          <ModalFooter
+            onCancel={() => setModalOpen(false)}
+            submitLabel={
+              <>
+                {editId ? "Update" : "Add Rendering Participation"}
+                <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
+              </>
+            }
+            onSubmit={handleSubmit}
+            loading={submitLoading}
+          />
+        }
+      >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Entity *</label>
-              <select value={selectedEntityId} onChange={(e) => { setSelectedEntityId(e.target.value); setForm((f) => ({ ...f, entityProviderId: "" })); }} className="w-full rounded-lg border border-input px-3 py-2 text-sm" required>
+              <label className="mb-1 block text-sm font-medium text-foreground">Entity <span className="text-red-500">*</span></label>
+              <select value={selectedEntityId} onChange={(e) => { setSelectedEntityId(e.target.value); setForm((f) => ({ ...f, entityProviderId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
                 <option value="">Select entity</option>
                 {entities.map((e) => (
                   <option key={e.id} value={e.id}>{e.displayName}</option>
@@ -426,8 +511,8 @@ export default function RenderingParticipationPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Provider *</label>
-              <select value={form.entityProviderId} onChange={(e) => setForm((f) => ({ ...f, entityProviderId: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" required disabled={!selectedEntityId}>
+              <label className="mb-1 block text-sm font-medium text-foreground">Provider <span className="text-red-500">*</span></label>
+              <select value={form.entityProviderId} onChange={(e) => setForm((f) => ({ ...f, entityProviderId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required disabled={!selectedEntityId}>
                 <option value="">{selectedEntityId ? "Select provider" : "Select entity first"}</option>
                 {filteredProviders.map((p) => (
                   <option key={p.id} value={p.id}>{p.displayName}</option>
@@ -435,8 +520,8 @@ export default function RenderingParticipationPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Payer *</label>
-              <select value={selectedPayerId} onChange={(e) => { setSelectedPayerId(e.target.value); setForm((f) => ({ ...f, planId: "" })); }} className="w-full rounded-lg border border-input px-3 py-2 text-sm" required>
+              <label className="mb-1 block text-sm font-medium text-foreground">Payer <span className="text-red-500">*</span></label>
+              <select value={selectedPayerId} onChange={(e) => { setSelectedPayerId(e.target.value); setForm((f) => ({ ...f, planId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
                 <option value="">Select payer</option>
                 {payers.map((p) => (
                   <option key={p.id} value={p.id}>{p.payerName}</option>
@@ -444,8 +529,8 @@ export default function RenderingParticipationPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Plan *</label>
-              <select value={form.planId} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" required disabled={!selectedPayerId}>
+              <label className="mb-1 block text-sm font-medium text-foreground">Plan <span className="text-red-500">*</span></label>
+              <select value={form.planId} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required disabled={!selectedPayerId}>
                 <option value="">{selectedPayerId ? "Select plan" : "Select payer first"}</option>
                 {filteredPlans.map((p) => (
                   <option key={p.id} value={p.id}>{p.displayName}</option>
@@ -454,7 +539,7 @@ export default function RenderingParticipationPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Participation status</label>
-              <select value={form.participationStatus} onChange={(e) => setForm((f) => ({ ...f, participationStatus: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+              <select value={form.participationStatus} onChange={(e) => setForm((f) => ({ ...f, participationStatus: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                 {participationStatuses.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
@@ -462,7 +547,7 @@ export default function RenderingParticipationPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Source</label>
-              <select value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+              <select value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                 {participationSources.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
@@ -470,20 +555,19 @@ export default function RenderingParticipationPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Effective from</label>
-              <input type="date" value={toDateInput(form.effectiveFrom ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveFrom: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+              <input type="date" value={toDateInput(form.effectiveFrom ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveFrom: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Effective to</label>
-              <input type="date" value={toDateInput(form.effectiveTo ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveTo: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+              <input type="date" value={toDateInput(form.effectiveTo ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveTo: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-input" />
+                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="h-5 w-5 rounded border-input" />
                 <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>
-          <ModalFooter onCancel={() => setModalOpen(false)} submitLabel={editId ? "Update" : "Create"} onSubmit={handleSubmit} loading={submitLoading} />
         </form>
       </Modal>
 

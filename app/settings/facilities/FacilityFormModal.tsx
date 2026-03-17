@@ -45,9 +45,10 @@ export function FacilityFormModal({
       footer={
         <DrawerFooter
           onCancel={onClose}
-          submitLabel={editId ? "Update" : "Create"}
+          submitLabel={editId ? "Update" : "Add Facility"}
           onSubmit={onSubmit}
           loading={loading}
+          className="p-0"
         />
       }
     >
@@ -57,7 +58,7 @@ export function FacilityFormModal({
             <Alert variant="error">{error}</Alert>
           </div>
         )}
-        <div className="space-y-4">
+        <div className="space-y-2">
           <Input
             label="Name"
             required
@@ -87,14 +88,15 @@ export function FacilityFormModal({
             value={form.posCode ?? ""}
             onChange={(e) => onFormChange({ ...form, posCode: e.target.value })}
           />
-          <label className="flex cursor-pointer items-center gap-2">
+          <label className="inline-flex w-fit cursor-pointer items-center gap-2">
             <input
               type="checkbox"
+              id="facility-active-checkbox"
               checked={form.isActive ?? true}
               onChange={(e) => onFormChange({ ...form, isActive: e.target.checked })}
-              className="rounded border-input"
+              className="h-5 w-5 rounded border-input mt-2"
             />
-            <span className="text-sm text-foreground">Active</span>
+            <span className="text-sm text-foreground mt-2">Active</span>
           </label>
         </div>
       </form>
