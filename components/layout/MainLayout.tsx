@@ -14,8 +14,8 @@ function MainContent({ children }: { children: React.ReactNode }) {
       className={`flex h-screen flex-col overflow-hidden transition-[padding] duration-200 ease-in-out ${collapsed ? "pl-12" : "pl-64"}`}
     >
       <Header />
-      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-4 px-6 pb-2">
-        <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col">{children}</div>
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-4 pb-2">
+        <div className="mx-auto flex w-full flex-1 flex-col">{children}</div>
       </main>
       <AppFooter />
     </div>

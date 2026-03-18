@@ -58,7 +58,7 @@ export function PageShell({
       )}
 
       {/* Title row - P2 design: font-aileron font-bold text-[24px] text-[#202830] */}
-      <div className={titleWrapperClassName ? `flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${titleWrapperClassName}` : "mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"}>
+      <div className={titleWrapperClassName ? `flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${titleWrapperClassName}` : "mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"}>
         <div>
           <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">
             {title}

@@ -6,14 +6,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import {
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableHeaderCell,
-  TableCell,
-} from "@/components/ui/Table";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
@@ -56,18 +48,9 @@ function resolveCategoryStr(category: number | string): string {
     "1": "UCR", "UCR": "UCR",
     "2": "MVA", "MVA": "MVA",
     "3": "WC", "WC": "WC",
-    "4": "Custom", "Custom": "Custom",
   };
   return catMap[catStr] ?? "Medicare";
 }
-
-const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  Medicare: "CMS Medicare Physician Fee Schedule",
-  UCR: "Usual, Customary & Reasonable (percentile-based)",
-  MVA: "Motor Vehicle Accident fee schedule",
-  WC: "Workers' Compensation fee schedule",
-  Custom: "Custom fee schedule (v1.1)",
-};
 
 export default function FeeSchedulesPage() {
   const [data, setData] = useState<PaginatedList<FeeScheduleDto> | null>(null);
@@ -87,14 +70,11 @@ export default function FeeSchedulesPage() {
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
-  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [wizardStep, setWizardStep] = useState(1);
   const [createdScheduleId, setCreatedScheduleId] = useState<string | null>(null);
 
   // Fee schedule options for adoptFeeScheduleId dropdown
   const [fsOptions, setFsOptions] = useState<FeeScheduleDto[]>([]);
-  // Zip mapping type: 0 = ZipExact, 1 = ZipRange (local UI state only)
-  const [zipMappingType, setZipMappingType] = useState<number>(0);
 
   // Lines modal state
   const [linesSchedule, setLinesSchedule] = useState<FeeScheduleDto | null>(null);
@@ -261,39 +241,6 @@ export default function FeeSchedulesPage() {
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (row: FeeScheduleDto, statusValue: number) => {
-    if (!canUpdate) return;
-    setStatusUpdatingId(row.id);
-    try {
-      const detail = await api.getById(row.id);
-      const payload: CreateFeeScheduleCommand = {
-        scheduleCode: detail.scheduleCode ?? "",
-        category: detail.category,
-        state: detail.state ?? "",
-        geoType: detail.geoType,
-        geoCode: detail.geoCode ?? "",
-        geoName: detail.geoName ?? "",
-        billingType: detail.billingType,
-        year: detail.year,
-        quarter: detail.quarter,
-        calculationModel: detail.calculationModel,
-        adoptFeeScheduleId: detail.adoptFeeScheduleId ?? null,
-        multiplierPct: detail.multiplierPct,
-        fallbackCategory: detail.fallbackCategory ?? null,
-        status: statusValue,
-        source: detail.source ?? "",
-        notes: detail.notes ?? "",
-      };
-      await api.update(row.id, payload);
-      await loadList();
-      toast.success("Status updated.");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
-    } finally {
-      setStatusUpdatingId(null);
     }
   };
 
@@ -474,14 +421,14 @@ export default function FeeSchedulesPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div>
       <PageHeader title="Fee Schedules" description="Centralized valuation datasets." />
 
       {/* Toolbar */}
       <div className="mb-6 flex items-center justify-between gap-3">
-        <div className="flex flex-1 items-center">
+        <div className="flex items-center gap-3">
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-[5px] font-aileron text-[14px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
@@ -490,14 +437,14 @@ export default function FeeSchedulesPage() {
               <SelectItem value="1">Inactive</SelectItem>
             </SelectContent>
           </Select>
-          <div className="relative flex-1">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-[300px] rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
         </div>
@@ -530,68 +477,47 @@ export default function FeeSchedulesPage() {
 
       {error && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
       {data && (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-            <Table className="min-w-[900px] table-fixed">
-              <TableHead>
-                <TableRow>
+        <>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-border">
+              <thead>
+                <tr>
                   {canDelete && (
-                    <TableHeaderCell className="!min-w-[50px] w-[50px]">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground" style={{ width: 50 }}>
                       <Checkbox
                         checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
                         onCheckedChange={toggleSelectAll}
                       />
-                    </TableHeaderCell>
+                    </th>
                   )}
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Code</TableHeaderCell>
-                  <TableHeaderCell className="w-[140px] min-w-[140px]">Category</TableHeaderCell>
-                  <TableHeaderCell className="w-[100px] min-w-[100px]">State</TableHeaderCell>
-                  <TableHeaderCell className="w-[100px] min-w-[100px]">Year / Q</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Status</TableHeaderCell>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Code</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Category</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">State</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Year / Q</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Status</th>
                   {(canUpdate || canDelete) && (
-                    <TableHeaderCell className="!w-[160px] min-w-[160px]">Actions</TableHeaderCell>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Actions</th>
                   )}
-                </TableRow>
-              </TableHead>
-              <TableBody>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
                 {filteredItems.map((row) => (
-                  <TableRow key={row.id}>
+                  <tr key={row.id} className="hover:bg-muted">
                     {canDelete && (
-                      <TableCell>
+                      <td className="px-4 py-3 text-sm">
                         <Checkbox
                           checked={selectedIds.has(row.id)}
                           onCheckedChange={() => toggleSelect(row.id)}
                         />
-                      </TableCell>
+                      </td>
                     )}
-                    <TableCell className="w-[160px] min-w-[160px]">
-                      <div className="max-w-[140px] truncate">{row.scheduleCode ?? "—"}</div>
-                    </TableCell>
-                    <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{categoryLabel(row.category)}</div>
-                    </TableCell>
-                    <TableCell className="w-[100px] min-w-[100px]">
-                      <div className="max-w-[80px] truncate">{row.state ?? "—"}</div>
-                    </TableCell>
-                    <TableCell className="w-[100px] min-w-[100px]">
-                      <div className="max-w-[80px] truncate">{row.year} / {row.quarter}</div>
-                    </TableCell>
-                    <TableCell className="w-[160px] min-w-[160px]">
-                      <select
-                        value={row.status}
-                        onChange={(e) => handleStatusChange(row, Number(e.target.value))}
-                        disabled={!canUpdate || statusUpdatingId === row.id}
-                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                      >
-                        {STATUS_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.name}
-                          </option>
-                        ))}
-                      </select>
-                    </TableCell>
+                    <td className="px-4 py-3 text-sm">{row.scheduleCode ?? "—"}</td>
+                    <td className="px-4 py-3 text-sm">{categoryLabel(row.category)}</td>
+                    <td className="px-4 py-3 text-sm">{row.state ?? "—"}</td>
+                    <td className="px-4 py-3 text-sm">{row.year} / {row.quarter}</td>
+                    <td className="px-4 py-3 text-sm">{statusLabel(row.status)}</td>
                     {(canUpdate || canDelete) && (
-                      <TableCell className="!w-[160px] min-w-[160px]">
+                      <td className="px-4 py-3 text-sm">
                         <div className="flex items-center gap-2">
                           <button onClick={() => openLines(row)} className="text-xs text-blue-600 hover:underline" title="Manage lines">
                             <FileSpreadsheet className="inline h-4 w-4 mr-0.5" />Lines
@@ -603,33 +529,31 @@ export default function FeeSchedulesPage() {
                             onDelete={() => setDeleteId(row.id)}
                           />
                         </div>
-                      </TableCell>
+                      </td>
                     )}
-                  </TableRow>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-          <div className="shrink-0 pt-4">
-            <Pagination
-              pageNumber={data.pageNumber}
-              totalPages={data.totalPages}
-              totalCount={data.totalCount}
-              hasPreviousPage={data.hasPreviousPage}
-              hasNextPage={data.hasNextPage}
-              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-              onPageChange={setPage}
-              pageSize={pageSize}
-              onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
-            />
-          </div>
-        </div>
+          <Pagination
+            pageNumber={data.pageNumber}
+            totalPages={data.totalPages}
+            totalCount={data.totalCount}
+            hasPreviousPage={data.hasPreviousPage}
+            hasNextPage={data.hasNextPage}
+            onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+            onNext={() => setPage((p) => p + 1)}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+          />
+        </>
       )}
       {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
 
       {/* 3-step wizard / edit modal */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={wizardTitle} size="lg" position="right">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={wizardTitle} size="lg">
         {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
 
         {/* Step indicator for create */}
@@ -655,16 +579,25 @@ export default function FeeSchedulesPage() {
         {!editId && wizardStep === 1 && (
           <div>
             <p className="mb-4 text-sm text-muted-foreground">Select the fee schedule category to configure.</p>
-            <div>
-              <select
-                value={form.category}
-                onChange={(e) => setForm((f) => ({ ...f, category: Number(e.target.value) }))}
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
-              >
-                {lookups?.categories?.map((c) => (
-                  <option key={c.value} value={c.value}>{c.name} — {CATEGORY_DESCRIPTIONS[c.name] ?? ""}</option>
-                ))}
-              </select>
+            <div className="grid grid-cols-2 gap-3">
+              {lookups?.categories?.filter((c) => c.name !== "Custom").map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, category: c.value }))}
+                  className={`rounded-lg border-2 p-4 text-left transition-colors ${
+                    form.category === c.value ? "border-[#0066CC] bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <div className="text-sm font-medium">{c.name}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {c.name === "Medicare" && "CMS Medicare Physician Fee Schedule"}
+                    {c.name === "UCR" && "Usual, Customary & Reasonable (percentile-based)"}
+                    {c.name === "MVA" && "Motor Vehicle Accident fee schedule"}
+                    {c.name === "WC" && "Workers' Compensation fee schedule"}
+                  </div>
+                </button>
+              ))}
             </div>
             <div className="mt-6 flex justify-end">
               <Button onClick={() => setWizardStep(2)} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
@@ -680,12 +613,12 @@ export default function FeeSchedulesPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Schedule code</label>
-                <input type="text" value={form.scheduleCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, scheduleCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                <input type="text" value={form.scheduleCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, scheduleCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
               </div>
               {editId && (
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Category</label>
-                  <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                  <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                     {lookups?.categories?.map((c) => (
                       <option key={c.value} value={c.value}>{c.name}</option>
                     ))}
@@ -695,24 +628,12 @@ export default function FeeSchedulesPage() {
               {!editId && (
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Category</label>
-                  <div className="w-full rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">{resolveCategoryStr(form.category)}</div>
+                  <div className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">{resolveCategoryStr(form.category)}</div>
                 </div>
               )}
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">State</label>
-                <select
-                  value={form.state ?? ""}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setForm((f) => ({
-                      ...f,
-                      state: val,
-                      // Auto-select State geo type when a state is chosen
-                      ...(val ? { geoType: 0 } : {}),
-                    }));
-                  }}
-                  className="w-full rounded-lg border border-input px-3 py-2 text-sm"
-                >
+                <select value={form.state ?? ""} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                   <option value="">—</option>
                   {lookups?.states?.map((s) => (
                     <option key={s} value={s}>{s}</option>
@@ -721,80 +642,23 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Geo type</label>
-                <select
-                  value={form.geoType}
-                  onChange={(e) => {
-                    const gt = Number(e.target.value);
-                    setForm((f) => ({ ...f, geoType: gt, geoCode: "", geoName: "" }));
-                    setZipMappingType(0);
-                  }}
-                  disabled={!!form.state}
-                  className="w-full rounded-lg border border-input px-3 py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-                >
+                <select value={form.geoType} onChange={(e) => setForm((f) => ({ ...f, geoType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                   {lookups?.geoTypes?.map((g) => (
                     <option key={g.value} value={g.value}>{g.name}</option>
                   ))}
                 </select>
               </div>
-              {/* State geo type (0): Geo code + Geo name */}
-              {form.geoType === 0 && (
-                <>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Geo code</label>
-                    <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 01, 99" />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Geo name</label>
-                    <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
-                  </div>
-                </>
-              )}
-              {/* Area geo type (1): Region field */}
-              {form.geoType === 1 && (
-                <div className="sm:col-span-2">
-                  <label className="mb-1 block text-sm font-medium text-foreground">Region</label>
-                  <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. Northeast, Pacific" />
-                </div>
-              )}
-              {/* Zip geo type (2): Mapping type + conditional inputs */}
-              {form.geoType === 2 && (
-                <>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Mapping type</label>
-                    <select
-                      value={zipMappingType}
-                      onChange={(e) => {
-                        setZipMappingType(Number(e.target.value));
-                        setForm((f) => ({ ...f, geoCode: "", geoName: "" }));
-                      }}
-                      className="w-full rounded-lg border border-input px-3 py-2 text-sm"
-                    >
-                      <option value={0}>ZipExact</option>
-                      <option value={1}>ZipRange</option>
-                    </select>
-                  </div>
-                  {zipMappingType === 0 ? (
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-foreground">Zip code</label>
-                      <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 10001" />
-                    </div>
-                  ) : (
-                    <>
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-foreground">Zip from</label>
-                        <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 10001" />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-foreground">Zip to</label>
-                        <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 10099" />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Geo code</label>
+                <input type="text" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. 01, 99" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Geo name</label>
+                <input type="text" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+              </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Billing type</label>
-                <select value={form.billingType} onChange={(e) => setForm((f) => ({ ...f, billingType: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                <select value={form.billingType} onChange={(e) => setForm((f) => ({ ...f, billingType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                   {lookups?.billingTypes?.map((b) => (
                     <option key={b.value} value={b.value}>{b.name}</option>
                   ))}
@@ -802,7 +666,7 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Year</label>
-                <select value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                <select value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                   {lookups?.years?.map((y) => (
                     <option key={y} value={y}>{y}</option>
                   ))}
@@ -810,11 +674,11 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Quarter</label>
-                <input type="number" min={1} max={4} value={form.quarter} onChange={(e) => setForm((f) => ({ ...f, quarter: Number(e.target.value) || 1 }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                <input type="number" min={1} max={4} value={form.quarter} onChange={(e) => setForm((f) => ({ ...f, quarter: Number(e.target.value) || 1 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Calculation model</label>
-                <select value={form.calculationModel} onChange={(e) => setForm((f) => ({ ...f, calculationModel: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                <select value={form.calculationModel} onChange={(e) => setForm((f) => ({ ...f, calculationModel: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                   {lookups?.calculationModels?.map((c) => (
                     <option key={c.value} value={c.value}>{c.name}</option>
                   ))}
@@ -822,11 +686,11 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Multiplier %</label>
-                <input type="number" step={0.01} value={form.multiplierPct} onChange={(e) => setForm((f) => ({ ...f, multiplierPct: Number(e.target.value) || 0 }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                <input type="number" step={0.01} value={form.multiplierPct} onChange={(e) => setForm((f) => ({ ...f, multiplierPct: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
-                <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                   {STATUS_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.name}</option>
                   ))}
@@ -834,7 +698,7 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Fallback category</label>
-                <select value={form.fallbackCategory ?? ""} onChange={(e) => setForm((f) => ({ ...f, fallbackCategory: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                <select value={form.fallbackCategory ?? ""} onChange={(e) => setForm((f) => ({ ...f, fallbackCategory: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                   <option value="">None</option>
                   {lookups?.categories?.map((c) => (
                     <option key={c.value} value={c.value}>{c.name}</option>
@@ -843,7 +707,7 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Adopt fee schedule</label>
-                <select value={form.adoptFeeScheduleId ?? ""} onChange={(e) => setForm((f) => ({ ...f, adoptFeeScheduleId: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                <select value={form.adoptFeeScheduleId ?? ""} onChange={(e) => setForm((f) => ({ ...f, adoptFeeScheduleId: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
                   <option value="">None</option>
                   {fsOptions.filter((fs) => fs.id !== editId).map((fs) => (
                     <option key={fs.id} value={fs.id}>
@@ -854,11 +718,11 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Source</label>
-                <input type="text" value={form.source ?? ""} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" placeholder="e.g. CMS Medicare PFS" />
+                <input type="text" value={form.source ?? ""} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. CMS Medicare PFS" />
               </div>
               <div className="sm:col-span-2">
                 <label className="mb-1 block text-sm font-medium text-foreground">Notes</label>
-                <textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                <textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
               </div>
             </div>
             <div className="mt-6 flex items-center justify-between">

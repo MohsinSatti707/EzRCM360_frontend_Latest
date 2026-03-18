@@ -46,6 +46,7 @@ export function ModifierFormModal({
           submitLabel={editId ? "Update" : "Create"}
           onSubmit={onSubmit}
           loading={loading}
+          className="p-0"
         />
       }
     >
@@ -55,7 +56,7 @@ export function ModifierFormModal({
             <Alert variant="error">{error}</Alert>
           </div>
         )}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-4">
           <Input
             label="Modifier code"
             required
@@ -68,20 +69,18 @@ export function ModifierFormModal({
             value={form.modifierType}
             onChange={(e) => onFormChange({ ...form, modifierType: Number(e.target.value) })}
           />
-          <div className="sm:col-span-2">
-            <Input
-              label="Description"
-              required
-              value={form.description}
-              onChange={(e) => onFormChange({ ...form, description: e.target.value })}
-            />
-          </div>
-          <label className="flex cursor-pointer items-center gap-2 sm:col-span-2">
+          <Input
+            label="Description"
+            required
+            value={form.description}
+            onChange={(e) => onFormChange({ ...form, description: e.target.value })}
+          />
+          <label className="inline-flex w-fit cursor-pointer items-center gap-2 mt-1">
             <input
               type="checkbox"
               checked={form.isActive}
               onChange={(e) => onFormChange({ ...form, isActive: e.target.checked })}
-              className="rounded border-input"
+              className="h-5 w-5 rounded border-input"
             />
             <span className="text-sm text-foreground">Active</span>
           </label>

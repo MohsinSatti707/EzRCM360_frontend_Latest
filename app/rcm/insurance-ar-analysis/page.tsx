@@ -24,7 +24,7 @@ import { insuranceArAnalysisApi, type ArAnalysisSessionListItemDto, type ArAnaly
 import { usePaginatedList } from "@/lib/hooks";
 
 const STATUS_OPTIONS: { value: ArAnalysisSessionStatus | ""; label: string }[] = [
-  { value: "", label: "All statuses" },
+  { value: "", label: "All Statuses" },
   { value: "Draft", label: "Draft" },
   { value: "IntakeUploaded", label: "Intake Uploaded" },
   { value: "ValidationInProgress", label: "Validation In Progress" },
@@ -153,7 +153,7 @@ export default function InsuranceArAnalysisListPage() {
             id="status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as ArAnalysisSessionStatus | "")}
-            className="h-10 min-w-[130px] rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+            className="h-10 w-[160px] rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
           >
             {STATUS_OPTIONS.map((o) => (
               <option key={o.value || "_all"} value={o.value}>{o.label}</option>
@@ -166,7 +166,7 @@ export default function InsuranceArAnalysisListPage() {
               setUploadedBy(e.target.value);
               setPage(1);
             }}
-            className="h-10 min-w-[120px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+            className="h-10 w-[150px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
           >
             <option value="">Uploaded By</option>
             {uniqueUploadedBy.map((u) => (
@@ -206,8 +206,8 @@ export default function InsuranceArAnalysisListPage() {
 
       {data && (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px] border border-border bg-card shadow-sm">
-            <Table className="w-[1950px] table-fixed">
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px] border-y border-border bg-card shadow-sm">
+            <Table className="w-[1700px] table-fixed">
                 <TableHead>
                   <TableRow className="bg-[hsl(210,100%,97%)] hover:bg-[hsl(210,100%,97%)]">
                     <TableHeaderCell className="w-[300px] min-w-[300px] first:rounded-bl-[5px] !bg-[hsl(210,100%,97%)] border-border">
@@ -222,25 +222,25 @@ export default function InsuranceArAnalysisListPage() {
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[200px] min-w-[200px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Status
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[250px] min-w-[250px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-normal text-[14px] leading-none text-[#0066CC]">
                         Uploaded By
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[200px] min-w-[200px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Uploaded At
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
                       </div>
                     </TableHeaderCell>
-                    <TableHeaderCell className="w-[300px] min-w-[300px] !bg-[hsl(210,100%,97%)] border-border">
+                    <TableHeaderCell className="w-[200px] min-w-[200px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Source Type
                         <ArrowUpDown className="h-3.5 w-3.5 text-[#0066CC]/70" />
@@ -283,7 +283,7 @@ export default function InsuranceArAnalysisListPage() {
                             <Link
                               href={`/rcm/insurance-ar-analysis/${row.id}/report`}
                               prefetch={false}
-                              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
                             >
                               View Report
                             </Link>
@@ -293,7 +293,7 @@ export default function InsuranceArAnalysisListPage() {
                             <Link
                               href={`/rcm/insurance-ar-analysis/${row.id}/processing`}
                               prefetch={false}
-                              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
                             >
                               View Progress
                             </Link>

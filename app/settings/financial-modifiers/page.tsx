@@ -6,6 +6,14 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+} from "@/components/ui/Table";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -20,6 +28,11 @@ import type { PaginatedList } from "@/lib/types";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { toDateInput } from "@/lib/utils";
+
+const ACTIVE_OPTIONS = [
+  { value: 0, name: "Inactive" },
+  { value: 1, name: "Active" },
+];
 
 const defaultForm: CreateFinancialModifierCommand = {
   modifierCode: "",
@@ -36,6 +49,8 @@ export default function FinancialModifiersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreateFinancialModifierCommand>(defaultForm);
@@ -53,8 +68,22 @@ export default function FinancialModifiersPage() {
 
   const loadList = useCallback(() => {
     setError(null);
-    api.getList({ pageNumber: page, pageSize }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize]);
+    const isActive =
+      statusFilter === "all"
+        ? undefined
+        : statusFilter === "active";
+    api
+      .getList({
+        pageNumber: page,
+        pageSize,
+        ...(searchTerm.trim() ? { modifierCode: searchTerm.trim() } : {}),
+        ...(isActive !== undefined ? { isActive } : {}),
+      })
+      .then(setData)
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : "Failed to load")
+      );
+  }, [page, pageSize, searchTerm, statusFilter]);
 
   useEffect(() => {
     loadList();
@@ -103,6 +132,28 @@ export default function FinancialModifiersPage() {
       toast.error(msg);
     } finally {
       setSubmitLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (row: FinancialModifierDto, activeValue: number) => {
+    if (!canUpdate) return;
+    setStatusUpdatingId(row.id);
+    try {
+      const payload: CreateFinancialModifierCommand = {
+        modifierCode: row.modifierCode,
+        factor: row.factor,
+        description: row.description ?? null,
+        effectiveStartDate: row.effectiveStartDate ?? null,
+        effectiveEndDate: row.effectiveEndDate ?? null,
+        isActive: activeValue === 1,
+      };
+      await api.update(row.id, payload);
+      loadList();
+      toast.success("Status updated.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Status update failed.");
+    } finally {
+      setStatusUpdatingId(null);
     }
   };
 
@@ -178,14 +229,14 @@ export default function FinancialModifiersPage() {
   }
 
   return (
-    <div>
+    <div className="flex min-h-0 flex-1 flex-col">
       <PageHeader title="Financial Modifiers" description="Financial modifier factors (e.g. MER)." />
 
       {/* Toolbar: search + add button */}
       <div className="mb-6 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Select value="" onValueChange={() => {}}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-[5px] font-aileron text-[14px]">
+        <div className="flex flex-1 items-center">
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
@@ -194,14 +245,14 @@ export default function FinancialModifiersPage() {
               <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
-          <div className="relative">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-[300px] rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
         </div>
@@ -235,110 +286,195 @@ export default function FinancialModifiersPage() {
 
       {error && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
       {data && (
-        <>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
-              <thead>
-                <tr>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
+            <Table className="min-w-[1200px] table-fixed">
+              <TableHead>
+                <TableRow>
                   {canDelete && (
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground" style={{ width: 50 }}>
+                    <TableHeaderCell className="!min-w-[50px] w-[50px]">
                       <Checkbox
                         checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
                         onCheckedChange={toggleSelectAll}
                       />
-                    </th>
+                    </TableHeaderCell>
                   )}
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Modifier code</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Factor</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Description</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Effective from</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Effective to</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Active</th>
+                  <TableHeaderCell className="w-[120px] min-w-[120px]">Modifier code</TableHeaderCell>
+                  <TableHeaderCell className="w-[100px] min-w-[100px]">Factor</TableHeaderCell>
+                  <TableHeaderCell className="w-[220px] min-w-[220px]">Description</TableHeaderCell>
+                  <TableHeaderCell className="w-[130px] min-w-[130px]">Effective from</TableHeaderCell>
+                  <TableHeaderCell className="w-[110px] min-w-[110px]">Effective to</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px]">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Actions</th>
+                    <TableHeaderCell className="!w-[100px] min-w-[100px]">Actions</TableHeaderCell>
                   )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {data.items.map((row) => (
-                  <tr key={row.id} className="hover:bg-muted">
+                  <TableRow key={row.id}>
                     {canDelete && (
-                      <td className="px-4 py-3 text-sm">
+                      <TableCell>
                         <Checkbox
                           checked={selectedIds.has(row.id)}
                           onCheckedChange={() => toggleSelect(row.id)}
                         />
-                      </td>
+                      </TableCell>
                     )}
-                    <td className="px-4 py-3 text-sm">{row.modifierCode}</td>
-                    <td className="px-4 py-3 text-sm">{row.factor}</td>
-                    <td className="px-4 py-3 text-sm">{row.description ?? "—"}</td>
-                    <td className="px-4 py-3 text-sm">{row.effectiveStartDate ? toDateInput(row.effectiveStartDate) : "—"}</td>
-                    <td className="px-4 py-3 text-sm">{row.effectiveEndDate ? toDateInput(row.effectiveEndDate) : "—"}</td>
-                    <td className="px-4 py-3 text-sm">{row.isActive ? "Yes" : "No"}</td>
+                    <TableCell className="w-[140px] min-w-[140px]">
+                      <div className="max-w-[120px] truncate">{row.modifierCode}</div>
+                    </TableCell>
+                    <TableCell className="w-[100px] min-w-[100px]">
+                      <div className="max-w-[80px] truncate">{row.factor}</div>
+                    </TableCell>
+                    <TableCell className="w-[220px] min-w-[220px]">
+                      <div className="max-w-[200px] truncate">{row.description ?? "—"}</div>
+                    </TableCell>
+                    <TableCell className="w-[110px] min-w-[110px]">
+                      <div className="max-w-[90px] truncate">{row.effectiveStartDate ? toDateInput(row.effectiveStartDate) : "—"}</div>
+                    </TableCell>
+                    <TableCell className="w-[110px] min-w-[110px]">
+                      <div className="max-w-[90px] truncate">{row.effectiveEndDate ? toDateInput(row.effectiveEndDate) : "—"}</div>
+                    </TableCell>
+                    <TableCell className="w-[160px] min-w-[160px]">
+                      <select
+                        value={row.isActive ? 1 : 0}
+                        onChange={(e) => handleStatusChange(row, Number(e.target.value))}
+                        disabled={!canUpdate || statusUpdatingId === row.id}
+                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                      >
+                        {ACTIVE_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.name}
+                          </option>
+                        ))}
+                      </select>
+                    </TableCell>
                     {(canUpdate || canDelete) && (
-                      <td className="px-4 py-3 text-sm">
+                      <TableCell className="!w-[120px] min-w-[120px]">
                         <TableActionsCell
                           canEdit={canUpdate}
                           canDelete={canDelete}
                           onEdit={() => openEdit(row)}
                           onDelete={() => setDeleteId(row.id)}
                         />
-                      </td>
+                      </TableCell>
                     )}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-          <Pagination
-            pageNumber={data.pageNumber}
-            totalPages={data.totalPages}
-            totalCount={data.totalCount}
-            hasPreviousPage={data.hasPreviousPage}
-            hasNextPage={data.hasNextPage}
-            onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-            onNext={() => setPage((p) => p + 1)}
-            onPageChange={setPage}
-            pageSize={pageSize}
-            onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
-          />
-        </>
+          <div className="shrink-0 pt-4">
+            <Pagination
+              pageNumber={data.pageNumber}
+              totalPages={data.totalPages}
+              totalCount={data.totalCount}
+              hasPreviousPage={data.hasPreviousPage}
+              hasNextPage={data.hasNextPage}
+              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => p + 1)}
+              onPageChange={setPage}
+              pageSize={pageSize}
+              onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+            />
+          </div>
+        </div>
       )}
       {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit financial modifier" : "Add financial modifier"} size="lg">
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editId ? "Edit financial modifier" : "Add financial modifier"}
+        size="lg"
+        position="right"
+        footer={
+          <ModalFooter
+            onCancel={() => setModalOpen(false)}
+            submitLabel={
+              <>
+                {editId ? "Update" : "Create"}
+                <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
+              </>
+            }
+            onSubmit={handleSubmit}
+            loading={submitLoading}
+          />
+        }
+      >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Modifier code *</label>
-              <input type="text" value={form.modifierCode} onChange={(e) => setForm((f) => ({ ...f, modifierCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Factor</label>
-              <input type="number" step="any" value={form.factor} onChange={(e) => setForm((f) => ({ ...f, factor: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-foreground">Description</label>
-              <input type="text" value={form.description ?? ""} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Effective start date</label>
-              <input type="date" value={toDateInput(form.effectiveStartDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveStartDate: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">
+                Modifier code <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.modifierCode}
+                onChange={(e) => setForm((f) => ({ ...f, modifierCode: e.target.value }))}
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Effective end date</label>
-              <input type="date" value={toDateInput(form.effectiveEndDate ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveEndDate: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+              <label className="mb-1 block text-sm font-medium text-foreground">
+                Factor
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={form.factor}
+                onChange={(e) => setForm((f) => ({ ...f, factor: Number(e.target.value) || 0 }))}
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              />
             </div>
-            <div className="sm:col-span-2">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="rounded border-input" />
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">
+                Description
+              </label>
+              <input
+                type="text"
+                value={form.description ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value || null }))}
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">
+                Effective start date
+              </label>
+              <input
+                type="date"
+                value={toDateInput(form.effectiveStartDate ?? undefined)}
+                onChange={(e) => setForm((f) => ({ ...f, effectiveStartDate: e.target.value || null }))}
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">
+                Effective end date
+              </label>
+              <input
+                type="date"
+                value={toDateInput(form.effectiveEndDate ?? undefined)}
+                onChange={(e) => setForm((f) => ({ ...f, effectiveEndDate: e.target.value || null }))}
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              />
+            </div>
+            <div className="flex items-center mt-1">
+              <label htmlFor="financial-modifier-active" className="inline-flex w-fit cursor-pointer items-center gap-2">
+                <input
+                  id="financial-modifier-active"
+                  type="checkbox"
+                  checked={form.isActive}
+                  onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
+                  className="h-5 w-5 rounded border-input"
+                />
                 <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>
-          <ModalFooter onCancel={() => setModalOpen(false)} submitLabel={editId ? "Update" : "Create"} onSubmit={handleSubmit} loading={submitLoading} />
         </form>
       </Modal>
 

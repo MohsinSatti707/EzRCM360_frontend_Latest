@@ -6,6 +6,14 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+} from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -211,6 +219,7 @@ export default function ApplicabilityRulesPage() {
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
 
   const [feeScheduleOptions, setFeeScheduleOptions] = useState<FeeScheduleDto[]>([]);
   const [fsCategoryLookup, setFsCategoryLookup] = useState<Record<number, string>>({});
@@ -373,6 +382,39 @@ export default function ApplicabilityRulesPage() {
     }
   };
 
+  const handleStatusChange = async (row: ApplicabilityRuleDto, activeValue: number) => {
+    if (!canUpdate) return;
+    setStatusUpdatingId(row.id);
+    try {
+      await api.update(row.id, {
+        sortOrder: row.sortOrder,
+        ruleSetName: row.ruleSetName,
+        displayName: row.displayName,
+        payerEntityType: row.payerEntityType,
+        planCategory: row.planCategory,
+        claimCategory: row.claimCategory,
+        providerParticipation: row.providerParticipation,
+        payerCategory: row.payerCategory,
+        feeScheduleApplied: row.feeScheduleApplied,
+        merCalculationScope: row.merCalculationScope,
+        isActive: activeValue === 1,
+        state: row.state ?? null,
+        placeOfService: row.placeOfService ?? null,
+        primaryFeeScheduleId: row.primaryFeeScheduleId ?? null,
+        modifier: row.modifier ?? null,
+        effectiveStartDate: row.effectiveStartDate ?? null,
+        effectiveEndDate: row.effectiveEndDate ?? null,
+        multiplierPct: row.multiplierPct ?? null,
+      });
+      await loadList();
+      toast.success("Status updated.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  };
+
   const payerCategoryLabel = (n: number) =>
     PAYER_CATEGORY.find((c) => c.value === n)?.name ?? String(n);
 
@@ -398,16 +440,16 @@ export default function ApplicabilityRulesPage() {
   }
 
   return (
-    <div>
+    <div className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title="Applicability Rules"
         description="Fee schedule applicability rules."
       />
       {/* Toolbar: search + add button */}
       <div className="mb-6 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-1 items-center">
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-[5px] font-aileron text-[14px]">
+            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
@@ -416,14 +458,14 @@ export default function ApplicabilityRulesPage() {
               <SelectItem value="false">Inactive</SelectItem>
             </SelectContent>
           </Select>
-          <div className="relative">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-[300px] rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
         </div>
@@ -461,95 +503,96 @@ export default function ApplicabilityRulesPage() {
         </div>
       )}
       {data && (
-        <>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
-              <thead>
-                <tr>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
+            <Table className="min-w-[1000px] table-fixed">
+              <TableHead>
+                <TableRow>
                   {canDelete && (
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground" style={{ width: 50 }}>
+                    <TableHeaderCell className="!min-w-[50px] w-[50px]">
                       <Checkbox
                         checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
                         onCheckedChange={toggleSelectAll}
                       />
-                    </th>
+                    </TableHeaderCell>
                   )}
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
-                    Sort
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
-                    Rule set / Display
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
-                    Payer category
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
-                    Multiplier
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
-                    Active
-                  </th>
+                  <TableHeaderCell className="w-[80px] min-w-[80px]">Sort</TableHeaderCell>
+                  <TableHeaderCell className="w-[240px] min-w-[240px]">Rule set / Display</TableHeaderCell>
+                  <TableHeaderCell className="w-[180px] min-w-[180px]">Payer category</TableHeaderCell>
+                  <TableHeaderCell className="w-[100px] min-w-[100px]">Multiplier</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px]">Active</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
-                      Actions
-                    </th>
+                    <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
                   )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {filteredItems.map((row) => (
-                  <tr key={row.id} className="hover:bg-muted">
+                  <TableRow key={row.id}>
                     {canDelete && (
-                      <td className="px-4 py-3 text-sm">
+                      <TableCell>
                         <Checkbox
                           checked={selectedIds.has(row.id)}
                           onCheckedChange={() => toggleSelect(row.id)}
                         />
-                      </td>
+                      </TableCell>
                     )}
-                    <td className="px-4 py-3 text-sm">
-                      {row.sortOrder}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {row.ruleSetName} / {row.displayName}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {payerCategoryLabel(row.payerCategory)}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {row.multiplierPct != null ? `${(row.multiplierPct * 100).toFixed(0)}%` : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {row.isActive ? "Yes" : "No"}
-                    </td>
+                    <TableCell className="w-[80px] min-w-[80px]">
+                      <div className="max-w-[60px] truncate">{row.sortOrder}</div>
+                    </TableCell>
+                    <TableCell className="w-[240px] min-w-[240px]">
+                      <div className="max-w-[220px] truncate">{row.ruleSetName} / {row.displayName}</div>
+                    </TableCell>
+                    <TableCell className="w-[180px] min-w-[180px]">
+                      <div className="max-w-[160px] truncate">{payerCategoryLabel(row.payerCategory)}</div>
+                    </TableCell>
+                    <TableCell className="w-[100px] min-w-[100px]">
+                      <div className="max-w-[80px] truncate">{row.multiplierPct != null ? `${(row.multiplierPct * 100).toFixed(0)}%` : "—"}</div>
+                    </TableCell>
+                    <TableCell className="w-[160px] min-w-[160px]">
+                      <select
+                        value={row.isActive ? 1 : 0}
+                        onChange={(e) => handleStatusChange(row, Number(e.target.value))}
+                        disabled={!canUpdate || statusUpdatingId === row.id}
+                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                      >
+                        {ACTIVE_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.name}
+                          </option>
+                        ))}
+                      </select>
+                    </TableCell>
                     {(canUpdate || canDelete) && (
-                      <td className="px-4 py-3 text-sm">
+                      <TableCell className="!w-[120px] min-w-[120px]">
                         <TableActionsCell
                           canEdit={canUpdate}
                           canDelete={canDelete}
                           onEdit={() => openEdit(row)}
                           onDelete={() => setDeleteId(row.id)}
                         />
-                      </td>
+                      </TableCell>
                     )}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-          <Pagination
-            pageNumber={data.pageNumber}
-            totalPages={data.totalPages}
-            totalCount={data.totalCount}
-            hasPreviousPage={data.hasPreviousPage}
-            hasNextPage={data.hasNextPage}
-            onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-            onNext={() => setPage((p) => p + 1)}
-            onPageChange={setPage}
-            pageSize={pageSize}
-            onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
-          />
-        </>
+          <div className="shrink-0 pt-4">
+            <Pagination
+              pageNumber={data.pageNumber}
+              totalPages={data.totalPages}
+              totalCount={data.totalCount}
+              hasPreviousPage={data.hasPreviousPage}
+              hasNextPage={data.hasNextPage}
+              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => p + 1)}
+              onPageChange={setPage}
+              pageSize={pageSize}
+              onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+            />
+          </div>
+        </div>
       )}
       {!data && !error && (
         <div className="py-8 text-center text-sm text-muted-foreground">
@@ -562,6 +605,20 @@ export default function ApplicabilityRulesPage() {
         onClose={() => setModalOpen(false)}
         title={editId ? "Edit applicability rule" : "Add applicability rule"}
         size="lg"
+        position="right"
+        footer={
+          <ModalFooter
+            onCancel={() => setModalOpen(false)}
+            submitLabel={
+              <>
+                {editId ? "Update" : "Create"}
+                <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
+              </>
+            }
+            onSubmit={handleSubmit}
+            loading={submitLoading}
+          />
+        }
       >
         <form
           onSubmit={(e) => {
@@ -574,7 +631,7 @@ export default function ApplicabilityRulesPage() {
               {formError}
             </div>
           )}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
                 Sort order
@@ -588,13 +645,12 @@ export default function ApplicabilityRulesPage() {
                     sortOrder: Number(e.target.value) || 0,
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
-            <div className="sm:col-span-2" />
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
-                Rule set name *
+                Rule set name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -602,12 +658,12 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, ruleSetName: e.target.value }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
-                Display name *
+                Display name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -615,19 +671,19 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, displayName: e.target.value }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
-                Payer entity type *
+                Payer entity type <span className="text-red-500">*</span>
               </label>
               <select
                 value={form.payerEntityType}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, payerEntityType: e.target.value }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 <option value="">— Select —</option>
                 {PAYER_ENTITY_TYPES.map((o) => (
@@ -637,25 +693,26 @@ export default function ApplicabilityRulesPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
-                Plan category *
+                Plan category <span className="text-red-500">*</span>
               </label>
               <PlanCategoryMultiSelect
                 value={form.planCategory}
                 onChange={(csv) =>
                   setForm((f) => ({ ...f, planCategory: csv }))
                 }
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
-                Claim category *
+                Claim category <span className="text-red-500">*</span>
               </label>
               <select
                 value={form.claimCategory}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, claimCategory: e.target.value }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 <option value="">— Select —</option>
                 {CLAIM_CATEGORIES.map((o) => (
@@ -675,7 +732,7 @@ export default function ApplicabilityRulesPage() {
                     providerParticipation: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 {PROVIDER_PARTICIPATION.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -696,7 +753,7 @@ export default function ApplicabilityRulesPage() {
                     payerCategory: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 {PAYER_CATEGORY.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -717,7 +774,7 @@ export default function ApplicabilityRulesPage() {
                     feeScheduleApplied: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 {FEE_SCHEDULE_APPLIED.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -738,7 +795,7 @@ export default function ApplicabilityRulesPage() {
                     merCalculationScope: Number(e.target.value),
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 {MER_CALCULATION_SCOPE.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -760,7 +817,7 @@ export default function ApplicabilityRulesPage() {
                     state: e.target.value.trim() || null,
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
             <div>
@@ -776,7 +833,7 @@ export default function ApplicabilityRulesPage() {
                     placeOfService: e.target.value.trim() || null,
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
             <div>
@@ -792,10 +849,10 @@ export default function ApplicabilityRulesPage() {
                     modifier: e.target.value.trim() || null,
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
                 Primary fee schedule (optional override)
               </label>
@@ -807,7 +864,7 @@ export default function ApplicabilityRulesPage() {
                     primaryFeeScheduleId: e.target.value || null,
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 <option value="">Automatic selection</option>
                 {feeScheduleOptions.map((fs) => (
@@ -833,7 +890,7 @@ export default function ApplicabilityRulesPage() {
                   }))
                 }
                 placeholder="Leave empty for fee schedule default"
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
             <div>
@@ -849,7 +906,7 @@ export default function ApplicabilityRulesPage() {
                     effectiveStartDate: e.target.value || null,
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
             <div>
@@ -865,29 +922,24 @@ export default function ApplicabilityRulesPage() {
                     effectiveEndDate: e.target.value || null,
                   }))
                 }
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
-            <div className="flex items-center sm:col-span-2">
-              <label className="flex items-center gap-2">
+            <div className="flex items-center">
+              <label htmlFor="applicability-rule-active" className="inline-flex w-fit cursor-pointer items-center gap-2">
                 <input
+                  id="applicability-rule-active"
                   type="checkbox"
                   checked={form.isActive}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, isActive: e.target.checked }))
                   }
-                  className="rounded border-input"
+                  className="h-5 w-5 rounded border-input"
                 />
                 <span className="text-sm text-foreground">Active</span>
               </label>
             </div>
           </div>
-          <ModalFooter
-            onCancel={() => setModalOpen(false)}
-            submitLabel={editId ? "Update" : "Create"}
-            onSubmit={handleSubmit}
-            loading={submitLoading}
-          />
         </form>
       </Modal>
 

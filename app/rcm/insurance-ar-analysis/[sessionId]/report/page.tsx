@@ -164,8 +164,8 @@ export default function InsuranceArAnalysisReportPage() {
         </div>
       )}
       <div className="space-y-8 pb-10">
-        <Card className="border border-[#E2E8F0] overflow-hidden p-6 sm:p-8">
-          <h2 className="mb-5 text-[16px] font-['Aileron'] font-bold text-foreground">Analysis Summary</h2>
+        <Card className="border-none overflow-hidden p-0 ">
+          <h2 className="mb-1 text-[16px] font-['Aileron'] font-bold text-foreground">Analysis Summary</h2>
           <div className="space-y-0">
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Session Name</span>
