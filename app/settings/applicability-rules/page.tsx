@@ -701,7 +701,6 @@ export default function ApplicabilityRulesPage() {
                 onChange={(csv) =>
                   setForm((f) => ({ ...f, planCategory: csv }))
                 }
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
             <div>
