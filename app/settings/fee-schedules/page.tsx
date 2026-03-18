@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Search, ArrowRight, ArrowLeft, Upload, Download, FileSpreadsheet, Trash2 } from "lucide-react";
+import { Search, ArrowRight, ArrowLeft, Upload, Download, FileSpreadsheet, Trash2, Pencil, Plus } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
@@ -25,7 +25,7 @@ import { feeSchedulesApi } from "@/lib/services/feeSchedules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
-import type { FeeScheduleDto, FeeScheduleDetailDto, FeeScheduleLineDto, CreateFeeScheduleCommand } from "@/lib/services/feeSchedules";
+import type { FeeScheduleDto, FeeScheduleDetailDto, FeeScheduleLineDto, CreateFeeScheduleCommand, CreateFeeScheduleLineRequest } from "@/lib/services/feeSchedules";
 import type { PaginatedList } from "@/lib/types";
 
 const STATUS_OPTIONS = [{ value: 0, name: "Active" }, { value: 1, name: "Inactive" }];
@@ -107,6 +107,17 @@ export default function FeeSchedulesPage() {
   const [wizardLinesData, setWizardLinesData] = useState<PaginatedList<FeeScheduleLineDto> | null>(null);
   const [wizardLinesLoading, setWizardLinesLoading] = useState(false);
   const [wizardImportLoading, setWizardImportLoading] = useState(false);
+
+  // Line CRUD state
+  const [lineModalOpen, setLineModalOpen] = useState(false);
+  const [lineEditId, setLineEditId] = useState<string | null>(null);
+  const [lineForm, setLineForm] = useState<CreateFeeScheduleLineRequest>({ cptHcpcs: "", feeAmount: 0 });
+  const [lineSubmitLoading, setLineSubmitLoading] = useState(false);
+  const [lineDeleteId, setLineDeleteId] = useState<string | null>(null);
+  const [lineDeleteLoading, setLineDeleteLoading] = useState(false);
+  const [lineSelectedIds, setLineSelectedIds] = useState<Set<string>>(new Set());
+  const [lineBulkDeleteConfirm, setLineBulkDeleteConfirm] = useState(false);
+  const [lineBulkDeleteLoading, setLineBulkDeleteLoading] = useState(false);
 
   const api = feeSchedulesApi();
   const toast = useToast();
@@ -290,6 +301,7 @@ export default function FeeSchedulesPage() {
     setLinesSchedule(row);
     setLinesPage(1);
     setLinesData(null);
+    setLineSelectedIds(new Set());
     loadLines(row.id, 1);
   };
 
@@ -332,6 +344,91 @@ export default function FeeSchedulesPage() {
       .then(setWizardLinesData)
       .catch(() => {})
       .finally(() => setWizardLinesLoading(false));
+  };
+
+  // Line CRUD handlers
+  const openAddLine = () => {
+    setLineEditId(null);
+    setLineForm({ cptHcpcs: "", feeAmount: 0, zip: "", modifier: "", rv: null, pctcIndicator: null, fee50th: null, fee60th: null, fee70th: null, fee75th: null, fee80th: null, fee85th: null, fee90th: null, fee95th: null });
+    setLineModalOpen(true);
+  };
+  const openEditLine = (line: FeeScheduleLineDto) => {
+    setLineEditId(line.id);
+    setLineForm({
+      cptHcpcs: line.cptHcpcs, feeAmount: line.feeAmount, zip: line.zip ?? "", modifier: line.modifier ?? "",
+      rv: line.rv, pctcIndicator: line.pctcIndicator,
+      fee50th: line.fee50th, fee60th: line.fee60th, fee70th: line.fee70th, fee75th: line.fee75th,
+      fee80th: line.fee80th, fee85th: line.fee85th, fee90th: line.fee90th, fee95th: line.fee95th,
+    });
+    setLineModalOpen(true);
+  };
+  const handleLineSave = async () => {
+    if (!linesSchedule) return;
+    if (!lineForm.cptHcpcs.trim()) { toast.error("CPT/HCPCS is required."); return; }
+    setLineSubmitLoading(true);
+    try {
+      const payload = { ...lineForm, zip: lineForm.zip || null, modifier: lineForm.modifier || null };
+      if (lineEditId) {
+        await api.updateLine(lineEditId, payload);
+        toast.success("Line updated.");
+      } else {
+        await api.createLine(linesSchedule.id, payload);
+        toast.success("Line created.");
+      }
+      setLineModalOpen(false);
+      loadLines(linesSchedule.id, linesPage);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Save failed.");
+    } finally {
+      setLineSubmitLoading(false);
+    }
+  };
+  const handleLineDelete = async () => {
+    if (!lineDeleteId || !linesSchedule) return;
+    setLineDeleteLoading(true);
+    try {
+      await api.deleteLine(lineDeleteId);
+      toast.success("Line deleted.");
+      setLineDeleteId(null);
+      loadLines(linesSchedule.id, linesPage);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setLineDeleteLoading(false);
+    }
+  };
+
+  const handleLineBulkDelete = async () => {
+    if (lineSelectedIds.size === 0 || !linesSchedule) return;
+    setLineBulkDeleteLoading(true);
+    try {
+      await Promise.all(Array.from(lineSelectedIds).map((id) => api.deleteLine(id)));
+      toast.success(`Deleted ${lineSelectedIds.size} line(s).`);
+      setLineSelectedIds(new Set());
+      setLineBulkDeleteConfirm(false);
+      loadLines(linesSchedule.id, linesPage);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setLineBulkDeleteLoading(false);
+    }
+  };
+  const toggleLineSelect = (id: string) => {
+    setLineSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const toggleAllLines = () => {
+    if (!linesData) return;
+    const allOnPage = linesData.items.map((l) => l.id);
+    const allSelected = allOnPage.every((id) => lineSelectedIds.has(id));
+    setLineSelectedIds((prev) => {
+      const next = new Set(prev);
+      allOnPage.forEach((id) => allSelected ? next.delete(id) : next.add(id));
+      return next;
+    });
   };
 
   const downloadTemplateForCategory = async (category: number | string) => {
@@ -853,6 +950,90 @@ export default function FeeSchedulesPage() {
 
       <OverlayLoader visible={overlayLoading} />
 
+      {/* Line add/edit modal */}
+      <Modal open={lineModalOpen} onClose={() => setLineModalOpen(false)} title={lineEditId ? "Edit Fee Schedule Line" : "Add Fee Schedule Line"} size="md">
+        <div className="grid grid-cols-2 gap-4">
+          {(String(linesSchedule?.category) === "1" || String(linesSchedule?.category) === "UCR") && (
+            <div>
+              <label className="text-sm font-medium">ZIP</label>
+              <input className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.zip ?? ""} onChange={(e) => setLineForm({ ...lineForm, zip: e.target.value })} placeholder="e.g. 070403716" />
+            </div>
+          )}
+          <div>
+            <label className="text-sm font-medium">CPT/HCPCS *</label>
+            <input className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.cptHcpcs} onChange={(e) => setLineForm({ ...lineForm, cptHcpcs: e.target.value })} placeholder="e.g. 99213" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Modifier</label>
+            <input className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.modifier ?? ""} onChange={(e) => setLineForm({ ...lineForm, modifier: e.target.value })} placeholder="e.g. 26" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Fee Amount *</label>
+            <input type="number" step="0.01" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.feeAmount} onChange={(e) => setLineForm({ ...lineForm, feeAmount: parseFloat(e.target.value) || 0 })} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">RV</label>
+            <input type="number" step="0.0001" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.rv ?? ""} onChange={(e) => setLineForm({ ...lineForm, rv: e.target.value ? parseFloat(e.target.value) : null })} />
+          </div>
+          {(String(linesSchedule?.category) === "1" || String(linesSchedule?.category) === "UCR") && (
+            <>
+              <div>
+                <label className="text-sm font-medium">50th Percentile</label>
+                <input type="number" step="0.01" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.fee50th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee50th: e.target.value ? parseFloat(e.target.value) : null })} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">75th Percentile</label>
+                <input type="number" step="0.01" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.fee75th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee75th: e.target.value ? parseFloat(e.target.value) : null })} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">90th Percentile</label>
+                <input type="number" step="0.01" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.fee90th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee90th: e.target.value ? parseFloat(e.target.value) : null })} />
+              </div>
+            </>
+          )}
+          {(String(linesSchedule?.category) === "3" || String(linesSchedule?.category) === "WC") && (
+            <div>
+              <label className="text-sm font-medium">PC/TC Indicator</label>
+              <select className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.pctcIndicator ?? ""} onChange={(e) => setLineForm({ ...lineForm, pctcIndicator: e.target.value ? Number(e.target.value) : null })}>
+                <option value="">—</option>
+                <option value="0">Professional (P)</option>
+                <option value="1">Technical (T)</option>
+              </select>
+            </div>
+          )}
+        </div>
+        <ModalFooter
+          onCancel={() => setLineModalOpen(false)}
+          onSubmit={handleLineSave}
+          submitLabel={lineSubmitLoading ? "Saving…" : lineEditId ? "Update" : "Create"}
+          loading={lineSubmitLoading}
+        />
+      </Modal>
+
+      {/* Line delete confirm */}
+      <ConfirmDialog
+        open={!!lineDeleteId}
+        onClose={() => setLineDeleteId(null)}
+        onConfirm={handleLineDelete}
+        title="Delete Fee Schedule Line"
+        message="Are you sure you want to delete this fee schedule line? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        loading={lineDeleteLoading}
+      />
+
+      {/* Line bulk delete confirm */}
+      <ConfirmDialog
+        open={lineBulkDeleteConfirm}
+        onClose={() => setLineBulkDeleteConfirm(false)}
+        onConfirm={handleLineBulkDelete}
+        title="Delete Selected Lines"
+        message={`Are you sure you want to delete ${lineSelectedIds.size} selected line(s)? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        variant="danger"
+        loading={lineBulkDeleteLoading}
+      />
+
       {/* Lines management modal (from table Actions) */}
       <Modal open={!!linesSchedule} onClose={() => setLinesSchedule(null)} title={`Fee Schedule Lines — ${linesSchedule?.scheduleCode ?? ""} (${categoryLabel(linesSchedule?.category ?? 0)})`} size="lg">
         <div className="mb-4 flex items-center gap-3">
@@ -863,6 +1044,14 @@ export default function FeeSchedulesPage() {
             <Upload className="h-4 w-4" /> {importLoading ? "Importing…" : "Import Lines"}
           </Button>
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f && linesSchedule) handleImportLines(f, linesSchedule.id); }} />
+          <Button onClick={openAddLine} className="h-9 text-sm gap-1.5 bg-green-600 hover:bg-green-700 text-white">
+            <Plus className="h-4 w-4" /> Add Line
+          </Button>
+          {lineSelectedIds.size > 0 && (
+            <Button onClick={() => setLineBulkDeleteConfirm(true)} variant="outline" className="h-9 text-sm gap-1.5 text-red-600 border-red-300 hover:bg-red-50">
+              <Trash2 className="h-4 w-4" /> Delete ({lineSelectedIds.size})
+            </Button>
+          )}
           {linesData && <span className="text-xs text-muted-foreground ml-auto">{linesData.totalCount} total lines</span>}
         </div>
         {linesLoading && <div className="py-6 text-center text-sm text-muted-foreground">Loading lines…</div>}
@@ -875,6 +1064,7 @@ export default function FeeSchedulesPage() {
               <table className="min-w-full divide-y divide-border text-sm">
                 <thead className="sticky top-0 bg-background">
                   <tr>
+                    <th className="px-3 py-2 w-8"><Checkbox checked={linesData ? linesData.items.every((l) => lineSelectedIds.has(l.id)) : false} onCheckedChange={toggleAllLines} /></th>
                     {String(linesSchedule?.category) === "1" || String(linesSchedule?.category) === "UCR" ? <th className="px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">ZIP</th> : null}
                     <th className="px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">CPT/HCPCS</th>
                     <th className="px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">Modifier</th>
@@ -888,6 +1078,7 @@ export default function FeeSchedulesPage() {
                         <th className="px-3 py-2 text-right text-xs font-medium uppercase text-muted-foreground">90th</th>
                       </>
                     )}
+                    <th className="px-3 py-2 text-center text-xs font-medium uppercase text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -896,6 +1087,7 @@ export default function FeeSchedulesPage() {
                     const isWC = String(linesSchedule?.category) === "3" || String(linesSchedule?.category) === "WC";
                     return (
                       <tr key={line.id} className="hover:bg-muted">
+                        <td className="px-3 py-2 w-8"><Checkbox checked={lineSelectedIds.has(line.id)} onCheckedChange={() => toggleLineSelect(line.id)} /></td>
                         {isUCR && <td className="px-3 py-2">{line.zip ?? "—"}</td>}
                         <td className="px-3 py-2 font-mono">{line.cptHcpcs}</td>
                         <td className="px-3 py-2">{line.modifier ?? "—"}</td>
@@ -909,6 +1101,16 @@ export default function FeeSchedulesPage() {
                             <td className="px-3 py-2 text-right">{line.fee90th?.toFixed(2) ?? "—"}</td>
                           </>
                         )}
+                        <td className="px-3 py-2 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={() => openEditLine(line)} className="p-1 rounded hover:bg-muted" title="Edit">
+                              <Pencil className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                            </button>
+                            <button onClick={() => setLineDeleteId(line.id)} className="p-1 rounded hover:bg-red-50" title="Delete">
+                              <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-600" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}

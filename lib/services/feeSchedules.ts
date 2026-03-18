@@ -168,7 +168,34 @@ export function feeSchedulesApi() {
       a.click();
       URL.revokeObjectURL(a.href);
     },
+    createLine: (feeScheduleId: string, body: CreateFeeScheduleLineRequest) =>
+      apiRequest<{ id: string }>(`/api/FeeSchedules/${feeScheduleId}/lines`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    updateLine: (lineId: string, body: CreateFeeScheduleLineRequest) =>
+      apiRequest<void>(`/api/FeeSchedules/lines/${lineId}`, {
+        method: "PUT",
+        body: JSON.stringify(body),
+      }),
     deleteLine: (lineId: string) =>
       apiRequest<void>(`/api/FeeSchedules/lines/${lineId}`, { method: "DELETE" }),
   };
+}
+
+export interface CreateFeeScheduleLineRequest {
+  zip?: string | null;
+  cptHcpcs: string;
+  modifier?: string | null;
+  feeAmount: number;
+  rv?: number | null;
+  pctcIndicator?: number | null;
+  fee50th?: number | null;
+  fee60th?: number | null;
+  fee70th?: number | null;
+  fee75th?: number | null;
+  fee80th?: number | null;
+  fee85th?: number | null;
+  fee90th?: number | null;
+  fee95th?: number | null;
 }
