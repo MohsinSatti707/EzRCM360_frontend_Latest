@@ -761,11 +761,11 @@ export default function FeeSchedulesPage() {
                     <>
                       <div>
                         <label className="mb-1 block text-sm font-medium text-foreground">ZIP from</label>
-                        <input type="text" placeholder="e.g. 07000" value={form.geoCode.split("-")[0] ?? ""} onChange={(e) => { const to = form.geoCode.split("-")[1] ?? ""; setForm((f) => ({ ...f, geoCode: `${e.target.value}-${to}` })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                        <input type="text" placeholder="e.g. 07000" value={(form.geoCode ?? "").split("-")[0] ?? ""} onChange={(e) => { const to = (form.geoCode ?? "").split("-")[1] ?? ""; setForm((f) => ({ ...f, geoCode: `${e.target.value}-${to}` })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
                       </div>
                       <div>
                         <label className="mb-1 block text-sm font-medium text-foreground">ZIP to</label>
-                        <input type="text" placeholder="e.g. 07999" value={form.geoCode.split("-")[1] ?? ""} onChange={(e) => { const from = form.geoCode.split("-")[0] ?? ""; setForm((f) => ({ ...f, geoCode: `${from}-${e.target.value}` })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                        <input type="text" placeholder="e.g. 07999" value={(form.geoCode ?? "").split("-")[1] ?? ""} onChange={(e) => { const from = (form.geoCode ?? "").split("-")[0] ?? ""; setForm((f) => ({ ...f, geoCode: `${from}-${e.target.value}` })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
                       </div>
                     </>
                   )}
