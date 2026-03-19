@@ -10,6 +10,8 @@ export interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  /** Optional fixed section rendered below title bar, outside the scroll area */
+  headerContent?: React.ReactNode;
   /** Optional footer (e.g. ModalFooter) rendered outside scroll so buttons stay fixed at bottom */
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg";
@@ -17,7 +19,7 @@ export interface ModalProps {
   position?: "center" | "top-right" | "right" | "left";
 }
 
-export function Modal({ open, onClose, title, children, footer, size = "md", position = "center" }: ModalProps) {
+export function Modal({ open, onClose, title, children, headerContent, footer, size = "md", position = "center" }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const handle = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -72,6 +74,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md", pos
             <X className="h-4 w-4" />
           </button>
         </div>
+        {headerContent != null && <div className="shrink-0 px-6 py-4">{headerContent}</div>}
         <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">{children}</div>
         {footer != null && <div className="flex shrink-0">{footer}</div>}
       </div>

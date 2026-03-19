@@ -451,6 +451,60 @@ export default function FeeSchedulesPage() {
         ? `Step 2: ${resolveCategoryStr(form.category)} Configuration`
         : `Step 3: Import Lines (${resolveCategoryStr(form.category)})`;
 
+  const wizardFooter = (
+    <div className="flex w-full items-center justify-between border-t border-border bg-card px-6 py-4">
+      {!editId && wizardStep === 2 ? (
+        <Button type="button" variant="outline" onClick={() => setWizardStep(1)}>
+          <ArrowLeft className="mr-1 h-4 w-4" /> Back
+        </Button>
+      ) : (
+        <div />
+      )}
+
+      <div className="flex gap-2">
+        <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
+          {wizardStep === 3 && !editId ? "Close" : "Cancel"}
+        </Button>
+
+        {!editId && wizardStep === 1 && (
+          <Button onClick={() => setWizardStep(2)} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
+            Next <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        )}
+
+        {wizardStep === 2 && (
+          <Button onClick={handleSubmit} disabled={submitLoading} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
+            {submitLoading ? "Saving…" : editId ? "Update" : <>Next: Import Lines <ArrowRight className="ml-1 h-4 w-4" /></>}
+          </Button>
+        )}
+
+        {!editId && wizardStep === 3 && (
+          <Button onClick={() => { setModalOpen(false); loadList(); }} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
+            Done
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
+  const wizardStepper = !editId ? (
+    <div className="flex items-center gap-2">
+      {[1, 2, 3].map((s) => (
+        <div key={s} className="flex items-center gap-2">
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+            wizardStep === s ? "bg-[#0066CC] text-white" : wizardStep > s ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"
+          }`}>
+            {wizardStep > s ? "✓" : s}
+          </div>
+          <span className={`text-sm ${wizardStep === s ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+            {s === 1 ? "Category" : s === 2 ? "Configuration" : "CPT Fees"}
+          </span>
+          {s < 3 && <div className={`h-0.5 w-8 ${wizardStep > s ? "bg-green-500" : "bg-gray-200"}`} />}
+        </div>
+      ))}
+    </div>
+  ) : null;
+
   if (!canView) {
     return (
       <div>
@@ -463,7 +517,7 @@ export default function FeeSchedulesPage() {
   }
 
   return (
-    <div className="px-6">
+    <div className="flex min-h-0 flex-1 flex-col px-6">
       <PageHeader title="Fee Schedules" description="Centralized valuation datasets." />
 
       {/* Toolbar */}
@@ -519,9 +573,9 @@ export default function FeeSchedulesPage() {
 
       {error && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
       {data && (
-        <div className="flex flex-1 flex-col">
-        <div className="h-[calc(100vh-316px)] flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-          <Table className="min-w-[1800px] table-fixed">
+        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
+          <Table className="min-w-[1200px] table-fixed">
               <TableHead>
                 <TableRow>
                   {canDelete && (
@@ -600,7 +654,7 @@ export default function FeeSchedulesPage() {
               </TableBody>
             </Table>
           </div>
-          <div className="shrink-0 pt-4">
+          <div className="mt-auto shrink-0 pt-4">
             <Pagination
               pageNumber={data.pageNumber}
               totalPages={data.totalPages}
@@ -619,27 +673,8 @@ export default function FeeSchedulesPage() {
       {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
 
       {/* 3-step wizard / edit modal */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={wizardTitle} size="lg">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={wizardTitle} size="lg" position="right" headerContent={wizardStepper} footer={wizardFooter}>
         {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
-
-        {/* Step indicator for create */}
-        {!editId && (
-          <div className="mb-6 flex items-center gap-2">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className="flex items-center gap-2">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
-                  wizardStep === s ? "bg-[#0066CC] text-white" : wizardStep > s ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"
-                }`}>
-                  {wizardStep > s ? "✓" : s}
-                </div>
-                <span className={`text-sm ${wizardStep === s ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                  {s === 1 ? "Category" : s === 2 ? "Configuration" : "CPT Fees"}
-                </span>
-                {s < 3 && <div className={`h-0.5 w-8 ${wizardStep > s ? "bg-green-500" : "bg-gray-200"}`} />}
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* STEP 1: Category selection (create only) */}
         {!editId && wizardStep === 1 && (
@@ -649,33 +684,28 @@ export default function FeeSchedulesPage() {
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: Number(e.target.value) }))}
-                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 {lookups?.categories?.filter((c) => c.name !== "Custom").map((c) => (
                   <option key={c.value} value={c.value}>{c.name}</option>
                 ))}
               </select>
             </div>
-            <div className="mt-6 flex justify-end">
-              <Button onClick={() => setWizardStep(2)} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
-                Next <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
           </div>
         )}
 
         {/* STEP 2: Configuration fields */}
         {wizardStep === 2 && (
-          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          <div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Schedule code</label>
-                <input type="text" value={form.scheduleCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, scheduleCode: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+                <input type="text" value={form.scheduleCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, scheduleCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
               </div>
               {editId && (
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Category</label>
-                  <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                  <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                     {lookups?.categories?.map((c) => (
                       <option key={c.value} value={c.value}>{c.name}</option>
                     ))}
@@ -690,7 +720,7 @@ export default function FeeSchedulesPage() {
               )}
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">State</label>
-                <select value={form.state ?? ""} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select value={form.state ?? ""} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                   <option value="">—</option>
                   {lookups?.states?.map((s) => (
                     <option key={s} value={s}>{s}</option>
@@ -699,7 +729,7 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Geo type</label>
-                <select value={form.geoType} onChange={(e) => setForm((f) => ({ ...f, geoType: Number(e.target.value), geoCode: "", geoName: "" }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select value={form.geoType} onChange={(e) => setForm((f) => ({ ...f, geoType: Number(e.target.value), geoCode: "", geoName: "" }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                   {lookups?.geoTypes?.map((g) => (
                     <option key={g.value} value={g.value}>{g.name}</option>
                   ))}
@@ -707,7 +737,7 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Billing type</label>
-                <select value={form.billingType} onChange={(e) => setForm((f) => ({ ...f, billingType: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select value={form.billingType} onChange={(e) => setForm((f) => ({ ...f, billingType: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                   {lookups?.billingTypes?.map((b) => (
                     <option key={b.value} value={b.value}>{b.name}</option>
                   ))}
@@ -715,7 +745,7 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Year</label>
-                <select value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                   {lookups?.years?.map((y) => (
                     <option key={y} value={y}>{y}</option>
                   ))}
@@ -723,11 +753,11 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Quarter</label>
-                <input type="number" min={1} max={4} value={form.quarter} onChange={(e) => setForm((f) => ({ ...f, quarter: Number(e.target.value) || 1 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+                <input type="number" min={1} max={4} value={form.quarter} onChange={(e) => setForm((f) => ({ ...f, quarter: Number(e.target.value) || 1 }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Calculation model</label>
-                <select value={form.calculationModel} onChange={(e) => setForm((f) => ({ ...f, calculationModel: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select value={form.calculationModel} onChange={(e) => setForm((f) => ({ ...f, calculationModel: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                   {lookups?.calculationModels?.map((c) => (
                     <option key={c.value} value={c.value}>{c.name}</option>
                   ))}
@@ -735,11 +765,11 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Multiplier %</label>
-                <input type="number" step={0.01} value={form.multiplierPct} onChange={(e) => setForm((f) => ({ ...f, multiplierPct: Number(e.target.value) || 0 }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+                <input type="number" step={0.01} value={form.multiplierPct} onChange={(e) => setForm((f) => ({ ...f, multiplierPct: Number(e.target.value) || 0 }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
-                <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                   {STATUS_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.name}</option>
                   ))}
@@ -747,7 +777,7 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Fallback category</label>
-                <select value={form.fallbackCategory ?? ""} onChange={(e) => setForm((f) => ({ ...f, fallbackCategory: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select value={form.fallbackCategory ?? ""} onChange={(e) => setForm((f) => ({ ...f, fallbackCategory: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                   <option value="">None</option>
                   {lookups?.categories?.map((c) => (
                     <option key={c.value} value={c.value}>{c.name}</option>
@@ -756,7 +786,7 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Adopt fee schedule</label>
-                <select value={form.adoptFeeScheduleId ?? ""} onChange={(e) => setForm((f) => ({ ...f, adoptFeeScheduleId: e.target.value || null }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm">
+                <select value={form.adoptFeeScheduleId ?? ""} onChange={(e) => setForm((f) => ({ ...f, adoptFeeScheduleId: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                   <option value="">None</option>
                   {fsOptions.filter((fs) => fs.id !== editId).map((fs) => (
                     <option key={fs.id} value={fs.id}>
@@ -767,28 +797,14 @@ export default function FeeSchedulesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Source</label>
-                <input type="text" value={form.source ?? ""} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" placeholder="e.g. CMS Medicare PFS" />
+                <input type="text" value={form.source ?? ""} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" placeholder="e.g. CMS Medicare PFS" />
               </div>
               <div className="sm:col-span-2">
                 <label className="mb-1 block text-sm font-medium text-foreground">Notes</label>
-                <textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} className="w-full rounded-lg border border-input px-3 py-2 text-sm" />
+                <textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
               </div>
             </div>
-            <div className="mt-6 flex items-center justify-between">
-              {!editId && (
-                <Button type="button" variant="outline" onClick={() => setWizardStep(1)}>
-                  <ArrowLeft className="mr-1 h-4 w-4" /> Back
-                </Button>
-              )}
-              {editId && <div />}
-              <div className="flex gap-2">
-                <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
-                <Button type="submit" onClick={handleSubmit} disabled={submitLoading} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
-                  {submitLoading ? "Saving…" : editId ? "Update" : <>Next: Import Lines <ArrowRight className="ml-1 h-4 w-4" /></>}
-                </Button>
-              </div>
-            </div>
-          </form>
+          </div>
         )}
 
         {/* STEP 3: Lines import (create flow only) */}
@@ -840,11 +856,6 @@ export default function FeeSchedulesPage() {
               <div className="py-6 text-center text-sm text-muted-foreground">No lines imported yet. Download the template and upload to add lines.</div>
             )}
 
-            <div className="mt-6 flex justify-end">
-              <Button onClick={() => { setModalOpen(false); loadList(); }} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
-                Done
-              </Button>
-            </div>
           </div>
         )}
       </Modal>
@@ -864,50 +875,50 @@ export default function FeeSchedulesPage() {
       <OverlayLoader visible={overlayLoading} />
 
       {/* Line add/edit modal */}
-      <Modal open={lineModalOpen} onClose={() => setLineModalOpen(false)} title={lineEditId ? "Edit Fee Schedule Line" : "Add Fee Schedule Line"} size="md">
+      <Modal open={lineModalOpen} onClose={() => setLineModalOpen(false)} title={lineEditId ? "Edit Fee Schedule Line" : "Add Fee Schedule Line"} size="md" position="right">
         <div className="grid grid-cols-2 gap-4">
           {(String(linesSchedule?.category) === "1" || String(linesSchedule?.category) === "UCR") && (
             <div>
               <label className="text-sm font-medium">ZIP</label>
-              <input className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.zip ?? ""} onChange={(e) => setLineForm({ ...lineForm, zip: e.target.value })} placeholder="e.g. 070403716" />
+              <input className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.zip ?? ""} onChange={(e) => setLineForm({ ...lineForm, zip: e.target.value })} placeholder="e.g. 070403716" />
             </div>
           )}
           <div>
             <label className="text-sm font-medium">CPT/HCPCS *</label>
-            <input className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.cptHcpcs} onChange={(e) => setLineForm({ ...lineForm, cptHcpcs: e.target.value })} placeholder="e.g. 99213" />
+            <input className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.cptHcpcs} onChange={(e) => setLineForm({ ...lineForm, cptHcpcs: e.target.value })} placeholder="e.g. 99213" />
           </div>
           <div>
             <label className="text-sm font-medium">Modifier</label>
-            <input className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.modifier ?? ""} onChange={(e) => setLineForm({ ...lineForm, modifier: e.target.value })} placeholder="e.g. 26" />
+            <input className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.modifier ?? ""} onChange={(e) => setLineForm({ ...lineForm, modifier: e.target.value })} placeholder="e.g. 26" />
           </div>
           <div>
             <label className="text-sm font-medium">Fee Amount *</label>
-            <input type="number" step="0.01" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.feeAmount} onChange={(e) => setLineForm({ ...lineForm, feeAmount: parseFloat(e.target.value) || 0 })} />
+            <input type="number" step="0.01" className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.feeAmount} onChange={(e) => setLineForm({ ...lineForm, feeAmount: parseFloat(e.target.value) || 0 })} />
           </div>
           <div>
             <label className="text-sm font-medium">RV</label>
-            <input type="number" step="0.0001" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.rv ?? ""} onChange={(e) => setLineForm({ ...lineForm, rv: e.target.value ? parseFloat(e.target.value) : null })} />
+            <input type="number" step="0.0001" className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.rv ?? ""} onChange={(e) => setLineForm({ ...lineForm, rv: e.target.value ? parseFloat(e.target.value) : null })} />
           </div>
           {(String(linesSchedule?.category) === "1" || String(linesSchedule?.category) === "UCR") && (
             <>
               <div>
                 <label className="text-sm font-medium">50th Percentile</label>
-                <input type="number" step="0.01" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.fee50th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee50th: e.target.value ? parseFloat(e.target.value) : null })} />
+                <input type="number" step="0.01" className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.fee50th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee50th: e.target.value ? parseFloat(e.target.value) : null })} />
               </div>
               <div>
                 <label className="text-sm font-medium">75th Percentile</label>
-                <input type="number" step="0.01" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.fee75th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee75th: e.target.value ? parseFloat(e.target.value) : null })} />
+                <input type="number" step="0.01" className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.fee75th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee75th: e.target.value ? parseFloat(e.target.value) : null })} />
               </div>
               <div>
                 <label className="text-sm font-medium">90th Percentile</label>
-                <input type="number" step="0.01" className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.fee90th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee90th: e.target.value ? parseFloat(e.target.value) : null })} />
+                <input type="number" step="0.01" className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.fee90th ?? ""} onChange={(e) => setLineForm({ ...lineForm, fee90th: e.target.value ? parseFloat(e.target.value) : null })} />
               </div>
             </>
           )}
           {(String(linesSchedule?.category) === "3" || String(linesSchedule?.category) === "WC") && (
             <div>
               <label className="text-sm font-medium">PC/TC Indicator</label>
-              <select className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={lineForm.pctcIndicator ?? ""} onChange={(e) => setLineForm({ ...lineForm, pctcIndicator: e.target.value ? Number(e.target.value) : null })}>
+              <select className="mt-1 w-full rounded-[5px] border px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" value={lineForm.pctcIndicator ?? ""} onChange={(e) => setLineForm({ ...lineForm, pctcIndicator: e.target.value ? Number(e.target.value) : null })}>
                 <option value="">—</option>
                 <option value="0">Professional (P)</option>
                 <option value="1">Technical (T)</option>
