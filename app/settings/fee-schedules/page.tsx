@@ -739,7 +739,7 @@ export default function FeeSchedulesPage() {
               {form.geoType === 1 && (
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Region</label>
-                  <input type="text" placeholder="e.g. Northern New Jersey" value={form.geoName} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                  <input type="text" placeholder="e.g. Northern New Jersey" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
                 </div>
               )}
               {/* Geo Type = Zip (2): show mapping type + zip inputs */}
@@ -755,7 +755,7 @@ export default function FeeSchedulesPage() {
                   {form.geoName !== "ZipRange" ? (
                     <div>
                       <label className="mb-1 block text-sm font-medium text-foreground">ZIP code</label>
-                      <input type="text" placeholder="e.g. 07040" value={form.geoCode} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                      <input type="text" placeholder="e.g. 07040" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
                     </div>
                   ) : (
                     <>
