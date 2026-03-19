@@ -645,25 +645,16 @@ export default function FeeSchedulesPage() {
         {!editId && wizardStep === 1 && (
           <div>
             <p className="mb-4 text-sm text-muted-foreground">Select the fee schedule category to configure.</p>
-            <div className="grid grid-cols-2 gap-3">
-              {lookups?.categories?.filter((c) => c.name !== "Custom").map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, category: c.value }))}
-                  className={`rounded-lg border-2 p-4 text-left transition-colors ${
-                    form.category === c.value ? "border-[#0066CC] bg-blue-50" : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="text-sm font-medium">{c.name}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {c.name === "Medicare" && "CMS Medicare Physician Fee Schedule"}
-                    {c.name === "UCR" && "Usual, Customary & Reasonable (percentile-based)"}
-                    {c.name === "MVA" && "Motor Vehicle Accident fee schedule"}
-                    {c.name === "WC" && "Workers' Compensation fee schedule"}
-                  </div>
-                </button>
-              ))}
+            <div>
+              <select
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: Number(e.target.value) }))}
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+              >
+                {lookups?.categories?.filter((c) => c.name !== "Custom").map((c) => (
+                  <option key={c.value} value={c.value}>{c.name}</option>
+                ))}
+              </select>
             </div>
             <div className="mt-6 flex justify-end">
               <Button onClick={() => setWizardStep(2)} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
