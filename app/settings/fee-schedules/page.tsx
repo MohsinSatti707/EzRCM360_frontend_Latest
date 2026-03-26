@@ -39,7 +39,7 @@ const defaultForm: CreateFeeScheduleCommand = {
   geoName: "",
   billingType: 0,
   year: new Date().getFullYear(),
-  quarter: 1,
+  quarter: null,
   calculationModel: 0,
   adoptFeeScheduleId: null,
   multiplierPct: 1.0,
@@ -81,6 +81,10 @@ export default function FeeSchedulesPage() {
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [createdScheduleId, setCreatedScheduleId] = useState<string | null>(null);
+  const [createdScheduleIds, setCreatedScheduleIds] = useState<string[]>([]);
+  // Multi-select state for create mode
+  const [selectedYears, setSelectedYears] = useState<number[]>([]);
+  const [selectedQuarters, setSelectedQuarters] = useState<number[]>([]); // empty = whole year
 
   // Fee schedule options for adoptFeeScheduleId dropdown
   const [fsOptions, setFsOptions] = useState<FeeScheduleDto[]>([]);
@@ -165,10 +169,14 @@ export default function FeeSchedulesPage() {
   const openCreate = () => {
     setEditId(null);
     setCreatedScheduleId(null);
+    setCreatedScheduleIds([]);
     setWizardStep(1);
+    const currentYear = new Date().getFullYear();
+    setSelectedYears([lookups?.years?.find((y) => y === currentYear) ?? lookups?.years?.[0] ?? currentYear]);
+    setSelectedQuarters([]);
     setForm({
       ...defaultForm,
-      year: lookups?.years?.[0] ?? new Date().getFullYear(),
+      year: lookups?.years?.[0] ?? currentYear,
     });
     setFormError(null);
     setWizardLinesData(null);
@@ -211,10 +219,21 @@ export default function FeeSchedulesPage() {
         loadList();
         toast.success("Updated successfully.");
       } else {
-        const newId = await api.create(form);
-        setCreatedScheduleId(newId);
+        // Create one fee schedule per year × quarter combination
+        const years = selectedYears.length > 0 ? selectedYears : [form.year];
+        const quarters = selectedQuarters.length > 0 ? selectedQuarters : [null]; // null = whole year
+        const ids: string[] = [];
+        for (const y of years) {
+          for (const q of quarters) {
+            const newId = await api.create({ ...form, year: y, quarter: q });
+            ids.push(newId);
+          }
+        }
+        setCreatedScheduleIds(ids);
+        setCreatedScheduleId(ids[0] ?? null);
         loadList();
-        toast.success("Fee schedule created. You can now import lines.");
+        const count = ids.length;
+        toast.success(`${count} fee schedule${count > 1 ? "s" : ""} created. You can now import lines.`);
         setWizardStep(3);
       }
     } catch (err) {
@@ -618,7 +637,7 @@ export default function FeeSchedulesPage() {
                       <div className="max-w-[90px] truncate">{row.state ?? "—"}</div>
                     </TableCell>
                     <TableCell className="w-[110px] min-w-[110px]">
-                      <div className="max-w-[90px] truncate">{row.year} / {row.quarter}</div>
+                      <div className="max-w-[90px] truncate">{row.year}{row.quarter != null ? ` / Q${row.quarter}` : ""}</div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select
@@ -779,18 +798,81 @@ export default function FeeSchedulesPage() {
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Year</label>
-                <select value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                  {lookups?.years?.map((y) => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Quarter</label>
-                <input type="number" min={1} max={4} value={form.quarter} onChange={(e) => setForm((f) => ({ ...f, quarter: Number(e.target.value) || 1 }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-              </div>
+              {editId ? (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Year</label>
+                    <select value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                      {lookups?.years?.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Quarter</label>
+                    <select value={form.quarter ?? ""} onChange={(e) => setForm((f) => ({ ...f, quarter: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                      <option value="">Whole Year</option>
+                      <option value="1">Q1</option>
+                      <option value="2">Q2</option>
+                      <option value="3">Q3</option>
+                      <option value="4">Q4</option>
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Year(s)</label>
+                    <div className="max-h-36 overflow-y-auto rounded-[5px] border border-input p-2">
+                      {lookups?.years?.map((y) => (
+                        <label key={y} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedYears.includes(y)}
+                            onChange={() => setSelectedYears((prev) =>
+                              prev.includes(y) ? prev.filter((v) => v !== y) : [...prev, y].sort()
+                            )}
+                            className="rounded border-input"
+                          />
+                          <span className="text-sm">{y}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Quarter(s)</label>
+                    <div className="rounded-[5px] border border-input p-2 space-y-1">
+                      <label className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedQuarters.length === 0}
+                          onChange={() => setSelectedQuarters([])}
+                          className="rounded border-input"
+                        />
+                        <span className="text-sm font-medium">Whole Year</span>
+                      </label>
+                      <hr className="border-input" />
+                      {[1, 2, 3, 4].map((q) => (
+                        <label key={q} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedQuarters.includes(q)}
+                            onChange={() => setSelectedQuarters((prev) => {
+                              if (prev.includes(q)) return prev.filter((v) => v !== q);
+                              return [...prev, q].sort();
+                            })}
+                            className="rounded border-input"
+                          />
+                          <span className="text-sm">Q{q}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {selectedQuarters.length === 0 && (
+                      <p className="mt-1 text-xs text-muted-foreground">Applies to the entire year.</p>
+                    )}
+                  </div>
+                </>
+              )}
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Calculation model</label>
                 <select value={form.calculationModel} onChange={(e) => setForm((f) => ({ ...f, calculationModel: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
@@ -826,7 +908,7 @@ export default function FeeSchedulesPage() {
                   <option value="">None</option>
                   {fsOptions.filter((fs) => fs.id !== editId).map((fs) => (
                     <option key={fs.id} value={fs.id}>
-                      {fs.scheduleCode ?? "—"} — {categoryLabel(fs.category)} {fs.state ? `(${fs.state})` : ""} {fs.year}/Q{fs.quarter}
+                      {fs.scheduleCode ?? "—"} — {categoryLabel(fs.category)} {fs.state ? `(${fs.state})` : ""} {fs.year}{fs.quarter != null ? `/Q${fs.quarter}` : ""}
                     </option>
                   ))}
                 </select>
@@ -856,9 +938,14 @@ export default function FeeSchedulesPage() {
               <Button onClick={() => wizardFileRef.current?.click()} disabled={wizardImportLoading} className="h-9 text-sm gap-1.5 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
                 <Upload className="h-4 w-4" /> {wizardImportLoading ? "Importing…" : "Import Lines"}
               </Button>
-              <input ref={wizardFileRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => {
+              <input ref={wizardFileRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={async (e) => {
                 const f = e.target.files?.[0];
-                if (f && createdScheduleId) handleImportLines(f, createdScheduleId, true);
+                if (!f) return;
+                // Import into ALL created fee schedules
+                const ids = createdScheduleIds.length > 0 ? createdScheduleIds : (createdScheduleId ? [createdScheduleId] : []);
+                for (const id of ids) {
+                  await handleImportLines(f, id, id === ids[ids.length - 1]);
+                }
               }} />
               {wizardLinesData && <span className="text-xs text-muted-foreground ml-auto">{wizardLinesData.totalCount} total lines</span>}
             </div>

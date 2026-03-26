@@ -22,6 +22,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { PayerFormModal } from "./PayerFormModal";
+import { AddPlanModal } from "./AddPlanModal";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { payersApi } from "@/lib/services/payers";
 import { lookupsApi } from "@/lib/services/lookups";
@@ -72,6 +73,7 @@ export default function PayersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
+  const [addPlanOpen, setAddPlanOpen] = useState(false);
 
   const api = payersApi();
   const toast = useToast();
@@ -149,13 +151,14 @@ export default function PayersPage() {
     const addresses = (form.addresses ?? []).filter((a) => (a.addressLine1 ?? "").trim() !== "");
     const phoneNumbers = (form.phoneNumbers ?? []).filter((p) => (p.phoneNumber ?? "").trim() !== "");
     const emails = (form.emails ?? []).filter((e) => (e.emailAddress ?? "").trim() !== "");
-    const planIds = form.planIds ?? [];
+    // Plan linking is managed from Plan Configuration page.
+    // Do not send planIds — backend auto-unlinks when entity type changes to non-Insurance.
     const payload = {
       ...form,
       addresses: addresses.length ? addresses : undefined,
       phoneNumbers: phoneNumbers.length ? phoneNumbers : undefined,
       emails: emails.length ? emails : undefined,
-      planIds: planIds.length ? planIds : undefined,
+      planIds: undefined,
     };
     setSubmitLoading(true);
     setOverlayLoading(true);
@@ -455,7 +458,26 @@ export default function PayersPage() {
         onSubmit={handleSubmit}
         loading={submitLoading}
         error={formError}
+        onAddNewPlan={() => setAddPlanOpen(true)}
       />
+
+      {editId && (
+        <AddPlanModal
+          open={addPlanOpen}
+          onClose={() => setAddPlanOpen(false)}
+          payerId={editId}
+          payerName={form.payerName}
+          onSuccess={async () => {
+            // Refresh plan options so linked plans list updates
+            lookupsApi().getPlans().then(setPlanOptions).catch(() => {});
+            // Refresh payer detail to get updated planIds
+            try {
+              const detail = await api.getById(editId);
+              setForm((f) => ({ ...f, planIds: detail.planIds ?? [] }));
+            } catch { /* ignore */ }
+          }}
+        />
+      )}
 
       <ConfirmDialog
         open={!!deleteId}

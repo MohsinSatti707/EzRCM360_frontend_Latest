@@ -50,6 +50,7 @@ export interface PayerFormModalProps {
   onSubmit: () => void;
   loading: boolean;
   error: string | null;
+  onAddNewPlan?: () => void;
 }
 
 export function PayerFormModal({
@@ -63,6 +64,7 @@ export function PayerFormModal({
   onSubmit,
   loading,
   error,
+  onAddNewPlan,
 }: PayerFormModalProps) {
   const insuranceEntityTypeValue = entityTypeOptions.find(
     (opt) => opt.label.toLowerCase() === "insurance"
@@ -83,9 +85,6 @@ export function PayerFormModal({
     onFormChange({ ...form, phoneNumbers: list });
   const setEmails = (list: PayerEmailRequest[]) =>
     onFormChange({ ...form, emails: list });
-  const setPlanIds = (ids: string[]) =>
-    onFormChange({ ...form, planIds: ids });
-
   const addAddress = () => setAddresses([...addresses, { ...emptyAddress }]);
   const removeAddress = (index: number) =>
     setAddresses(addresses.filter((_, i) => i !== index));
@@ -113,13 +112,8 @@ export function PayerFormModal({
     setEmails(next);
   };
 
-  const togglePlan = (planId: string) => {
-    if (planIds.includes(planId)) {
-      setPlanIds(planIds.filter((id) => id !== planId));
-    } else {
-      setPlanIds([...planIds, planId]);
-    }
-  };
+  // Plans linked to this payer (read-only display)
+  const linkedPlans = planOptions.filter((p) => planIds.includes(p.id));
 
   return (
     <DrawerForm
@@ -346,32 +340,39 @@ export function PayerFormModal({
           {isInsurance && (
             <div className="space-y-3">
               <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Linked plans</h3>
-              <p className="text-sm text-muted-foreground">
-                Select plans that belong to this payer. Plans are scoped to your organization.
-              </p>
-              {planOptions.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No plans available. Create plans first under Plan Configuration.
-                </p>
-              )}
-              <div className="max-h-48 overflow-y-auto rounded-lg border border-[#E2E8F0] p-3">
-                <div className="space-y-2">
-                  {planOptions.map((plan) => (
-                    <label
-                      key={plan.id}
-                      className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-[#F7F8F9]"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={planIds.includes(plan.id)}
-                        onChange={() => togglePlan(plan.id)}
-                        className="rounded border-input"
-                      />
-                      <span className="text-sm text-foreground">{plan.displayName}</span>
-                    </label>
-                  ))}
+              {linkedPlans.length > 0 ? (
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-[#E2E8F0] p-3">
+                  <div className="space-y-2">
+                    {linkedPlans.map((plan) => (
+                      <div
+                        key={plan.id}
+                        className="flex items-center gap-2 rounded bg-[#F7F8F9] px-3 py-2"
+                      >
+                        <span className="text-sm text-foreground">{plan.displayName}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="rounded-lg border border-dashed border-[#E2E8F0] p-4 text-center">
+                  <p className="mb-3 text-sm text-muted-foreground">
+                    No plans linked to this payer.
+                  </p>
+                  {onAddNewPlan && editId && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={onAddNewPlan}
+                    >
+                      Add new plan
+                    </Button>
+                  )}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    To link existing plans, go to Plan Configuration.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

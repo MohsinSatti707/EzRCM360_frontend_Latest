@@ -9,7 +9,7 @@ export interface FeeScheduleDto {
   state?: string | null;
   status: number;
   year: number;
-  quarter: number;
+  quarter: number | null;
 }
 
 export interface FeeScheduleDetailDto {
@@ -22,7 +22,7 @@ export interface FeeScheduleDetailDto {
   geoName?: string | null;
   billingType: number;
   year: number;
-  quarter: number;
+  quarter: number | null;
   calculationModel: number;
   adoptFeeScheduleId?: string | null;
   multiplierPct: number;
@@ -66,7 +66,7 @@ export interface CreateFeeScheduleCommand {
   geoName?: string | null;
   billingType: number;
   year: number;
-  quarter: number;
+  quarter: number | null;
   calculationModel: number;
   adoptFeeScheduleId?: string | null;
   multiplierPct: number;
