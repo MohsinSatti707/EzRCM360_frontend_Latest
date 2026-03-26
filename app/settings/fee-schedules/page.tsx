@@ -798,6 +798,14 @@ export default function FeeSchedulesPage() {
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Calculation model</label>
+                <select value={form.calculationModel} onChange={(e) => setForm((f) => ({ ...f, calculationModel: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                  {lookups?.calculationModels?.map((c) => (
+                    <option key={c.value} value={c.value}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
               {editId ? (
                 <>
                   <div>
@@ -823,7 +831,7 @@ export default function FeeSchedulesPage() {
                 <>
                   <div>
                     <label className="mb-1 block text-sm font-medium text-foreground">Year(s)</label>
-                    <div className="max-h-36 overflow-y-auto rounded-[5px] border border-input p-2">
+                    <div className="max-h-48 overflow-y-auto rounded-[5px] border border-input p-2">
                       {lookups?.years?.map((y) => (
                         <label key={y} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted cursor-pointer">
                           <input
@@ -841,7 +849,7 @@ export default function FeeSchedulesPage() {
                   </div>
                   <div>
                     <label className="mb-1 block text-sm font-medium text-foreground">Quarter(s)</label>
-                    <div className="rounded-[5px] border border-input p-2 space-y-1">
+                    <div className="max-h-48 overflow-y-auto rounded-[5px] border border-input p-2 space-y-1">
                       <label className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted cursor-pointer">
                         <input
                           type="checkbox"
@@ -873,14 +881,6 @@ export default function FeeSchedulesPage() {
                   </div>
                 </>
               )}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Calculation model</label>
-                <select value={form.calculationModel} onChange={(e) => setForm((f) => ({ ...f, calculationModel: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                  {lookups?.calculationModels?.map((c) => (
-                    <option key={c.value} value={c.value}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Multiplier %</label>
                 <input type="number" step={0.01} value={form.multiplierPct} onChange={(e) => setForm((f) => ({ ...f, multiplierPct: Number(e.target.value) || 0 }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
