@@ -21,6 +21,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { feeSchedulesApi } from "@/lib/services/feeSchedules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
@@ -829,46 +830,28 @@ export default function FeeSchedulesPage() {
                 </>
               ) : (
                 <>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Year(s)</label>
-                    <div className="max-h-48 overflow-y-auto rounded-[5px] border border-input p-2">
-                      {lookups?.years?.map((y) => (
-                        <label key={y} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedYears.includes(y)}
-                            onChange={() => setSelectedYears((prev) =>
-                              prev.includes(y) ? prev.filter((v) => v !== y) : [...prev, y].sort()
-                            )}
-                            className="rounded border-input"
-                          />
-                          <span className="text-sm">{y}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
+                  <MultiSelectDropdown
+                    label="Year(s)"
+                    options={lookups?.years?.map((y) => ({ value: y, label: String(y) })) ?? []}
+                    selected={selectedYears}
+                    onChange={setSelectedYears}
+                    placeholder="Select year(s)"
+                  />
                   <div>
                     <label className="mb-1 block text-sm font-medium text-foreground">Quarter(s)</label>
-                    <div className="max-h-48 overflow-y-auto rounded-[5px] border border-input p-2 space-y-1">
-                      <label className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedQuarters.length === 0}
-                          onChange={() => setSelectedQuarters([])}
-                          className="rounded border-input"
-                        />
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" checked={selectedQuarters.length === 0} onChange={() => setSelectedQuarters([])} className="rounded border-input" />
                         <span className="text-sm font-medium">Whole Year</span>
                       </label>
-                      <hr className="border-input" />
                       {[1, 2, 3, 4].map((q) => (
-                        <label key={q} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted cursor-pointer">
+                        <label key={q} className="flex items-center gap-1.5 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={selectedQuarters.includes(q)}
-                            onChange={() => setSelectedQuarters((prev) => {
-                              if (prev.includes(q)) return prev.filter((v) => v !== q);
-                              return [...prev, q].sort();
-                            })}
+                            onChange={() => setSelectedQuarters((prev) =>
+                              prev.includes(q) ? prev.filter((v) => v !== q) : [...prev, q].sort()
+                            )}
                             className="rounded border-input"
                           />
                           <span className="text-sm">Q{q}</span>
