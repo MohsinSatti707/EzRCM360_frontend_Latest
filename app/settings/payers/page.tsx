@@ -203,9 +203,9 @@ export default function PayersPage() {
       const newId = await api.create(payload);
       await reload();
       toast.success("Payer created. Now add a plan.");
-      // Switch to edit mode for the new payer and open the Add Plan modal
+      // Close the payer modal first, then open the Add Plan modal
+      setModalOpen(false);
       setEditId(newId);
-      setForm((f) => ({ ...f }));
       setAddPlanOpen(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
