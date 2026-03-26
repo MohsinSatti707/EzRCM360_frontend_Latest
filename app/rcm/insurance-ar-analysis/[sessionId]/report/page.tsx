@@ -58,12 +58,11 @@ const DUMMY_REPORT: ArAnalysisReportDto = {
 };
 
 function formatCurrency(n: number) {
-  if (n >= 1000) return `$${(n / 1000).toFixed(0)}K`;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(n);
 }
 
@@ -127,6 +126,28 @@ export default function InsuranceArAnalysisReportPage() {
       return s;
     }
   };
+  const formatSessionDetails = (sessionName, uploadedAt) => {
+  // Split session name
+  const parts = sessionName?.split(" - ") || [];
+  const name = parts.slice(0, -1).join(" - ") || sessionName;
+
+  // Format uploadedAt
+  let formattedDate = "";
+  if (uploadedAt) {
+    const d = new Date(uploadedAt);
+
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+
+    formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
+  }
+
+  return { name, date: formattedDate };
+};
 
   if (loading || !report) {
     return (
@@ -138,14 +159,17 @@ export default function InsuranceArAnalysisReportPage() {
   }
 
   const { analysisSummary, totalClaimsAnalyzed, totalUnderpayment, riskAdjustedRecovery } = report;
-
+const formattedSession = formatSessionDetails(
+  analysisSummary.sessionName,
+  analysisSummary.uploadedAt
+);
   return (
     <PageShell
       breadcrumbs={[
         { label: "Insurance AR Analysis", href: "/rcm/insurance-ar-analysis" },
         { label: `${analysisSummary.practiceName} – ${formatDate(analysisSummary.uploadedAt)}` },
       ]}
-      title={analysisSummary.sessionName}
+      title={`${formattedSession.name} - ${formattedSession.date}`}
       description={`AR Analysis report for ${analysisSummary.practiceName}`}
       titleWrapperClassName="px-6"
       actions={
@@ -170,7 +194,9 @@ export default function InsuranceArAnalysisReportPage() {
           <div className="space-y-0">
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Session Name</span>
-              <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%] pr-[10px]">{analysisSummary.sessionName}</span>
+              <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%] pr-[10px]">
+  {formattedSession.name} - {formattedSession.date}
+</span>
             </div>
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Practice Name</span>
@@ -341,7 +367,7 @@ export default function InsuranceArAnalysisReportPage() {
                   {formatCurrency(report.recoveryProjectionSummary.maxPotentialRecovery)}
                 </div>
                 <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-muted-foreground">
-                  Maximum Potential Recovery (100%)
+                  Maximum Potential Recovery
                 </div>
               </div>
               <div className=" rounded-lg p-6 sm:p-7 text-center border-2 border-[#16A34A] bg-green-50/50">
