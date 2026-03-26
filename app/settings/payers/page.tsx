@@ -181,6 +181,42 @@ export default function PayersPage() {
     }
   }, [editId, form, api, reload]);
 
+  const handleSubmitAndAddPlan = useCallback(async () => {
+    setFormError(null);
+    if (!form.payerName.trim()) {
+      setFormError("Payer name is required.");
+      return;
+    }
+    const addresses = (form.addresses ?? []).filter((a) => (a.addressLine1 ?? "").trim() !== "");
+    const phoneNumbers = (form.phoneNumbers ?? []).filter((p) => (p.phoneNumber ?? "").trim() !== "");
+    const emails = (form.emails ?? []).filter((e) => (e.emailAddress ?? "").trim() !== "");
+    const payload = {
+      ...form,
+      addresses: addresses.length ? addresses : undefined,
+      phoneNumbers: phoneNumbers.length ? phoneNumbers : undefined,
+      emails: emails.length ? emails : undefined,
+      planIds: undefined,
+    };
+    setSubmitLoading(true);
+    setOverlayLoading(true);
+    try {
+      const newId = await api.create(payload);
+      await reload();
+      toast.success("Payer created. Now add a plan.");
+      // Switch to edit mode for the new payer and open the Add Plan modal
+      setEditId(newId);
+      setForm((f) => ({ ...f }));
+      setAddPlanOpen(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Save failed.";
+      setFormError(msg);
+      toast.error(msg);
+    } finally {
+      setSubmitLoading(false);
+      setOverlayLoading(false);
+    }
+  }, [form, api, reload]);
+
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
@@ -456,6 +492,7 @@ export default function PayersPage() {
         entityTypeOptions={entityTypes}
         planOptions={planOptions}
         onSubmit={handleSubmit}
+        onSubmitAndAddPlan={handleSubmitAndAddPlan}
         loading={submitLoading}
         error={formError}
         onAddNewPlan={() => setAddPlanOpen(true)}

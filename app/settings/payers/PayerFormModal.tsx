@@ -48,6 +48,7 @@ export interface PayerFormModalProps {
   entityTypeOptions: { value: string; label: string }[];
   planOptions: PlanLookupDto[];
   onSubmit: () => void;
+  onSubmitAndAddPlan?: () => void;
   loading: boolean;
   error: string | null;
   onAddNewPlan?: () => void;
@@ -62,6 +63,7 @@ export function PayerFormModal({
   entityTypeOptions,
   planOptions,
   onSubmit,
+  onSubmitAndAddPlan,
   loading,
   error,
   onAddNewPlan,
@@ -134,6 +136,16 @@ export function PayerFormModal({
               </>
             )}
           </Button>
+          {!editId && isInsurance && onSubmitAndAddPlan && (
+            <Button
+              type="button"
+              onClick={onSubmitAndAddPlan}
+              disabled={loading}
+              className="h-10 rounded-[5px] px-[18px] py-3 bg-[#0066CC]/80 hover:bg-[#0066CC]/70 text-white font-aileron text-[14px]"
+            >
+              {loading ? "Saving…" : "Add Payer & Add Plan"}
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={onClose}
