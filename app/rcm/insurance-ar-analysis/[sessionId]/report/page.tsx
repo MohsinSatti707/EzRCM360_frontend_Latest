@@ -126,7 +126,7 @@ export default function InsuranceArAnalysisReportPage() {
       return s;
     }
   };
-  const formatSessionDetails = (sessionName, uploadedAt) => {
+  const formatSessionDetails = (sessionName: string, uploadedAt: string) => {
   // Split session name
   const parts = sessionName?.split(" - ") || [];
   const name = parts.slice(0, -1).join(" - ") || sessionName;
