@@ -3,7 +3,7 @@ import { ComingSoonCard } from "@/components/ui/ComingSoonCard";
 
 export default function ContactSupportPage() {
   return (
-    <PageShell title="Contact Support" description="Get in touch with the EzRCM360 support team.">
+    <PageShell title="Contact Support" description="Get in touch with the EzRCM360 support team." titleWrapperClassName="mt-4 px-6">
       <ComingSoonCard
         icon={
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -13,6 +13,7 @@ export default function ContactSupportPage() {
         title="Coming Soon"
         description="Support ticket submission, live chat, and direct contact options will be available here."
         iconBg="from-emerald-100 to-emerald-200"
+        className="mt-4 mx-6"
       />
     </PageShell>
   );

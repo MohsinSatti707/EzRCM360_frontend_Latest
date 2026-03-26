@@ -3,7 +3,7 @@ import { ComingSoonCard } from "@/components/ui/ComingSoonCard";
 
 export default function FeedbackPage() {
   return (
-    <PageShell title="Feedback & Feature Requests" description="Share your feedback and suggest new features.">
+    <PageShell title="Feedback & Feature Requests" description="Share your feedback and suggest new features." titleWrapperClassName="mt-4 px-6">
       <ComingSoonCard
         icon={
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -13,6 +13,7 @@ export default function FeedbackPage() {
         title="Coming Soon"
         description="Submit feedback, request new features, and vote on community suggestions here."
         iconBg="from-violet-100 to-violet-200"
+        className="mt-4 mx-6"
       />
     </PageShell>
   );

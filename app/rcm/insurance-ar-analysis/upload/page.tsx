@@ -237,7 +237,7 @@ export default function InsuranceArAnalysisUploadPage() {
 
         {step === 1 && (
           <Card className="animate-fade-in-up overflow-hidden border-none">
-          <div className="space-y-4 overflow-auto h-[calc(100vh-341px)]">
+          <div className="space-y-4 overflow-auto h-[calc(100vh-347px)]">
             <div className="space-y-3">
               <label className="block text-[14px] font-['Aileron'] font-medium text-foreground">Validation Mode</label>
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
@@ -275,17 +275,17 @@ export default function InsuranceArAnalysisUploadPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="block text-[14px] font-['Aileron'] font-semibold text-foreground">Practice Name</label>
+              <label className="block text-[14px] font-['Aileron'] font-semibold text-foreground">Practice Name <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={practiceName}
                 onChange={(e) => setPracticeName(e.target.value)}
                 placeholder="e.g., Medical Billing"
-                className="h-11 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-4 text-[14px] font-['Aileron'] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="h-11 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-4 text-[14px] font-['Aileron'] placeholder:text-muted-foreground focus-visible:outline-none"
               />
             </div>
 
-            <div className="space-y-0">
+            <div className="space-y-2 mt-2">
               <label className="block text-[14px] font-['Aileron'] font-semibold text-foreground">
                 Upload AR Intake File
               </label>
@@ -354,7 +354,7 @@ export default function InsuranceArAnalysisUploadPage() {
 
  
           </div>
-          <div className="flex flex-wrap gap-3 border-t border-border pt-3">
+          <div className="flex flex-wrap gap-3 pt-4">
               <Button
                 onClick={validationResult?.success ? handleNextFromStep1 : handleCreateSession}
                 disabled={!practiceName.trim() || !intakeFile || submitLoading}
@@ -379,55 +379,58 @@ export default function InsuranceArAnalysisUploadPage() {
         )}
 
         {step === 2 && (
-          <Card className="animate-fade-in-up overflow-hidden">
-          <div className="space-y-8 p-6 sm:p-8">
-            <div className="space-y-4">
-              <h3 className="text-base font-semibold text-foreground">
-                Upload PM Source Reports (Required for Audit)
-              </h3>
-              <FileUploadZone
-                label="Drag and Drop PM Source Reports"
-                hint="Accepted formats: XLSX, XLS"
-                multiple
-                onFiles={setPmFiles}
-              />
-            </div>
-            {pmFiles.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-foreground">Uploaded File(s)</h4>
-                <ul className="space-y-2">
-                  {pmFiles.map((f, i) => (
-                    <li
-                      key={i}
-                      className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 transition-colors"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
-                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-foreground">{f.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          File size: {(f.size / 1024).toFixed(2)}KB
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setPmFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-border hover:text-muted-foreground"
-                        aria-label="Remove file"
-                      >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+          <Card className="animate-fade-in-up overflow-hidden border-none">
+          <div className="h-[calc(100vh-348px)] overflow-auto">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h3 className="text-base font-semibold text-foreground">
+                  Upload PM Source Reports (Required for Audit)
+                </h3>
+                <FileUploadZone
+                  label="Drag and Drop PM Source Reports"
+                  hint="Accepted formats: XLSX, XLS"
+                  multiple
+                  onFiles={setPmFiles}
+                />
               </div>
-            )}
-            <div className="flex flex-wrap gap-3 border-t border-border pt-6">
+              {pmFiles.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-foreground">Uploaded File(s)</h4>
+                  <ul className="space-y-2">
+                    {pmFiles.map((f, i) => (
+                      <li
+                        key={i}
+                        className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 transition-colors"
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-foreground">{f.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            File size: {(f.size / 1024).toFixed(2)}KB
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setPmFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-border hover:text-muted-foreground"
+                          aria-label="Remove file"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3 pt-4">
               <Button
                 onClick={handleUploadPmReports}
                 disabled={pmFiles.length === 0 || submitLoading}
@@ -443,53 +446,55 @@ export default function InsuranceArAnalysisUploadPage() {
                 <Button variant="secondary">Cancel</Button>
               </Link>
             </div>
-          </div>
           </Card>
         )}
 
         {step === 3 && sessionDetail && (
-          <Card className="animate-fade-in-up overflow-hidden">
-          <div className="space-y-8 p-6 sm:p-8">
-            <h2 className="text-[18px] font-['Aileron'] font-semibold text-foreground">Review & Create Session</h2>
-            <div className="space-y-0">
-              <div className="flex justify-between py-3 border-b border-border">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Session Name</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.sessionName}</span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-border">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Practice Name</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.practiceName}</span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-border">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Uploaded by</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.uploadedBy ?? "—"}</span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-border">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Uploaded at</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{formatDate(sessionDetail.uploadedAt)}</span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-border">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Source Type</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.sourceType}</span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-border">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Intake Template File</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.intakeTemplateFile ?? "—"}</span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-border">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">PM Source Report File</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">
-                  {sessionDetail.pmSourceReportFiles.length > 0 ? sessionDetail.pmSourceReportFiles.join(", ") : "—"}
-                </span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-border">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Total Rows</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">
-                  {sessionDetail.totalRows != null ? `${sessionDetail.totalRows} Rows` : "—"}
-                </span>
+          <Card className="animate-fade-in-up overflow-hidden border-none">
+          <div className="h-[calc(100vh-348px)] overflow-auto">
+            <div className="space-y-4">
+              <h2 className="text-[18px] font-['Aileron'] font-semibold text-foreground">Review & Create Session</h2>
+              <div className="space-y-0 px-2">
+                <div className="flex justify-between py-3 border-b border-border">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Session Name</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.sessionName}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-border">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Practice Name</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.practiceName}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-border">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Uploaded by</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.uploadedBy ?? "—"}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-border">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Uploaded at</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{formatDate(sessionDetail.uploadedAt)}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-border">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Source Type</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.sourceType}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-border">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Intake Template File</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.intakeTemplateFile ?? "—"}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-border">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">PM Source Report File</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">
+                    {sessionDetail.pmSourceReportFiles.length > 0 ? sessionDetail.pmSourceReportFiles.join(", ") : "—"}
+                  </span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-border">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Total Rows</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">
+                    {sessionDetail.totalRows != null ? `${sessionDetail.totalRows} Rows` : "—"}
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="flex flex-wrap gap-3 border-t border-border pt-6">
+          </div>
+            <div className="flex flex-wrap gap-3 pt-4">
               <Button
                 onClick={handleStartAnalysis}
                 disabled={submitLoading}
@@ -505,7 +510,6 @@ export default function InsuranceArAnalysisUploadPage() {
                 <Button variant="secondary">Cancel</Button>
               </Link>
             </div>
-          </div>
           </Card>
         )}
       </div>
@@ -533,8 +537,8 @@ function ValidationStatus({
   const allErrors = [...result.columnErrors, ...result.rowErrors];
 
   return (
-    <div className="space-y-4 rounded-lg border border-border bg-muted p-4">
-      <h4 className="font-semibold text-foreground">
+    <div className="space-y-4">
+      <h4 className="font-bold text-foreground text-xl">
         {loading ? "Validation In Progress" : result.success ? "Validation Completed" : "Validation In Progress"}
       </h4>
       {loading && (
@@ -571,10 +575,10 @@ function ValidationStatus({
       {!loading && (
         <>
           <div>
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-[#25213B]">
               {loading ? "Validating Column(s)" : "Column(s) Validation"}
             </p>
-            <div className="mt-1 flex items-center gap-2">
+            <div className="mt-5 flex items-center gap-2">
               <div className="h-2 flex-1 rounded-full bg-border">
                 <div
                   className="h-full rounded-full bg-primary-600"
@@ -584,15 +588,17 @@ function ValidationStatus({
               <span className="text-xs text-muted-foreground">{colOk ? "Completed" : "10%"}</span>
             </div>
             {colOk ? (
-              <div className="mt-2 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
-                <svg className="h-5 w-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <div className="mt-3 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-[#00A63E]">
+                <svg className="h-7 w-7 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                     clipRule="evenodd"
                   />
                 </svg>
-                Validation Successful! {result.columnValidatedCount} column(s) validated; no errors found
+                <div className="flex flex-col">
+                <span className="text-[16px]">Validation Successful! </span><span className="text-[#00A63E]">{result.columnValidatedCount} column(s) validated; no errors found</span>
+              </div>
               </div>
             ) : result.columnErrors.length > 0 ? (
               <div className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
@@ -609,10 +615,10 @@ function ValidationStatus({
           </div>
 
           <div>
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-[#25213B]">
               {loading ? "Validating Row(s)" : "Row(s) Validation"}
             </p>
-            <div className="mt-1 flex items-center gap-2">
+            <div className="mt-5 flex items-center gap-2">
               <div className="h-2 flex-1 rounded-full bg-border">
                 <div
                   className="h-full rounded-full bg-primary-600"
@@ -626,15 +632,17 @@ function ValidationStatus({
               </span>
             </div>
             {rowOk ? (
-              <div className="mt-2 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
-                <svg className="h-5 w-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <div className="mt-3 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-[#00A63E]">
+                <svg className="h-7 w-7 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                     clipRule="evenodd"
                   />
                 </svg>
-                Validation Successful! {result.rowValidatedCount} row(s) validated; no errors found
+                <div className="flex flex-col">
+                <span className="text-[16px]">Validation Successful! </span><span className="text-[#00A63E]">{result.rowValidatedCount} row(s) validated; no errors found</span>
+              </div>
               </div>
             ) : result.rowErrors.length > 0 ? (
               <div className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">

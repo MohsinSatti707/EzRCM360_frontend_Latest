@@ -656,10 +656,11 @@ export default function InsuranceArAnalysisProcessingPage() {
       ]}
       title="Data Upload and AR Analysis Session Creation"
       description="Review session summary and complete any required actions."
+      titleWrapperClassName="px-6 mt-4"
     >
-      <div className="space-y-6">
+      <div className="space-y-6 px-6 h-[calc(100vh-235px)] overflow-auto">
         {session && (
-          <Card className="animate-fade-in-up border border-[#E2E8F0] bg-card p-6 sm:p-8">
+          <Card className="animate-fade-in-up border border-[#E2E8F0] bg-card p-6 sm:p-8 mt-2">
             <h3 className="mb-6 text-[13px] font-['Aileron'] font-semibold uppercase tracking-wide text-[#64748B]">
               SESSION SUMMARY
             </h3>

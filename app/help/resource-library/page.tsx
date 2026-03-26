@@ -3,7 +3,7 @@ import { ComingSoonCard } from "@/components/ui/ComingSoonCard";
 
 export default function ResourceLibraryPage() {
   return (
-    <PageShell title="Resource Library" description="Guides, documentation, and learning resources.">
+    <PageShell title="Resource Library" description="Guides, documentation, and learning resources." titleWrapperClassName="mt-4 px-6">
       <ComingSoonCard
         icon={
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -13,6 +13,7 @@ export default function ResourceLibraryPage() {
         title="Coming Soon"
         description="User guides, video tutorials, FAQs, and best practice documentation will be available here."
         iconBg="from-blue-100 to-blue-200"
+        className="mt-4 mx-6"
       />
     </PageShell>
   );

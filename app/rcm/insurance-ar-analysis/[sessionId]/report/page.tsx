@@ -147,6 +147,7 @@ export default function InsuranceArAnalysisReportPage() {
       ]}
       title={analysisSummary.sessionName}
       description={`AR Analysis report for ${analysisSummary.practiceName}`}
+      titleWrapperClassName="px-6"
       actions={
         <Button
           onClick={handleExport}
@@ -163,9 +164,9 @@ export default function InsuranceArAnalysisReportPage() {
           <strong>Dummy report (preview).</strong> This is sample data for UI preview. Use &quot;Refresh status&quot; or complete the pipeline to see the real report.
         </div>
       )}
-      <div className="space-y-8 pb-10">
-        <Card className="border-none overflow-hidden p-0 ">
-          <h2 className="mb-1 text-[16px] font-['Aileron'] font-bold text-foreground">Analysis Summary</h2>
+      <div className="space-y-8 px-6 h-[calc(100vh-237px)] overflow-auto mt-3">
+        <Card className="border-none overflow-hidden p-0">
+          <h2 className="mb-0 text-[17px] font-['Aileron'] font-bold text-foreground">Analysis Summary</h2>
           <div className="space-y-0">
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Session Name</span>
@@ -209,25 +210,25 @@ export default function InsuranceArAnalysisReportPage() {
         </Card>
 
         <section>
-          <h2 className="mb-5 text-[16px] font-['Aileron'] font-bold text-foreground">Analysis Report</h2>
+          <h2 className="mb-3 text-[17px] font-['Aileron'] font-bold text-foreground">Analysis Report</h2>
           <div className="grid gap-5 sm:grid-cols-3">
             <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
               <div className="text-[32px] font-bold font-['Aileron'] text-foreground mb-1">
                 {totalClaimsAnalyzed.toLocaleString()}
               </div>
-              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total Claims Analyzed</div>
+              <div className="text-[15px] font-['Aileron'] text-muted-foreground">Total Claims Analyzed</div>
             </div>
             <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
               <div className="text-[32px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
                 {formatCurrency(totalUnderpayment)}
               </div>
-              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total Underpayment</div>
+              <div className="text-[15px] font-['Aileron'] text-muted-foreground">Total Underpayment</div>
             </div>
             <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
               <div className="text-[32px] font-bold font-['Aileron'] text-[#16A34A] mb-1">
                 {formatCurrency(riskAdjustedRecovery)}
               </div>
-              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Risk-Adjusted Recovery</div>
+              <div className="text-[15px] font-['Aileron'] text-muted-foreground">Risk-Adjusted Recovery</div>
             </div>
           </div>
           {(report.underbilledClaimCount > 0 || report.totalUnderbilledAmount > 0) && (
@@ -248,8 +249,8 @@ export default function InsuranceArAnalysisReportPage() {
           )}
         </section>
 
-        <Card className="p-6 sm:p-8">
-          <h2 className="mb-5 text-[16px] font-bold font-['Aileron'] text-foreground">
+        <Card className="p-0 border-none">
+          <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
             Claim Categorisation Breakdown
           </h2>
           {report.claimCategorisationBreakdown?.length ? (
@@ -295,8 +296,8 @@ export default function InsuranceArAnalysisReportPage() {
         </Card>
 
         {report.underpaymentByPriority?.length > 0 && (
-          <Card className="p-6 sm:p-8">
-            <h2 className="mb-5 text-[16px] font-bold font-['Aileron'] text-foreground">
+          <Card className="p-0 border-none">
+            <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
               Underpayment Analysis by Priority
             </h2>
             <div className="space-y-3">
@@ -330,8 +331,8 @@ export default function InsuranceArAnalysisReportPage() {
         )}
 
         {report.recoveryProjectionSummary && (
-          <Card className="p-6 sm:p-8">
-            <h2 className="mb-5 text-[16px] font-bold font-['Aileron'] text-foreground">
+          <Card className="p-0 border-none">
+            <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
               Recovery Projection Summary
             </h2>
             <div className="grid gap-5 sm:grid-cols-2 mb-5">
@@ -343,7 +344,7 @@ export default function InsuranceArAnalysisReportPage() {
                   Maximum Potential Recovery (100%)
                 </div>
               </div>
-              <div className="bg-background rounded-lg p-6 sm:p-7 text-center border-2 border-[#16A34A] bg-green-50/50">
+              <div className=" rounded-lg p-6 sm:p-7 text-center border-2 border-[#16A34A] bg-green-50/50">
                 <div className="text-[32px] font-bold font-['Aileron'] text-[#16A34A] mb-2">
                   {formatCurrency(report.recoveryProjectionSummary.riskAdjustedRecovery)}
                 </div>
@@ -363,8 +364,8 @@ export default function InsuranceArAnalysisReportPage() {
           </Card>
         )}
 
-        <Card className="p-6 sm:p-8">
-          <h2 className="mb-5 text-[16px] font-bold font-['Aileron'] text-foreground">
+        <Card className="p-0 border-none">
+          <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
             Contingency Fee Application by Claim Age
           </h2>
           <div className="space-y-3">
@@ -374,7 +375,7 @@ export default function InsuranceArAnalysisReportPage() {
                     key={i}
                     className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded"
                   >
-                    <span className="text-[14px] font-['Aileron'] text-muted-foreground">
+                    <span className="text-[15px] font-['Aileron'] text-muted-foreground">
                       {item.ageBand} ({item.feePct}% fee)
                     </span>
                     <span className="text-[14px] font-['Aileron'] text-foreground font-medium text-right">
