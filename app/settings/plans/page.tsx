@@ -1,29 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Search, ArrowRight, Trash2 } from "lucide-react";
+import { Search, ArrowRight, Trash2, ChevronUp, Pencil, Trash } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
-import {
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableHeaderCell,
-  TableCell,
-} from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
-import { TableActionsCell } from "@/components/ui/TableActionsCell";
-import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Loader } from "@/components/ui/Loader";
 import { plansApi } from "@/lib/services/plans";
+import { payersApi } from "@/lib/services/payers";
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { PlanFormModal } from "./PlanFormModal";
 import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
@@ -38,22 +31,6 @@ const STATUS_OPTIONS = [
   { value: 1, name: "Active" },
 ];
 
-// Plan Category / Type enum values for parent-child dropdown filtering
-const CATEGORY = ENUMS.PlanCategory;
-const TYPE = ENUMS.PlanType;
-
-// Parent-child: which plan types are valid for each plan category
-const CATEGORY_TO_TYPES: Record<number, number[]> = {
-  [CATEGORY.Commercial]: [TYPE.Hmo, TYPE.Ppo, TYPE.Epo, TYPE.Pos, TYPE.Na],
-  [CATEGORY.Medicare]: [TYPE.PartA, TYPE.PartB, TYPE.PartC, TYPE.PartD],
-  [CATEGORY.RailroadMedicare]: [TYPE.PartA, TYPE.PartB, TYPE.PartC, TYPE.PartD],
-  [CATEGORY.Tricare]: [TYPE.CHAMPUS, TYPE.CHAMPVA],
-  [CATEGORY.Medicaid]: [TYPE.Na],
-  [CATEGORY.MVA]: [TYPE.Na],
-  [CATEGORY.WC]: [TYPE.Na],
-  [CATEGORY.HmoManaged]: [TYPE.Hmo, TYPE.Na],
-};
-
 export default function PlansPage() {
   const [payers, setPayers] = useState<PayerLookupDto[]>([]);
   const [planCategories, setPlanCategories] = useState<{ value: string; label: string }[]>([]);
@@ -63,6 +40,7 @@ export default function PlansPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreatePlanRequest>({
@@ -94,40 +72,75 @@ export default function PlansPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
+  const [expandedPayers, setExpandedPayers] = useState<Set<string>>(new Set());
+  const [createPayerOpen, setCreatePayerOpen] = useState(false);
+  const [createPayerName, setCreatePayerName] = useState("");
+  const [createPayerLoading, setCreatePayerLoading] = useState(false);
 
   const api = plansApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
-    extraParams: { search: debouncedSearch || undefined },
+    extraParams: {
+      search: debouncedSearch || undefined,
+      status: statusFilter === "all" ? undefined : statusFilter === "active" ? 1 : 0,
+    },
     fetch: api.getList,
   });
 
-  useEffect(() => {
+  const reloadLookups = useCallback(() => {
     lookupsApi().getPayers().then(setPayers).catch(() => setPayers([]));
+  }, []);
+
+  useEffect(() => {
+    reloadLookups();
     lookupsApi().getPlanCategories().then(setPlanCategories).catch(() => setPlanCategories([]));
     lookupsApi().getPlanTypes().then(setPlanTypes).catch(() => setPlanTypes([]));
     lookupsApi().getMarketTypes().then(setMarketTypes).catch(() => setMarketTypes([]));
     lookupsApi().getNsaCategories().then(setNsaCategories).catch(() => setNsaCategories([]));
   }, []);
 
-  // Filter plan types based on selected plan category
-  const filteredPlanTypes = useMemo(() => {
-    const allowedTypes = CATEGORY_TO_TYPES[form.planCategory];
-    if (!allowedTypes) return planTypes;
-    return planTypes.filter((t) => allowedTypes.includes(Number(t.value)));
-  }, [form.planCategory, planTypes]);
+  // Group plans by payer for accordion display
+  const groupedByPayer = useMemo(() => {
+    if (!data) return [];
+    const groups = new Map<string, { payerId: string; payerName: string; plans: PlanListItemDto[] }>();
+    for (const plan of data.items) {
+      const payerId = plan.payerId ?? "unlinked";
+      const payerName = plan.linkedPayerName ?? "Unlinked";
+      if (!groups.has(payerId)) {
+        groups.set(payerId, { payerId, payerName, plans: [] });
+      }
+      groups.get(payerId)!.plans.push(plan);
+    }
+    return Array.from(groups.values());
+  }, [data]);
 
-  const openCreate = () => {
+  // Auto-expand payers that have plans on initial load
+  useEffect(() => {
+    if (groupedByPayer.length > 0 && expandedPayers.size === 0) {
+      setExpandedPayers(new Set(groupedByPayer.map((g) => g.payerId)));
+    }
+  }, [groupedByPayer]);
+
+  const togglePayer = (payerId: string) => {
+    setExpandedPayers((prev) => {
+      const next = new Set(prev);
+      if (next.has(payerId)) next.delete(payerId);
+      else next.add(payerId);
+      return next;
+    });
+  };
+
+  const openCreate = (payerId?: string) => {
     setEditId(null);
     setForm({
-      payerId: payers[0]?.id ?? "",
+      payerId: payerId ?? payers[0]?.id ?? "",
       planName: "",
       aliases: "",
       planIdPrefix: "",
@@ -307,16 +320,35 @@ export default function PlansPage() {
     }
   };
 
+  const handleCreatePayer = async () => {
+    if (!createPayerName.trim()) return;
+    setCreatePayerLoading(true);
+    try {
+      await payersApi().create({
+        payerName: createPayerName.trim(),
+        entityType: 0,
+        status: 1,
+      });
+      setCreatePayerOpen(false);
+      setCreatePayerName("");
+      reloadLookups();
+      toast.success("Payer created.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create payer.");
+    } finally {
+      setCreatePayerLoading(false);
+    }
+  };
+
   const planCategoryLabel = (n: number) => planCategories.find((c) => Number(c.value) === n)?.label ?? String(n);
   const planTypeLabel = (n: number) => planTypes.find((t) => Number(t.value) === n)?.label ?? String(n);
-  const statusLabel = (n: number) => STATUS_OPTIONS.find((o) => o.value === n)?.name ?? String(n);
 
   if (!canView) {
     return (
       <div>
-        <PageHeader title="Plan Configuration" description="Centralized plan registry." />
+        <PageHeader title="Plan Configurations" description="Centralized plan registry." />
         <Card>
-          <AccessRestrictedContent sectionName="Plan Configuration" />
+          <AccessRestrictedContent sectionName="Plan Configurations" />
         </Card>
       </div>
     );
@@ -324,12 +356,12 @@ export default function PlansPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      <PageHeader title="Plan Configuration" description="Centralized plan registry." />
+      <PageHeader title="Plan Configurations" description="Centralized plan registry." />
 
-      {/* Toolbar: search + add button */}
+      {/* Toolbar */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
-          <Select value="" onValueChange={() => {}}>
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
@@ -343,7 +375,7 @@ export default function PlansPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -368,7 +400,7 @@ export default function PlansPage() {
                 onLoadingChange={setOverlayLoading}
               />
               <Button
-                onClick={openCreate}
+                onClick={() => openCreate()}
                 className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
               >
                 <>Add Plan <ArrowRight className="ml-1 h-4 w-4" /></>
@@ -383,107 +415,136 @@ export default function PlansPage() {
           <Alert variant="error">{error}</Alert>
         </div>
       )}
+
+      {/* Grouped-by-payer accordion list */}
       {data && (
-           <div className="flex min-h-0 flex-1 flex-col">
-           <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-             <Table className="min-w-[1800px] table-fixed">
-              <TableHead className="sticky top-0 z-20">
-                <TableRow>
-                  {canDelete && (
-                    <TableHeaderCell className="!min-w-[50px] w-[50px]">
-                      <Checkbox
-                        checked={!!data?.items.length && data.items.every((r) => selectedIds.has(r.id))}
-                        onCheckedChange={toggleSelectAll}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-y-auto space-y-0 rounded-[5px] border border-[#E2E8F0]">
+            {groupedByPayer.map((group) => {
+              const isExpanded = expandedPayers.has(group.payerId);
+              return (
+                <div key={group.payerId} className="border-b border-[#E2E8F0] last:border-b-0">
+                  {/* Payer header row */}
+                  <div className="flex items-center justify-between px-4 py-3 bg-white hover:bg-[#F8FAFC]">
+                    <button
+                      type="button"
+                      onClick={() => togglePayer(group.payerId)}
+                      className="flex items-center gap-2 font-aileron text-sm font-semibold text-[#0066CC]"
+                    >
+                      {group.payerName}
+                      <ChevronUp
+                        className={`h-4 w-4 transition-transform ${isExpanded ? "" : "rotate-180"}`}
                       />
-                    </TableHeaderCell>
+                    </button>
+                    <div className="flex items-center gap-3">
+                      {canCreate && (
+                        <button
+                          type="button"
+                          onClick={() => openCreate(group.payerId)}
+                          className="text-sm font-medium text-[#0066CC] hover:underline"
+                        >
+                          Add Plan
+                        </button>
+                      )}
+                      {canUpdate && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            /* Navigate to payer edit — for now open the first plan's edit */
+                          }}
+                          className="p-1 text-[#64748B] hover:text-[#2A2C33]"
+                          title="Edit payer"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            /* Payer delete would go here */
+                          }}
+                          className="p-1 text-[#64748B] hover:text-red-600"
+                          title="Delete payer"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Plans under this payer */}
+                  {isExpanded && group.plans.length > 0 && (
+                    <div className="border-t border-[#E2E8F0] bg-[#FAFBFC]">
+                      {group.plans.map((plan) => (
+                        <div
+                          key={plan.id}
+                          className="flex items-center justify-between border-b border-[#F1F5F9] last:border-b-0 px-6 py-3"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-aileron text-sm font-semibold text-[#2A2C33]">
+                              {plan.planName}
+                            </div>
+                            <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-[#64748B]">
+                              {plan.planIdPrefix && (
+                                <>
+                                  <span>Plan ID: <span className="font-medium text-[#2A2C33]">{plan.planIdPrefix}</span></span>
+                                  <span className="text-[#CBD5E1]">&bull;</span>
+                                </>
+                              )}
+                              <span>Plan Category: <span className="font-medium text-[#2A2C33]">{planCategoryLabel(plan.planCategory)}</span></span>
+                              <span className="text-[#CBD5E1]">&bull;</span>
+                              <span>Plan Type: <span className="font-medium text-[#2A2C33]">{planTypeLabel(plan.planType)}</span></span>
+                              <span className="text-[#CBD5E1]">&bull;</span>
+                              <span>Out-of-Network Benefits: <span className="font-medium text-[#2A2C33]">{plan.oonBenefits ? "Yes" : "No"}</span></span>
+                              <span className="text-[#CBD5E1]">&bull;</span>
+                              <span>NSA Eligible: <span className="font-medium text-[#2A2C33]">{plan.nsaEligible ? "Yes" : "No"}</span></span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0 ml-4">
+                            <select
+                              value={plan.status}
+                              onChange={(e) => handleStatusChange(plan, Number(e.target.value))}
+                              disabled={!canUpdate || statusUpdatingId === plan.id}
+                              className="input-enterprise w-[100px] rounded-[5px] px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0"
+                            >
+                              {STATUS_OPTIONS.map((o) => (
+                                <option key={o.value} value={o.value}>{o.name}</option>
+                              ))}
+                            </select>
+                            {canUpdate && (
+                              <button
+                                type="button"
+                                onClick={() => openEdit(plan)}
+                                className="p-1 text-[#64748B] hover:text-[#2A2C33]"
+                                title="Edit plan"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                            )}
+                            {canDelete && (
+                              <button
+                                type="button"
+                                onClick={() => setDeleteId(plan.id)}
+                                className="p-1 text-[#64748B] hover:text-red-600"
+                                title="Delete plan"
+                              >
+                                <Trash className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  <TableHeaderCell className="w-[220px] min-w-[220px]">Plan Name</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Plan ID</TableHeaderCell>
-                  <TableHeaderCell className="w-[220px] min-w-[220px]">Linked Payer</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Plan Category</TableHeaderCell>
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Plan Type</TableHeaderCell>
-                  <TableHeaderCell className="w-[190px] min-w-[190px]">Out-of-Network Benefits</TableHeaderCell>
-                  <TableHeaderCell className="w-[130px] min-w-[130px]">NSA Eligible</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">NSA Category</TableHeaderCell>
-                  <TableHeaderCell className="w-[180px] min-w-[180px]">Status</TableHeaderCell>
-                  {(canUpdate || canDelete) && (
-                    <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
-                  )}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data.items.map((row) => (
-                  <TableRow key={row.id}>
-                    {canDelete && (
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedIds.has(row.id)}
-                          onCheckedChange={() => toggleSelect(row.id)}
-                        />
-                      </TableCell>
-                    )}
-                    <TableCell className="w-[220px] min-w-[220px]">
-                      <div className="max-w-xs truncate">{row.planName}</div>
-                    </TableCell>
-                    <TableCell className="w-[160px] min-w-[160px]">
-                      <div className="max-w-[140px] truncate">{row.planIdPrefix ?? "—"}</div>
-                    </TableCell>
-                    <TableCell className="w-[220px] min-w-[220px]">
-                      <div className="max-w-xs truncate">{row.linkedPayerName}</div>
-                    </TableCell>
-                    <TableCell className="w-[200px] min-w-[200px]">
-                      <div className="max-w-[140px] truncate">
-                        {planCategoryLabel(row.planCategory)}
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-[200px] min-w-[200px]">
-                      <div className="max-w-[140px] truncate">
-                        {planTypeLabel(row.planType)}
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-[220px] min-w-[220px]">
-                      <div className="max-w-[180px] truncate">
-                        {row.oonBenefits ? "Yes" : "No"}
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[140px] truncate">
-                        {row.nsaEligible ? "Yes" : "No"}
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-[200px] min-w-[200px]">
-                      <div className="max-w-[180px] truncate">
-                        {(row as any).nsaCategory ?? "—"}
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-[180px] min-w-[180px]">
-                      <select
-                        value={row.status}
-                        onChange={(e) => handleStatusChange(row, Number(e.target.value))}
-                        disabled={!canUpdate || statusUpdatingId === row.id}
-                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                      >
-                        {STATUS_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.name}
-                          </option>
-                        ))}
-                      </select>
-                    </TableCell>
-                    {(canUpdate || canDelete) && (
-                      <TableCell className="!w-[120px] min-w-[120px]">
-                        <TableActionsCell
-                          canEdit={canUpdate}
-                          canDelete={canDelete}
-                          onEdit={() => openEdit(row)}
-                          onDelete={() => setDeleteId(row.id)}
-                        />
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </div>
+              );
+            })}
+            {data.items.length === 0 && (
+              <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+                No plans found.
+              </div>
+            )}
           </div>
           <div className="shrink-0 pt-4">
             <Pagination
@@ -501,235 +562,48 @@ export default function PlansPage() {
           </div>
         </div>
       )}
-      {loading && !data && !error && (
-        <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
-      )}
+      {loading && !data && !error && <Loader variant="inline" />}
 
-      <Modal
+      <PlanFormModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editId ? "Edit plan" : "Add plan"}
-        size="lg"
-        position="right"
-        footer={
-          <ModalFooter
-            onCancel={() => setModalOpen(false)}
-            submitLabel={
-              <>
-                {editId ? "Update" : "Add Plan"}
-                <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
-              </>
-            }
-            onSubmit={handleSubmit}
-            loading={submitLoading}
-          />
-        }
+        editId={editId}
+        form={form}
+        onFormChange={setForm}
+        payers={payers}
+        planCategories={planCategories}
+        planTypes={planTypes}
+        marketTypes={marketTypes}
+        nsaCategories={nsaCategories}
+        onSubmit={handleSubmit}
+        loading={submitLoading}
+        error={formError}
+        onCreatePayer={() => setCreatePayerOpen(true)}
+      />
+
+      {/* Quick Create Payer dialog */}
+      <ConfirmDialog
+        open={createPayerOpen}
+        onClose={() => { setCreatePayerOpen(false); setCreatePayerName(""); }}
+        onConfirm={handleCreatePayer}
+        title="Create Payer"
+        message="Enter the name for the new payer."
+        confirmLabel={createPayerLoading ? "Creating…" : "Create"}
+        variant="primary"
+        loading={createPayerLoading}
       >
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          {formError && (
-            <div className="mb-4 rounded-[5px]">
-              <Alert variant="error">{formError}</Alert>
-            </div>
-          )}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-foreground">Payer *</label>
-              <select
-                value={form.payerId}
-                onChange={(e) => setForm((f) => ({ ...f, payerId: e.target.value }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                required
-              >
-                <option value="">Select payer</option>
-                {payers.map((p) => (
-                  <option key={p.id} value={p.id}>{p.payerName}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Plan name *</label>
-              <input
-                type="text"
-                value={form.planName}
-                onChange={(e) => setForm((f) => ({ ...f, planName: e.target.value }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Aliases</label>
-              <input
-                type="text"
-                value={form.aliases ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, aliases: e.target.value }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                placeholder="Optional"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Plan ID prefix</label>
-              <input
-                type="text"
-                value={form.planIdPrefix ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, planIdPrefix: e.target.value }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Plan category</label>
-              <select
-                value={form.planCategory}
-                onChange={(e) => {
-                const newCategory = Number(e.target.value);
-                const allowedTypes = CATEGORY_TO_TYPES[newCategory];
-                const defaultType = allowedTypes?.[0] ?? 0;
-                setForm((f) => ({ ...f, planCategory: newCategory, planType: defaultType }));
-              }}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                {planCategories.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Plan type</label>
-              <select
-                value={form.planType}
-                onChange={(e) => setForm((f) => ({ ...f, planType: Number(e.target.value) }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                {filteredPlanTypes.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Market type</label>
-              <select
-                value={form.marketType ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, marketType: e.target.value ? Number(e.target.value) : null }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                <option value="">—</option>
-                {marketTypes.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">NSA category</label>
-              <select
-                value={form.nsaCategory ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, nsaCategory: e.target.value ? Number(e.target.value) : null }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                <option value="">—</option>
-                {nsaCategories.map((n) => (
-                  <option key={n.value} value={n.value}>{n.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center gap-4 sm:col-span-2">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.oonBenefits} onChange={(e) => setForm((f) => ({ ...f, oonBenefits: e.target.checked }))} className="rounded border-input" />
-                <span className="text-sm text-foreground">OON benefits</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.nsaEligible} onChange={(e) => setForm((f) => ({ ...f, nsaEligible: e.target.checked }))} className="rounded border-input" />
-                <span className="text-sm text-foreground">NSA eligible</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.providerParticipationApplicable} onChange={(e) => setForm((f) => ({ ...f, providerParticipationApplicable: e.target.checked }))} className="rounded border-input" />
-                <span className="text-sm text-foreground">Provider participation applicable</span>
-              </label>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Plan responsibility %</label>
-              <input
-                type="number"
-                step="any"
-                value={form.planResponsibilityPct ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, planResponsibilityPct: e.target.value === "" ? null : Number(e.target.value) }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                placeholder="—"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Patient responsibility %</label>
-              <input
-                type="number"
-                step="any"
-                value={form.patientResponsibilityPct ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, patientResponsibilityPct: e.target.value === "" ? null : Number(e.target.value) }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                placeholder="—"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Typical deductible</label>
-              <input
-                type="number"
-                step="any"
-                value={form.typicalDeductible ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, typicalDeductible: e.target.value === "" ? null : Number(e.target.value) }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                placeholder="—"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">OOP max</label>
-              <input
-                type="number"
-                step="any"
-                value={form.oopMax ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, oopMax: e.target.value === "" ? null : Number(e.target.value) }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                placeholder="—"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Timely filing initial (days)</label>
-              <input
-                type="number"
-                value={form.timelyFilingInitialDays}
-                onChange={(e) => setForm((f) => ({ ...f, timelyFilingInitialDays: Number(e.target.value) || 0 }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Timely filing resubmission (days)</label>
-              <input
-                type="number"
-                value={form.timelyFilingResubmissionDays ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, timelyFilingResubmissionDays: e.target.value === "" ? null : Number(e.target.value) }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                placeholder="—"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Timely filing appeal (days)</label>
-              <input
-                type="number"
-                value={form.timelyFilingAppealDays}
-                onChange={(e) => setForm((f) => ({ ...f, timelyFilingAppealDays: Number(e.target.value) || 0 }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))}
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                {STATUS_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </form>
-      </Modal>
+        <div className="mt-2">
+          <label className="mb-1 block text-sm font-medium text-foreground">Payer Name</label>
+          <input
+            type="text"
+            value={createPayerName}
+            onChange={(e) => setCreatePayerName(e.target.value)}
+            placeholder="e.g., BCBS"
+            className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0"
+            autoFocus
+          />
+        </div>
+      </ConfirmDialog>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete plan" message="Are you sure you want to delete this plan?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
       <ConfirmDialog

@@ -20,6 +20,7 @@ type ConfirmDialogProps = {
   confirmLabel?: string;
   variant?: "danger" | "primary";
   loading?: boolean;
+  children?: React.ReactNode;
 };
 
 export function ConfirmDialog({
@@ -31,6 +32,7 @@ export function ConfirmDialog({
   confirmLabel = "Confirm",
   variant = "danger",
   loading,
+  children,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -43,6 +45,7 @@ export function ConfirmDialog({
             {message}
           </AlertDialogDescription>
         </AlertDialogHeader>
+        {children}
         <AlertDialogFooter className="flex flex-row justify-start gap-3 sm:justify-start">
           <AlertDialogAction
             onClick={onConfirm}
