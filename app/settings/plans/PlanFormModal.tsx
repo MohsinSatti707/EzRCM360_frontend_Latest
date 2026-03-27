@@ -379,6 +379,12 @@ export function PlanFormModal({
               />
               <span className="text-sm text-foreground">Provider Participation Applicable</span>
             </label>
+            <div className="rounded-lg border border-[#E2E8F0] bg-[#FFFBEB] px-4 py-3 text-sm text-[#92400E]">
+              <ul className="list-inside space-y-1">
+                <li>&bull; Yes (IN / OON validation required)</li>
+                <li>&bull; No (participation irrelevant for this plan category)</li>
+              </ul>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Initial Submission (Days)</label>
