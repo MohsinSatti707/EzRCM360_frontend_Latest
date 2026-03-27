@@ -13,7 +13,10 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
 import { plansApi } from "@/lib/services/plans";
 import { payersApi } from "@/lib/services/payers";
+import type { CreatePayerRequest } from "@/lib/services/payers";
 import { lookupsApi } from "@/lib/services/lookups";
+import type { PlanLookupDto } from "@/lib/services/lookups";
+import { PayerFormModal } from "../payers/PayerFormModal";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { PlanFormModal } from "./PlanFormModal";
@@ -74,8 +77,20 @@ export default function PlansPage() {
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [expandedPayers, setExpandedPayers] = useState<Set<string>>(new Set());
   const [createPayerOpen, setCreatePayerOpen] = useState(false);
-  const [createPayerName, setCreatePayerName] = useState("");
+  const [createPayerForm, setCreatePayerForm] = useState<CreatePayerRequest>({
+    payerName: "",
+    aliases: "",
+    entityType: 0,
+    status: 1,
+    planIds: [],
+    addresses: [],
+    phoneNumbers: [],
+    emails: [],
+  });
   const [createPayerLoading, setCreatePayerLoading] = useState(false);
+  const [createPayerError, setCreatePayerError] = useState<string | null>(null);
+  const [entityTypes, setEntityTypes] = useState<{ value: string; label: string }[]>([]);
+  const [planLookups, setPlanLookups] = useState<PlanLookupDto[]>([]);
 
   const api = plansApi();
   const toast = useToast();
@@ -104,6 +119,8 @@ export default function PlansPage() {
     lookupsApi().getPlanTypes().then(setPlanTypes).catch(() => setPlanTypes([]));
     lookupsApi().getMarketTypes().then(setMarketTypes).catch(() => setMarketTypes([]));
     lookupsApi().getNsaCategories().then(setNsaCategories).catch(() => setNsaCategories([]));
+    lookupsApi().getPayerEntityTypes().then(setEntityTypes).catch(() => setEntityTypes([]));
+    lookupsApi().getPlans().then(setPlanLookups).catch(() => setPlanLookups([]));
   }, []);
 
   // Group plans by payer for accordion display
@@ -320,21 +337,37 @@ export default function PlansPage() {
     }
   };
 
+  const openCreatePayer = () => {
+    setCreatePayerForm({
+      payerName: "",
+      aliases: "",
+      entityType: 0,
+      status: 1,
+      planIds: [],
+      addresses: [],
+      phoneNumbers: [],
+      emails: [],
+    });
+    setCreatePayerError(null);
+    setCreatePayerOpen(true);
+  };
+
   const handleCreatePayer = async () => {
-    if (!createPayerName.trim()) return;
+    if (!createPayerForm.payerName.trim()) {
+      setCreatePayerError("Payer name is required.");
+      return;
+    }
+    setCreatePayerError(null);
     setCreatePayerLoading(true);
     try {
-      await payersApi().create({
-        payerName: createPayerName.trim(),
-        entityType: 0,
-        status: 1,
-      });
+      await payersApi().create(createPayerForm);
       setCreatePayerOpen(false);
-      setCreatePayerName("");
       reloadLookups();
       toast.success("Payer created.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create payer.");
+      const msg = err instanceof Error ? err.message : "Failed to create payer.";
+      setCreatePayerError(msg);
+      toast.error(msg);
     } finally {
       setCreatePayerLoading(false);
     }
@@ -578,32 +611,22 @@ export default function PlansPage() {
         onSubmit={handleSubmit}
         loading={submitLoading}
         error={formError}
-        onCreatePayer={() => setCreatePayerOpen(true)}
+        onCreatePayer={openCreatePayer}
       />
 
-      {/* Quick Create Payer dialog */}
-      <ConfirmDialog
+      {/* Create Payer modal (full form) */}
+      <PayerFormModal
         open={createPayerOpen}
-        onClose={() => { setCreatePayerOpen(false); setCreatePayerName(""); }}
-        onConfirm={handleCreatePayer}
-        title="Create Payer"
-        message="Enter the name for the new payer."
-        confirmLabel={createPayerLoading ? "Creating…" : "Create"}
-        variant="primary"
+        onClose={() => setCreatePayerOpen(false)}
+        editId={null}
+        form={createPayerForm}
+        onFormChange={setCreatePayerForm}
+        entityTypeOptions={entityTypes}
+        planOptions={planLookups}
+        onSubmit={handleCreatePayer}
         loading={createPayerLoading}
-      >
-        <div className="mt-2">
-          <label className="mb-1 block text-sm font-medium text-foreground">Payer Name</label>
-          <input
-            type="text"
-            value={createPayerName}
-            onChange={(e) => setCreatePayerName(e.target.value)}
-            placeholder="e.g., BCBS"
-            className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0"
-            autoFocus
-          />
-        </div>
-      </ConfirmDialog>
+        error={createPayerError}
+      />
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete plan" message="Are you sure you want to delete this plan?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
       <ConfirmDialog
