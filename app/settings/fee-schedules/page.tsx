@@ -819,13 +819,26 @@ export default function FeeSchedulesPage() {
                   </div>
                   <div>
                     <label className="mb-1 block text-sm font-medium text-foreground">Quarter</label>
-                    <select value={form.quarter ?? ""} onChange={(e) => setForm((f) => ({ ...f, quarter: e.target.value === "" ? null : Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                      <option value="">Whole Year</option>
-                      <option value="1">Q1</option>
-                      <option value="2">Q2</option>
-                      <option value="3">Q3</option>
-                      <option value="4">Q4</option>
-                    </select>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" checked={form.quarter == null} onChange={() => setForm((f) => ({ ...f, quarter: null }))} className="rounded border-input" />
+                        <span className="text-sm font-medium">Whole Year</span>
+                      </label>
+                      {[1, 2, 3, 4].map((q) => (
+                        <label key={q} className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.quarter === q}
+                            onChange={() => setForm((f) => ({ ...f, quarter: f.quarter === q ? null : q }))}
+                            className="rounded border-input"
+                          />
+                          <span className="text-sm">Q{q}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {form.quarter == null && (
+                      <p className="mt-1 text-xs text-muted-foreground">Applies to the entire year.</p>
+                    )}
                   </div>
                 </>
               ) : (
