@@ -50,6 +50,7 @@ export default function EntitiesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreateEntityRequest>(defaultForm);
@@ -67,12 +68,15 @@ export default function EntitiesPage() {
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
-    extraParams: { search: debouncedSearch || undefined },
+    extraParams: {
+      search: debouncedSearch || undefined,
+      status: statusFilter === "all" ? undefined : statusFilter === "active" ? 1 : 0,
+    },
     fetch: api.getList,
   });
 
@@ -225,7 +229,7 @@ export default function EntitiesPage() {
       {/* Toolbar: search + add button */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
-          <Select value="" onValueChange={() => {}}>
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>

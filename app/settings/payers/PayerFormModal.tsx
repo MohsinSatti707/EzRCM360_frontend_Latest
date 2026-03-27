@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import { DrawerForm } from "@/components/ui/DrawerForm";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -114,8 +114,10 @@ export function PayerFormModal({
     setEmails(next);
   };
 
-  // Plans linked to this payer (read-only display)
   const linkedPlans = planOptions.filter((p) => planIds.includes(p.id));
+  const removePlan = (planId: string) => {
+    onFormChange({ ...form, planIds: planIds.filter((id) => id !== planId) });
+  };
 
   return (
     <DrawerForm
@@ -167,7 +169,6 @@ export function PayerFormModal({
         <div className="space-y-6">
           {/* Basic info */}
           <div className="space-y-4">
-            <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Basic information</h3>
             <Input
               label="Payer name"
               required
@@ -358,9 +359,17 @@ export function PayerFormModal({
                     {linkedPlans.map((plan) => (
                       <div
                         key={plan.id}
-                        className="flex items-center gap-2 rounded bg-[#F7F8F9] px-3 py-2"
+                        className="flex items-center justify-between gap-2 rounded bg-[#F7F8F9] px-3 py-2"
                       >
                         <span className="text-sm text-foreground">{plan.displayName}</span>
+                        <button
+                          type="button"
+                          onClick={() => removePlan(plan.id)}
+                          className="shrink-0 rounded p-0.5 text-[#94A3B8] hover:text-red-600 hover:bg-red-50 transition-colors"
+                          title="Remove plan"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
                     ))}
                   </div>

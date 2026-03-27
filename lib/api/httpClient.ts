@@ -35,8 +35,34 @@ export class HttpClient implements IHttpClient {
       const text = await res.text();
       let message = text;
       try {
-        const json = JSON.parse(text) as { message?: string; title?: string; detail?: string };
-        message = json.message || json.title || json.detail || text;
+        const parsed = JSON.parse(text);
+        // Handle array-format validation errors: [{"errorMessage":"..."}]
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const msgs = parsed
+            .map((e: { errorMessage?: string; ErrorMessage?: string }) =>
+              e.errorMessage ?? e.ErrorMessage
+            )
+            .filter(Boolean);
+          message = msgs.length > 0 ? msgs.join(" ") : text;
+        } else if (parsed && typeof parsed === "object") {
+          const json = parsed as {
+            message?: string;
+            title?: string;
+            detail?: string;
+            errors?: Record<string, string[]>;
+          };
+          // Extract field-level validation errors from ValidationProblemDetails
+          if (json.errors && typeof json.errors === "object") {
+            const fieldErrors = Object.values(json.errors).flat().filter(Boolean);
+            if (fieldErrors.length > 0) {
+              message = fieldErrors.join(" ");
+            } else {
+              message = json.message || json.title || json.detail || text;
+            }
+          } else {
+            message = json.message || json.title || json.detail || text;
+          }
+        }
       } catch {
         /* use text as-is */
       }

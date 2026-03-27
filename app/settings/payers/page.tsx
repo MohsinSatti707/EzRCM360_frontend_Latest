@@ -62,6 +62,7 @@ export default function PayersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreatePayerRequest>(defaultForm);
@@ -74,18 +75,22 @@ export default function PayersPage() {
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [addPlanOpen, setAddPlanOpen] = useState(false);
+  const [originalPlanIds, setOriginalPlanIds] = useState<string[]>([]);
 
   const api = payersApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
-    extraParams: { search: debouncedSearch || undefined },
+    extraParams: {
+      search: debouncedSearch || undefined,
+      status: statusFilter === "all" ? undefined : statusFilter === "active" ? 1 : 0,
+    },
     fetch: api.getList,
   });
 
@@ -125,12 +130,14 @@ export default function PayersPage() {
           emailAddress: e.emailAddress,
           label: e.label ?? "",
         })) ?? [];
+      const planIds = detail.planIds ?? [];
+      setOriginalPlanIds(planIds);
       setForm({
         payerName: detail.payerName,
         aliases: detail.aliases ?? "",
         entityType: resolveEnum(detail.entityType, ENUMS.PayerEntityType),
         status: resolveEnum(detail.status, ENUMS.PayerStatus),
-        planIds: detail.planIds ?? [],
+        planIds,
         addresses: mapAddresses(),
         phoneNumbers: mapPhones(),
         emails: mapEmails(),
@@ -151,8 +158,11 @@ export default function PayersPage() {
     const addresses = (form.addresses ?? []).filter((a) => (a.addressLine1 ?? "").trim() !== "");
     const phoneNumbers = (form.phoneNumbers ?? []).filter((p) => (p.phoneNumber ?? "").trim() !== "");
     const emails = (form.emails ?? []).filter((e) => (e.emailAddress ?? "").trim() !== "");
-    // Plan linking is managed from Plan Configuration page.
-    // Do not send planIds — backend auto-unlinks when entity type changes to non-Insurance.
+    // Calculate explicit plan add/remove lists for updates
+    const currentPlanIds = form.planIds ?? [];
+    const planIdsToAdd = currentPlanIds.filter((id) => !originalPlanIds.includes(id));
+    const planIdsToRemove = originalPlanIds.filter((id) => !currentPlanIds.includes(id));
+
     const payload = {
       ...form,
       addresses: addresses.length ? addresses : undefined,
@@ -164,7 +174,12 @@ export default function PayersPage() {
     setOverlayLoading(true);
     try {
       if (editId) {
-        await api.update(editId, { ...payload, status: form.status } as UpdatePayerRequest);
+        await api.update(editId, {
+          ...payload,
+          status: form.status,
+          planIdsToAdd: planIdsToAdd.length ? planIdsToAdd : undefined,
+          planIdsToRemove: planIdsToRemove.length ? planIdsToRemove : undefined,
+        } as UpdatePayerRequest);
       } else {
         await api.create(payload);
       }
@@ -289,7 +304,6 @@ export default function PayersPage() {
         aliases: detail.aliases ?? "",
         entityType: detail.entityType,
         status: statusValue,
-        planIds: detail.planIds ?? [],
         addresses: (detail.addresses ?? []).map((a) => ({
           addressLine1: a.addressLine1,
           addressLine2: a.addressLine2 ?? "",
@@ -337,7 +351,7 @@ export default function PayersPage() {
       {/* Toolbar: search + add button */}
       <div className="mb-3 flex items-center justify-between gap-3 ">
         <div className="flex flex-1 items-center">
-          <Select value="" onValueChange={() => {}}>
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>

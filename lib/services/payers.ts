@@ -85,7 +85,8 @@ export interface UpdatePayerRequest {
   aliases?: string | null;
   entityType: number;
   status: number;
-  planIds?: string[] | null;
+  planIdsToAdd?: string[] | null;
+  planIdsToRemove?: string[] | null;
   addresses?: PayerAddressRequest[] | null;
   phoneNumbers?: PayerPhoneRequest[] | null;
   emails?: PayerEmailRequest[] | null;

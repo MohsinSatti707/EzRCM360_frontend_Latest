@@ -10,6 +10,8 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import { organizationsApi } from "@/lib/services/organizations";
+import { usersApi } from "@/lib/services/users";
+import type { UserListItemDto } from "@/lib/services/users";
 import { OrganizationIcon } from "@/lib/icons/OrganizationIcon";
 import { PhoneIcon } from "@/lib/icons/PhoneIcon";
 import type {
@@ -44,6 +46,7 @@ function formatId(id: string | null | undefined): string {
 }
 
 const DATE_FORMAT_OPTIONS: { value: string; label: string }[] = [
+  { value: "MMM DD, YYYY", label: "MMM DD, YYYY" },
   { value: "YYYY-MM-DD", label: "YYYY-MM-DD" },
   { value: "MM/DD/YYYY", label: "MM/DD/YYYY" },
   { value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
@@ -75,7 +78,10 @@ function formatDateExample(format: string | null | undefined): string {
   const day = String(d.getDate()).padStart(2, "0");
   const mm = m;
   const dd = day;
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const mmm = monthNames[d.getMonth()];
   const map: Record<string, string> = {
+    "MMM DD, YYYY": `${mmm} ${dd}, ${y}`,
     "YYYY-MM-DD": `${y}-${m}-${dd}`,
     "MM/DD/YYYY": `${mm}/${dd}/${y}`,
     "DD/MM/YYYY": `${dd}/${mm}/${y}`,
@@ -120,6 +126,8 @@ export default function OrganizationPage() {
   const MAX_LOGO_MB = 5;
   const MAX_LOGO_BYTES = MAX_LOGO_MB * 1024 * 1024;
 
+  const [users, setUsers] = useState<UserListItemDto[]>([]);
+
   const api = organizationsApi();
   const toast = useToast();
   const { canView, canUpdate } = useModulePermission("Organizations");
@@ -134,6 +142,7 @@ export default function OrganizationPage() {
         setError(err instanceof Error ? err.message : "Failed to load organization")
       )
       .finally(() => setLoading(false));
+    usersApi().getList({ pageSize: 200 }).then((res) => setUsers(res.items)).catch(() => {});
   }, []);
 
   const openEdit = () => {
@@ -255,7 +264,10 @@ export default function OrganizationPage() {
               Primary Administrator
             </dt>
             <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black" title={profile.primaryAdministratorUserId ?? undefined}>
-              {formatId(profile.primaryAdministratorUserId)}
+              {(() => {
+                const user = users.find((u) => u.id === profile.primaryAdministratorUserId);
+                return user ? user.userName : formatId(profile.primaryAdministratorUserId);
+              })()}
             </dd>
           </div>
           <div>
@@ -348,8 +360,7 @@ export default function OrganizationPage() {
               <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
                 Primary Administrator
               </label>
-              <input
-                type="text"
+              <select
                 value={form.primaryAdministratorUserId ?? ""}
                 onChange={(e) =>
                   setForm((f) => ({
@@ -357,9 +368,15 @@ export default function OrganizationPage() {
                     primaryAdministratorUserId: e.target.value || undefined,
                   }))
                 }
-                className="input-enterprise"
-                placeholder="User ID (e.g. RCM-12453 or Guid)"
-              />
+                className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
+              >
+                <option value="">— Select administrator —</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.userName} ({u.email})
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
