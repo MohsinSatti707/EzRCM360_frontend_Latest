@@ -138,10 +138,10 @@ export default function PlansPage() {
     return Array.from(groups.values());
   }, [data]);
 
-  // Auto-expand payers that have plans on initial load
+  // Auto-expand only the first payer group on load
   useEffect(() => {
     if (groupedByPayer.length > 0 && expandedPayers.size === 0) {
-      setExpandedPayers(new Set(groupedByPayer.map((g) => g.payerId)));
+      setExpandedPayers(new Set([groupedByPayer[0].payerId]));
     }
   }, [groupedByPayer]);
 
