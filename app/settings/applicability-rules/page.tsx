@@ -869,7 +869,7 @@ export default function ApplicabilityRulesPage() {
                 <option value="">Automatic selection</option>
                 {feeScheduleOptions.map((fs) => (
                   <option key={fs.id} value={fs.id}>
-                    {fs.scheduleCode ?? "—"} — {fsCategoryLookup[fs.category] ?? fs.category} {fs.state ? `(${fs.state})` : ""} {fs.year}/Q{fs.quarter}
+                    {fs.scheduleCode ?? "—"} — {fsCategoryLookup[fs.category] ?? fs.category} {fs.state ? `(${fs.state})` : ""} {fs.years?.join(",")}{fs.quarters?.length ? `/Q${fs.quarters.join(",")}` : ""}
                   </option>
                 ))}
               </select>

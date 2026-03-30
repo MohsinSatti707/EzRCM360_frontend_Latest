@@ -5,6 +5,22 @@
 
 ---
 
+## Global Rules (apply to ALL projects, ALL machines)
+
+### Pre-Commit Recheck (MANDATORY)
+Before EVERY git commit, re-read ALL changed files and verify:
+- All existing API calls are identical to before (no accidental removal/alteration)
+- All existing methods, computed properties, watchers, event handlers are still present
+- Property/method names match what the framework template expects
+- All imports and component registrations are intact
+- ONLY the explicitly requested changes are present — no accidental scope creep
+
+### Standard Date Format
+All projects use **MMM DD, YYYY** as default date format (e.g. "Mar 30, 2026").
+For date-time: **MMM DD, YYYY - h:mm A** (e.g. "Mar 30, 2026 - 3:10 PM").
+
+---
+
 ## Memory System (Git-Tracked)
 
 **Memory files live in `.claude/memory/` in this repo — NOT in the local `~/.claude/projects/` folder.**

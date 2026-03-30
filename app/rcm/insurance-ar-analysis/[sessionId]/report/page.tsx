@@ -55,6 +55,18 @@ const DUMMY_REPORT: ArAnalysisReportDto = {
   ],
   underbilledClaimCount: 3,
   totalUnderbilledAmount: 2200,
+  totalBilledAmount: 45000,
+  totalPaidAmount: 32500,
+  totalMerFs: 48000,
+  totalMerAllowed: 42000,
+  totalMerOonAdjusted: 21000,
+  noPayDenialSummary: {
+    fullNoPayClaimCount: 2,
+    partialNoPayClaimCount: 3,
+    denialClaimCount: 1,
+    totalNoPayLineCount: 8,
+    totalDenialLineCount: 2,
+  },
 };
 
 function formatCurrency(n: number) {
@@ -275,6 +287,46 @@ const formattedSession = formatSessionDetails(
           )}
         </section>
 
+        <section>
+          <h2 className="mb-3 text-[17px] font-['Aileron'] font-bold text-foreground">Financial Summary</h2>
+          <div className="grid gap-5 sm:grid-cols-3">
+            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+                {formatCurrency(report.totalBilledAmount)}
+              </div>
+              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total Billed Amount</div>
+            </div>
+            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-[#2563EB] mb-1">
+                {formatCurrency(report.totalPaidAmount)}
+              </div>
+              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total Paid Amount</div>
+            </div>
+            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+                {formatCurrency(report.totalMerFs)}
+              </div>
+              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total MER (Fee Schedule)</div>
+            </div>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 mt-5">
+            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+                {formatCurrency(report.totalMerAllowed)}
+              </div>
+              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total MER Allowed</div>
+            </div>
+            {report.totalMerOonAdjusted > 0 && (
+              <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+                <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+                  {formatCurrency(report.totalMerOonAdjusted)}
+                </div>
+                <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total MER OON Plan-Benefits Adjusted</div>
+              </div>
+            )}
+          </div>
+        </section>
+
         <Card className="p-0 border-none">
           <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
             Claim Categorisation Breakdown
@@ -352,6 +404,44 @@ const formattedSession = formatSessionDetails(
                   </div>
                 );
               })}
+            </div>
+          </Card>
+        )}
+
+        {report.noPayDenialSummary && (report.noPayDenialSummary.fullNoPayClaimCount > 0 || report.noPayDenialSummary.partialNoPayClaimCount > 0 || report.noPayDenialSummary.denialClaimCount > 0) && (
+          <Card className="p-0 border-none">
+            <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
+              No-Pay / Denial Summary
+            </h2>
+            <div className="grid gap-5 sm:grid-cols-3 mb-4">
+              <div className="bg-[#FEF2F2] rounded-lg p-5 text-center border border-[#DC2626]/20">
+                <div className="text-[28px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
+                  {report.noPayDenialSummary.fullNoPayClaimCount}
+                </div>
+                <div className="text-[13px] font-['Aileron'] text-muted-foreground">Full No-Pay Claims</div>
+              </div>
+              <div className="bg-[#FFFBEB] rounded-lg p-5 text-center border border-[#F59E0B]/20">
+                <div className="text-[28px] font-bold font-['Aileron'] text-[#D97706] mb-1">
+                  {report.noPayDenialSummary.partialNoPayClaimCount}
+                </div>
+                <div className="text-[13px] font-['Aileron'] text-muted-foreground">Partial No-Pay Claims</div>
+              </div>
+              <div className="bg-[#FEF2F2] rounded-lg p-5 text-center border border-[#DC2626]/20">
+                <div className="text-[28px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
+                  {report.noPayDenialSummary.denialClaimCount}
+                </div>
+                <div className="text-[13px] font-['Aileron'] text-muted-foreground">Claims with Denials</div>
+              </div>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded">
+                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Total No-Pay Service Lines</span>
+                <span className="text-[14px] font-['Aileron'] text-foreground font-medium">{report.noPayDenialSummary.totalNoPayLineCount}</span>
+              </div>
+              <div className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded">
+                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Total Denial Service Lines</span>
+                <span className="text-[14px] font-['Aileron'] text-foreground font-medium">{report.noPayDenialSummary.totalDenialLineCount}</span>
+              </div>
             </div>
           </Card>
         )}
