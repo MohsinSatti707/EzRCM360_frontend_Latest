@@ -312,7 +312,13 @@ export default function InsuranceArAnalysisUploadPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIntakeFile(null)}
+                    onClick={() => {
+                      setIntakeFile(null);
+                      setValidationResult(null);
+                      setValidationLoading(false);
+                      setColumnsPassed(false);
+                      setRowsPassed(false);
+                    }}
                     className="ml-auto text-sm text-primary-600 hover:text-primary-700"
                   >
                     Remove

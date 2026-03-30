@@ -226,7 +226,19 @@ export default function OrganizationPage() {
       <Card className="mb-5 overflow-hidden rounded-[5px] border-none bg-[#F8FAFC] shadow-none mx-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-5">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#DBEAFE] text-2xl font-semibold text-[#0066CC]">
-            <span className="flex h-full w-full items-center justify-center">
+            {profile.logoUrl ? (
+              <img
+                src={profile.logoUrl.startsWith("http") ? profile.logoUrl : getApiUrl("/api/files/" + profile.logoUrl)}
+                alt={profile.name}
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.style.display = "none";
+                  target.nextElementSibling?.classList.remove("hidden");
+                }}
+              />
+            ) : null}
+            <span className={`flex h-full w-full items-center justify-center${profile.logoUrl ? " hidden" : ""}`}>
               {getAvatarInitials(profile.name)}
             </span>
           </div>
