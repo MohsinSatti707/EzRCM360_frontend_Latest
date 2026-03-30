@@ -157,6 +157,14 @@ export interface ContingencyFeeByAgeDto {
   amount: number;
 }
 
+export interface NoPayDenialSummaryDto {
+  fullNoPayClaimCount: number;
+  partialNoPayClaimCount: number;
+  denialClaimCount: number;
+  totalNoPayLineCount: number;
+  totalDenialLineCount: number;
+}
+
 export interface ArAnalysisReportDto {
   analysisSummary: ArAnalysisSummaryDto;
   totalClaimsAnalyzed: number;
@@ -168,6 +176,12 @@ export interface ArAnalysisReportDto {
   contingencyFeeByClaimAge: ContingencyFeeByAgeDto[];
   underbilledClaimCount: number;
   totalUnderbilledAmount: number;
+  totalBilledAmount: number;
+  totalPaidAmount: number;
+  totalMerFs: number;
+  totalMerAllowed: number;
+  totalMerOonAdjusted: number;
+  noPayDenialSummary: NoPayDenialSummaryDto;
 }
 
 export function insuranceArAnalysisApi() {
