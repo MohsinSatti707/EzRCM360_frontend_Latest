@@ -39,8 +39,8 @@ const defaultForm: CreateFeeScheduleCommand = {
   geoCode: "",
   geoName: "",
   billingType: 0,
-  year: new Date().getFullYear(),
-  quarter: null,
+  years: [new Date().getFullYear()],
+  quarters: [],
   calculationModel: 0,
   adoptFeeScheduleId: null,
   multiplierPct: 1.0,
@@ -83,9 +83,7 @@ export default function FeeSchedulesPage() {
   const [wizardStep, setWizardStep] = useState(1);
   const [createdScheduleId, setCreatedScheduleId] = useState<string | null>(null);
   const [createdScheduleIds, setCreatedScheduleIds] = useState<string[]>([]);
-  // Multi-select state for create mode
-  const [selectedYears, setSelectedYears] = useState<number[]>([]);
-  const [selectedQuarters, setSelectedQuarters] = useState<number[]>([]); // empty = whole year
+  // Years/quarters are now part of form state (form.years, form.quarters)
 
   // Fee schedule options for adoptFeeScheduleId dropdown
   const [fsOptions, setFsOptions] = useState<FeeScheduleDto[]>([]);
@@ -139,8 +137,8 @@ export default function FeeSchedulesPage() {
         geoCode: detail.geoCode ?? "",
         geoName: detail.geoName ?? "",
         billingType: detail.billingType,
-        year: detail.year,
-        quarter: detail.quarter,
+        years: detail.years ?? [],
+        quarters: detail.quarters ?? [],
         calculationModel: detail.calculationModel,
         adoptFeeScheduleId: detail.adoptFeeScheduleId ?? null,
         multiplierPct: detail.multiplierPct,
@@ -173,11 +171,10 @@ export default function FeeSchedulesPage() {
     setCreatedScheduleIds([]);
     setWizardStep(1);
     const currentYear = new Date().getFullYear();
-    setSelectedYears([lookups?.years?.find((y) => y === currentYear) ?? lookups?.years?.[0] ?? currentYear]);
-    setSelectedQuarters([]);
     setForm({
       ...defaultForm,
-      year: lookups?.years?.[0] ?? currentYear,
+      years: [lookups?.years?.find((y) => y === currentYear) ?? lookups?.years?.[0] ?? currentYear],
+      quarters: [],
     });
     setFormError(null);
     setWizardLinesData(null);
@@ -197,8 +194,8 @@ export default function FeeSchedulesPage() {
         geoCode: detail.geoCode ?? "",
         geoName: detail.geoName ?? "",
         billingType: detail.billingType,
-        year: detail.year,
-        quarter: detail.quarter,
+        years: detail.years ?? [],
+        quarters: detail.quarters ?? [],
         calculationModel: detail.calculationModel,
         adoptFeeScheduleId: detail.adoptFeeScheduleId ?? null,
         multiplierPct: detail.multiplierPct,
@@ -220,21 +217,11 @@ export default function FeeSchedulesPage() {
         loadList();
         toast.success("Updated successfully.");
       } else {
-        // Create one fee schedule per year × quarter combination
-        const years = selectedYears.length > 0 ? selectedYears : [form.year];
-        const quarters = selectedQuarters.length > 0 ? selectedQuarters : [null]; // null = whole year
-        const ids: string[] = [];
-        for (const y of years) {
-          for (const q of quarters) {
-            const newId = await api.create({ ...form, year: y, quarter: q });
-            ids.push(newId);
-          }
-        }
-        setCreatedScheduleIds(ids);
-        setCreatedScheduleId(ids[0] ?? null);
+        const newId = await api.create(form);
+        setCreatedScheduleIds([newId]);
+        setCreatedScheduleId(newId);
         loadList();
-        const count = ids.length;
-        toast.success(`${count} fee schedule${count > 1 ? "s" : ""} created. You can now import lines.`);
+        toast.success("Fee schedule created. You can now import lines.");
         setWizardStep(3);
       }
     } catch (err) {
@@ -638,7 +625,7 @@ export default function FeeSchedulesPage() {
                       <div className="max-w-[90px] truncate">{row.state ?? "—"}</div>
                     </TableCell>
                     <TableCell className="w-[110px] min-w-[110px]">
-                      <div className="max-w-[90px] truncate">{row.year}{row.quarter != null ? ` / Q${row.quarter}` : ""}</div>
+                      <div className="max-w-[90px] truncate" title={`${row.years?.join(", ") ?? ""}${row.quarters?.length ? ` / Q${row.quarters.join(",")}` : ""}`}>{row.years?.join(", ") ?? ""}{row.quarters?.length ? ` / Q${row.quarters.join(",")}` : ""}</div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select
@@ -807,76 +794,39 @@ export default function FeeSchedulesPage() {
                   ))}
                 </select>
               </div>
-              {editId ? (
-                <>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Year</label>
-                    <select value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                      {lookups?.years?.map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Quarter</label>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="checkbox" checked={form.quarter == null} onChange={() => setForm((f) => ({ ...f, quarter: null }))} className="rounded border-input" />
-                        <span className="text-sm font-medium">Whole Year</span>
-                      </label>
-                      {[1, 2, 3, 4].map((q) => (
-                        <label key={q} className="flex items-center gap-1.5 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={form.quarter === q}
-                            onChange={() => setForm((f) => ({ ...f, quarter: f.quarter === q ? null : q }))}
-                            className="rounded border-input"
-                          />
-                          <span className="text-sm">Q{q}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {form.quarter == null && (
-                      <p className="mt-1 text-xs text-muted-foreground">Applies to the entire year.</p>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <MultiSelectDropdown
-                    label="Year(s)"
-                    options={lookups?.years?.map((y) => ({ value: y, label: String(y) })) ?? []}
-                    selected={selectedYears}
-                    onChange={setSelectedYears}
-                    placeholder="Select year(s)"
-                  />
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Quarter(s)</label>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="checkbox" checked={selectedQuarters.length === 0} onChange={() => setSelectedQuarters([])} className="rounded border-input" />
-                        <span className="text-sm font-medium">Whole Year</span>
-                      </label>
-                      {[1, 2, 3, 4].map((q) => (
-                        <label key={q} className="flex items-center gap-1.5 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedQuarters.includes(q)}
-                            onChange={() => setSelectedQuarters((prev) =>
-                              prev.includes(q) ? prev.filter((v) => v !== q) : [...prev, q].sort()
-                            )}
-                            className="rounded border-input"
-                          />
-                          <span className="text-sm">Q{q}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {selectedQuarters.length === 0 && (
-                      <p className="mt-1 text-xs text-muted-foreground">Applies to the entire year.</p>
-                    )}
-                  </div>
-                </>
-              )}
+              <MultiSelectDropdown
+                label="Year(s)"
+                options={lookups?.years?.map((y) => ({ value: y, label: String(y) })) ?? []}
+                selected={form.years}
+                onChange={(yrs) => setForm((f) => ({ ...f, years: yrs }))}
+                placeholder="Select year(s)"
+              />
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Quarter(s)</label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" checked={form.quarters.length === 0} onChange={() => setForm((f) => ({ ...f, quarters: [] }))} className="rounded border-input" />
+                    <span className="text-sm font-medium">Whole Year</span>
+                  </label>
+                  {[1, 2, 3, 4].map((q) => (
+                    <label key={q} className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.quarters.includes(q)}
+                        onChange={() => setForm((f) => ({
+                          ...f,
+                          quarters: f.quarters.includes(q) ? f.quarters.filter((v) => v !== q) : [...f.quarters, q].sort()
+                        }))}
+                        className="rounded border-input"
+                      />
+                      <span className="text-sm">Q{q}</span>
+                    </label>
+                  ))}
+                </div>
+                {form.quarters.length === 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">Applies to the entire year.</p>
+                )}
+              </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Multiplier %</label>
                 <input type="number" step={0.01} value={form.multiplierPct} onChange={(e) => setForm((f) => ({ ...f, multiplierPct: Number(e.target.value) || 0 }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
@@ -904,7 +854,7 @@ export default function FeeSchedulesPage() {
                   <option value="">None</option>
                   {fsOptions.filter((fs) => fs.id !== editId).map((fs) => (
                     <option key={fs.id} value={fs.id}>
-                      {fs.scheduleCode ?? "—"} — {categoryLabel(fs.category)} {fs.state ? `(${fs.state})` : ""} {fs.year}{fs.quarter != null ? `/Q${fs.quarter}` : ""}
+                      {fs.scheduleCode ?? "—"} — {categoryLabel(fs.category)} {fs.state ? `(${fs.state})` : ""} {fs.years?.join(",")}{fs.quarters?.length ? `/Q${fs.quarters.join(",")}` : ""}
                     </option>
                   ))}
                 </select>
