@@ -433,7 +433,7 @@ export default function ApplicabilityRulesPage() {
     return (
       <div>
         <PageHeader title="Applicability Rules" description="Fee schedule applicability rules." />
-        <Card>
+        <Card >
           <AccessRestrictedContent sectionName="Applicability Rules" />
         </Card>
       </div>
@@ -441,10 +441,11 @@ export default function ApplicabilityRulesPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col px-6">
       <PageHeader
         title="Applicability Rules"
         description="Fee schedule applicability rules."
+        
       />
       {/* Toolbar: search + add button */}
       <div className="mb-6 flex items-center justify-between gap-3">
