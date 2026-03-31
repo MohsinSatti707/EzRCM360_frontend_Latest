@@ -79,9 +79,19 @@ export function FacilityFormModal({
             onChange={(e) => onFormChange({ ...form, entityId: e.target.value })}
           />
           <Input
-            label="Physical address"
-            value={form.physicalAddress ?? ""}
-            onChange={(e) => onFormChange({ ...form, physicalAddress: e.target.value })}
+            label="Address line 1"
+            value={form.addressLine1 ?? ""}
+            onChange={(e) => onFormChange({ ...form, addressLine1: e.target.value })}
+          />
+          <Input
+            label="Address line 2"
+            value={form.addressLine2 ?? ""}
+            onChange={(e) => onFormChange({ ...form, addressLine2: e.target.value })}
+          />
+          <Input
+            label="Zip code"
+            value={form.zipCode ?? ""}
+            onChange={(e) => onFormChange({ ...form, zipCode: e.target.value })}
           />
           <Input
             label="POS code"

@@ -5,7 +5,9 @@ export interface FacilityListItemDto {
   id: string;
   name: string;
   facilityType: string;
-  physicalAddress?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  zipCode?: string | null;
   entityId: string;
   entityDisplayName?: string | null;
   posCode?: string | null;
@@ -16,7 +18,9 @@ export interface FacilityDetailDto {
   id: string;
   name: string;
   facilityType: string;
-  physicalAddress?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  zipCode?: string | null;
   entityId: string;
   posCode?: string | null;
   isActive: boolean;
@@ -25,7 +29,9 @@ export interface FacilityDetailDto {
 export interface CreateFacilityRequest {
   name: string;
   facilityType: string;
-  physicalAddress?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  zipCode?: string | null;
   entityId: string;
   posCode?: string | null;
   isActive?: boolean;
@@ -35,7 +41,9 @@ export interface CreateFacilityRequest {
 export interface UpdateFacilityRequest {
   name: string;
   facilityType: string;
-  physicalAddress?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  zipCode?: string | null;
   entityId: string;
   posCode?: string | null;
   isActive: boolean;

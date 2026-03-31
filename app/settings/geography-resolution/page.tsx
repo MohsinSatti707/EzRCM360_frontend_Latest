@@ -111,15 +111,26 @@ export default function GeographyResolutionPage() {
     setModalOpen(true);
   };
 
+  const resolveLookup = (val: unknown, items: { value: number; name: string }[] | undefined): number => {
+    if (typeof val === "number") return val;
+    if (typeof val === "string" && items) {
+      const match = items.find((i) => i.name === val);
+      if (match) return match.value;
+      const n = Number(val);
+      if (!isNaN(n)) return n;
+    }
+    return 0;
+  };
+
   const openEdit = (row: ZipGeoMappingDto) => {
     setEditId(row.id);
     setForm({
       mappingName: row.mappingName,
-      fsCategory: row.fsCategory,
+      fsCategory: resolveLookup(row.fsCategory, lookups?.fsCategories),
       state: row.state,
       zip: row.zip,
-      mappingType: row.mappingType,
-      source: row.source,
+      mappingType: resolveLookup(row.mappingType, lookups?.mappingTypes),
+      source: resolveLookup(row.source, lookups?.sources),
       geoCode: row.geoCode ?? "",
       geoName: row.geoName ?? "",
       year: row.year,
@@ -221,11 +232,11 @@ export default function GeographyResolutionPage() {
     try {
       await api.update(row.id, {
         mappingName: row.mappingName,
-        fsCategory: row.fsCategory,
+        fsCategory: resolveLookup(row.fsCategory, lookups?.fsCategories),
         state: row.state,
         zip: row.zip,
-        mappingType: row.mappingType,
-        source: row.source,
+        mappingType: resolveLookup(row.mappingType, lookups?.mappingTypes),
+        source: resolveLookup(row.source, lookups?.sources),
         geoCode: row.geoCode ?? undefined,
         geoName: row.geoName ?? undefined,
         year: row.year,
@@ -267,12 +278,18 @@ export default function GeographyResolutionPage() {
     }
   };
 
-  const fsCategoryLabel = (n: number) =>
-    lookups?.fsCategories?.find((c) => c.value === n)?.name ?? String(n);
-  const mappingTypeLabel = (n: number) =>
-    lookups?.mappingTypes?.find((m) => m.value === n)?.name ?? String(n);
-  const sourceLabel = (n: number) =>
-    lookups?.sources?.find((s) => s.value === n)?.name ?? String(n);
+  const fsCategoryLabel = (n: number | string) => {
+    if (typeof n === "string") return lookups?.fsCategories?.find((c) => c.name === n)?.name ?? n;
+    return lookups?.fsCategories?.find((c) => c.value === n)?.name ?? String(n);
+  };
+  const mappingTypeLabel = (n: number | string) => {
+    if (typeof n === "string") return lookups?.mappingTypes?.find((m) => m.name === n)?.name ?? n;
+    return lookups?.mappingTypes?.find((m) => m.value === n)?.name ?? String(n);
+  };
+  const sourceLabel = (n: number | string) => {
+    if (typeof n === "string") return lookups?.sources?.find((s) => s.name === n)?.name ?? n;
+    return lookups?.sources?.find((s) => s.value === n)?.name ?? String(n);
+  };
 
   const filteredItems = data?.items.filter((row) => {
     if (!searchTerm.trim()) return true;

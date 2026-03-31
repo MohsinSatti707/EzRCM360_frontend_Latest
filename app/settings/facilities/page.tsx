@@ -39,7 +39,9 @@ const ACTIVE_OPTIONS = [
 const defaultForm: CreateFacilityRequest = {
   name: "",
   facilityType: "",
-  physicalAddress: "",
+  addressLine1: "",
+  addressLine2: "",
+  zipCode: "",
   entityId: "",
   posCode: "",
   isActive: true,
@@ -95,7 +97,9 @@ export default function FacilitiesPage() {
       setForm({
         name: detail.name,
         facilityType: detail.facilityType,
-        physicalAddress: detail.physicalAddress ?? "",
+        addressLine1: detail.addressLine1 ?? "",
+        addressLine2: detail.addressLine2 ?? "",
+        zipCode: detail.zipCode ?? "",
         entityId: detail.entityId,
         posCode: detail.posCode ?? "",
         isActive: detail.isActive,
@@ -203,7 +207,9 @@ export default function FacilitiesPage() {
       await api.update(row.id, {
         name: detail.name,
         facilityType: detail.facilityType,
-        physicalAddress: detail.physicalAddress ?? null,
+        addressLine1: detail.addressLine1 ?? null,
+        addressLine2: detail.addressLine2 ?? null,
+        zipCode: detail.zipCode ?? null,
         entityId: detail.entityId,
         posCode: detail.posCode ?? null,
         isActive: isActiveValue === 1,
@@ -335,7 +341,7 @@ export default function FacilitiesPage() {
                       <div className="max-w-[140px] truncate">{row.entityDisplayName ?? "—"}</div>
                     </TableCell>
                     <TableCell className="w-[220px] min-w-[220px]">
-                      <div className="max-w-[180px] truncate">{row.physicalAddress ?? "—"}</div>
+                      <div className="max-w-[180px] truncate">{[row.addressLine1, row.addressLine2, row.zipCode].filter(Boolean).join(", ") || "—"}</div>
                     </TableCell>
                     <TableCell className="w-[120px] min-w-[120px]">
                       <div className="max-w-[100px] truncate">{row.posCode ?? "—"}</div>
