@@ -24,6 +24,7 @@ import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { feeSchedulesApi } from "@/lib/services/feeSchedules";
 import { useToast } from "@/lib/contexts/ToastContext";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { FeeScheduleDto, FeeScheduleDetailDto, FeeScheduleLineDto, CreateFeeScheduleCommand, CreateFeeScheduleLineRequest } from "@/lib/services/feeSchedules";
@@ -107,6 +108,8 @@ export default function FeeSchedulesPage() {
   const [linesSchedule, setLinesSchedule] = useState<FeeScheduleDto | null>(null);
   const [linesData, setLinesData] = useState<PaginatedList<FeeScheduleLineDto> | null>(null);
   const [linesPage, setLinesPage] = useState(1);
+  const [linesSearch, setLinesSearch] = useState("");
+  const debouncedLinesSearch = useDebounce(linesSearch, 300);
   const [linesLoading, setLinesLoading] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -179,6 +182,15 @@ export default function FeeSchedulesPage() {
     api.getLookups().then(setLookups).catch(() => setLookups(null));
     api.getList({ pageSize: 500, status: 0 }).then((res) => setFsOptions(res.items)).catch(() => {});
   }, []);
+
+  // Debounced search for fee schedule lines
+  useEffect(() => {
+    if (linesSchedule) {
+      setLinesPage(1);
+      loadLines(linesSchedule.id, 1, debouncedLinesSearch);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedLinesSearch]);
 
   const openCreate = () => {
     setEditId(null);
@@ -311,14 +323,15 @@ export default function FeeSchedulesPage() {
   const openLines = (row: FeeScheduleDto) => {
     setLinesSchedule(row);
     setLinesPage(1);
+    setLinesSearch("");
     setLinesData(null);
     setLineSelectedIds(new Set());
     loadLines(row.id, 1);
   };
 
-  const loadLines = (id: string, pg: number) => {
+  const loadLines = (id: string, pg: number, search?: string) => {
     setLinesLoading(true);
-    api.getLines(id, { pageNumber: pg, pageSize: 20 })
+    api.getLines(id, { pageNumber: pg, pageSize: 20, search: search || undefined })
       .then(setLinesData)
       .catch(() => toast.error("Failed to load lines."))
       .finally(() => setLinesLoading(false));
@@ -334,6 +347,7 @@ export default function FeeSchedulesPage() {
         if (isWizard) {
           loadWizardLines(scheduleId);
         } else {
+          setLinesSearch("");
           loadLines(scheduleId, 1);
           setLinesPage(1);
         }
@@ -387,7 +401,7 @@ export default function FeeSchedulesPage() {
         toast.success("Line created.");
       }
       setLineModalOpen(false);
-      loadLines(linesSchedule.id, linesPage);
+      loadLines(linesSchedule.id, linesPage, linesSearch);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Save failed.");
     } finally {
@@ -401,7 +415,7 @@ export default function FeeSchedulesPage() {
       await api.deleteLine(lineDeleteId);
       toast.success("Line deleted.");
       setLineDeleteId(null);
-      loadLines(linesSchedule.id, linesPage);
+      loadLines(linesSchedule.id, linesPage, linesSearch);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
@@ -417,7 +431,7 @@ export default function FeeSchedulesPage() {
       toast.success(`Deleted ${lineSelectedIds.size} line(s).`);
       setLineSelectedIds(new Set());
       setLineBulkDeleteConfirm(false);
-      loadLines(linesSchedule.id, linesPage);
+      loadLines(linesSchedule.id, linesPage, linesSearch);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
@@ -1062,6 +1076,15 @@ export default function FeeSchedulesPage() {
           )}
           {linesData && <span className="text-xs text-muted-foreground ml-auto">{linesData.totalCount} total lines</span>}
         </div>
+        <div className="mb-3">
+          <input
+            type="text"
+            placeholder="Search by CPT code, ZIP, or modifier..."
+            value={linesSearch}
+            onChange={(e) => setLinesSearch(e.target.value)}
+            className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+          />
+        </div>
         {linesLoading && <div className="py-6 text-center text-sm text-muted-foreground">Loading lines…</div>}
         {!linesLoading && linesData && linesData.items.length === 0 && (
           <div className="py-6 text-center text-sm text-muted-foreground">No lines yet. Import an Excel file to add lines.</div>
@@ -1133,9 +1156,9 @@ export default function FeeSchedulesPage() {
                   totalCount={linesData.totalCount}
                   hasPreviousPage={linesData.hasPreviousPage}
                   hasNextPage={linesData.hasNextPage}
-                  onPrevious={() => { const p = linesPage - 1; setLinesPage(p); loadLines(linesSchedule!.id, p); }}
-                  onNext={() => { const p = linesPage + 1; setLinesPage(p); loadLines(linesSchedule!.id, p); }}
-                  onPageChange={(p) => { setLinesPage(p); loadLines(linesSchedule!.id, p); }}
+                  onPrevious={() => { const p = linesPage - 1; setLinesPage(p); loadLines(linesSchedule!.id, p, linesSearch); }}
+                  onNext={() => { const p = linesPage + 1; setLinesPage(p); loadLines(linesSchedule!.id, p, linesSearch); }}
+                  onPageChange={(p) => { setLinesPage(p); loadLines(linesSchedule!.id, p, linesSearch); }}
                   pageSize={20}
                   onPageSizeChange={() => {}}
                 />

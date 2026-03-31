@@ -917,7 +917,7 @@ function DryRunResults({
                       </span>
                     )}
                     {d.additionalInfo && (
-                      <span className="text-muted-foreground truncate flex-1" title={d.additionalInfo}>
+                      <span className="text-muted-foreground flex-1 break-words whitespace-normal" title={d.additionalInfo}>
                         — {d.additionalInfo}
                       </span>
                     )}

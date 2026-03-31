@@ -123,10 +123,11 @@ export function feeSchedulesApi() {
         method: "POST",
         body: JSON.stringify({ ids }),
       }),
-    getLines: (feeScheduleId: string, params?: { pageNumber?: number; pageSize?: number }) => {
+    getLines: (feeScheduleId: string, params?: { pageNumber?: number; pageSize?: number; search?: string }) => {
       const q = new URLSearchParams();
       if (params?.pageNumber != null) q.set("pageNumber", String(params.pageNumber));
       if (params?.pageSize != null) q.set("pageSize", String(params.pageSize));
+      if (params?.search) q.set("search", params.search);
       return apiRequest<PaginatedList<FeeScheduleLineDto>>(`/api/FeeSchedules/${feeScheduleId}/lines?${q}`);
     },
     importLines: async (feeScheduleId: string, file: File): Promise<FeeScheduleLineImportResult> => {
