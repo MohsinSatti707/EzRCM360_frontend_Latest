@@ -157,6 +157,40 @@ export interface ContingencyFeeByAgeDto {
   amount: number;
 }
 
+// ── Dry Run Types ────────────────────────────────────────────────────────────
+
+export type DryRunIssueSeverity = "Error" | "Warning" | "Info";
+export type DryRunActionType = "UpdateConfig" | "UploadCorrectedFile";
+
+export interface DryRunIssueDetail {
+  clientClaimId: string;
+  cptHcpcs?: string | null;
+  modifier?: string | null;
+  payerName?: string | null;
+  planName?: string | null;
+  providerName?: string | null;
+  additionalInfo?: string | null;
+}
+
+export interface DryRunIssueGroup {
+  category: string;
+  categoryLabel: string;
+  severity: DryRunIssueSeverity;
+  affectedClaimCount: number;
+  description: string;
+  suggestedAction: string;
+  actionType: DryRunActionType;
+  details: DryRunIssueDetail[];
+}
+
+export interface DryRunArAnalysisResult {
+  sessionId: string;
+  totalClaimsChecked: number;
+  totalIssuesFound: number;
+  hasBlockingIssues: boolean;
+  issueGroups: DryRunIssueGroup[];
+}
+
 export interface NoPayDenialSummaryDto {
   fullNoPayClaimCount: number;
   partialNoPayClaimCount: number;
@@ -338,6 +372,24 @@ export function insuranceArAnalysisApi() {
         } catch {}
         throw new Error(msg || "Failed to start analysis.");
       }
+    },
+
+    dryRun: async (sessionId: string): Promise<DryRunArAnalysisResult> => {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem(AUTH_TOKEN_KEY)
+          : null;
+      const url = getApiUrl(`${BASE}/${sessionId}/dry-run`);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(getErrorMessageFromResponse(text, "Dry run failed."));
+      }
+      const json = JSON.parse(text) as { data: DryRunArAnalysisResult };
+      return json.data;
     },
 
     getStatus: (sessionId: string) =>

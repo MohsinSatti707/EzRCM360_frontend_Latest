@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, AlertTriangle, CheckCircle, XCircle, Info, Search, ExternalLink } from "lucide-react";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { Button } from "@/components/ui/Button";
@@ -26,6 +26,8 @@ import {
   insuranceArAnalysisApi,
   type ArIntakeValidationResult,
   type ArValidationError,
+  type DryRunArAnalysisResult,
+  type DryRunIssueGroup,
 } from "@/lib/services/insuranceArAnalysis";
 
 type Step = 1 | 2 | 3;
@@ -67,6 +69,8 @@ export default function InsuranceArAnalysisUploadPage() {
   const [validationLoading, setValidationLoading] = useState(false);
   const [pmFiles, setPmFiles] = useState<File[]>([]);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [dryRunLoading, setDryRunLoading] = useState(false);
+  const [dryRunResult, setDryRunResult] = useState<DryRunArAnalysisResult | null>(null);
   const [sessionDetail, setSessionDetail] = useState<{
     sessionName: string;
     practiceName: string;
@@ -187,6 +191,27 @@ export default function InsuranceArAnalysisUploadPage() {
       setSubmitLoading(false);
     }
   }, [sessionId, api, toast, router]);
+
+  const handleDryRun = useCallback(async () => {
+    if (!sessionId) return;
+    setDryRunLoading(true);
+    setDryRunResult(null);
+    try {
+      const result = await api.dryRun(sessionId);
+      setDryRunResult(result);
+      if (result.totalIssuesFound === 0) {
+        toast.success("Dry run passed — no issues found. Ready to start analysis.");
+      } else if (result.hasBlockingIssues) {
+        toast.error(`Dry run found ${result.totalIssuesFound} issue(s) that must be resolved before analysis.`);
+      } else {
+        toast.warning(`Dry run found ${result.totalIssuesFound} warning(s). Analysis can proceed but results may be affected.`);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Dry run failed.");
+    } finally {
+      setDryRunLoading(false);
+    }
+  }, [sessionId, api, toast]);
 
   useEffect(() => {
     if (step === 3 && sessionId && !sessionDetail) {
@@ -500,10 +525,27 @@ export default function InsuranceArAnalysisUploadPage() {
               </div>
             </div>
           </div>
+            {/* Dry Run Results */}
+            {dryRunResult && (
+              <DryRunResults
+                result={dryRunResult}
+                onDismiss={() => setDryRunResult(null)}
+              />
+            )}
+
             <div className="flex flex-wrap gap-3 pt-4">
               <Button
+                onClick={handleDryRun}
+                disabled={dryRunLoading || submitLoading}
+                variant="secondary"
+                className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] border-[#0066CC] text-[#0066CC] font-['Aileron'] text-[14px]"
+              >
+                {dryRunLoading ? "Checking…" : "Start Dry Run"}
+                <Search className="h-4 w-4" />
+              </Button>
+              <Button
                 onClick={handleStartAnalysis}
-                disabled={submitLoading}
+                disabled={submitLoading || dryRunLoading}
                 className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]"
               >
                 {submitLoading ? "Starting…" : "Start AR Analysis"}
@@ -711,6 +753,186 @@ function ValidationStatus({
           )}
         </>
       )}
+    </div>
+  );
+}
+
+// ── Dry Run Results Component ──────────────────────────────────────────────
+
+function DryRunResults({
+  result,
+  onDismiss,
+}: {
+  result: DryRunArAnalysisResult;
+  onDismiss: () => void;
+}) {
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+
+  const severityIcon = (severity: string) => {
+    switch (severity) {
+      case "Error":
+        return <XCircle className="h-5 w-5 text-red-500 shrink-0" />;
+      case "Warning":
+        return <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />;
+      default:
+        return <Info className="h-5 w-5 text-blue-500 shrink-0" />;
+    }
+  };
+
+  const severityBg = (severity: string) => {
+    switch (severity) {
+      case "Error":
+        return "bg-red-50 border-red-200";
+      case "Warning":
+        return "bg-amber-50 border-amber-200";
+      default:
+        return "bg-blue-50 border-blue-200";
+    }
+  };
+
+  if (result.totalIssuesFound === 0) {
+    return (
+      <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4">
+        <div className="flex items-center gap-3">
+          <CheckCircle className="h-6 w-6 text-green-600 shrink-0" />
+          <div>
+            <p className="font-semibold text-green-800 text-[14px] font-['Aileron']">
+              Dry Run Passed — No Issues Found
+            </p>
+            <p className="text-green-700 text-[13px] font-['Aileron'] mt-1">
+              All {result.totalClaimsChecked} claim(s) checked against your configurations. Ready to start analysis.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 space-y-3">
+      {/* Summary banner */}
+      <div className={`rounded-lg border p-4 ${result.hasBlockingIssues ? "bg-red-50 border-red-200" : "bg-amber-50 border-amber-200"}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {result.hasBlockingIssues ? (
+              <XCircle className="h-6 w-6 text-red-600 shrink-0" />
+            ) : (
+              <AlertTriangle className="h-6 w-6 text-amber-600 shrink-0" />
+            )}
+            <div>
+              <p className={`font-semibold text-[14px] font-['Aileron'] ${result.hasBlockingIssues ? "text-red-800" : "text-amber-800"}`}>
+                Dry Run: {result.totalIssuesFound} Issue(s) Found
+              </p>
+              <p className={`text-[13px] font-['Aileron'] mt-1 ${result.hasBlockingIssues ? "text-red-700" : "text-amber-700"}`}>
+                {result.hasBlockingIssues
+                  ? "Blocking issues found — resolve before starting analysis."
+                  : "Warnings found — analysis can proceed but some results may show $0."}
+              </p>
+            </div>
+          </div>
+          <button onClick={onDismiss} className="text-gray-400 hover:text-gray-600 text-sm">
+            Dismiss
+          </button>
+        </div>
+      </div>
+
+      {/* Issue groups */}
+      {result.issueGroups.map((group) => (
+        <div
+          key={group.category}
+          className={`rounded-lg border ${severityBg(group.severity)}`}
+        >
+          <button
+            className="w-full flex items-center gap-3 p-4 text-left"
+            onClick={() =>
+              setExpandedGroup(expandedGroup === group.category ? null : group.category)
+            }
+          >
+            {severityIcon(group.severity)}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-[14px] font-['Aileron'] text-foreground">
+                  {group.categoryLabel}
+                </span>
+                <span className="text-[12px] font-['Aileron'] bg-white/80 px-2 py-0.5 rounded-full text-muted-foreground">
+                  {group.affectedClaimCount} claim(s)
+                </span>
+              </div>
+              <p className="text-[13px] font-['Aileron'] text-muted-foreground mt-1">
+                {group.description}
+              </p>
+            </div>
+            <svg
+              className={`h-5 w-5 text-gray-400 shrink-0 transition-transform ${expandedGroup === group.category ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {expandedGroup === group.category && (
+            <div className="border-t border-inherit px-4 pb-4">
+              {/* Suggested action */}
+              <div className="flex items-start gap-2 mt-3 mb-3 p-3 bg-white/60 rounded-md">
+                <Info className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-[13px] font-['Aileron'] text-foreground">{group.suggestedAction}</p>
+                  <div className="mt-2">
+                    {group.actionType === "UpdateConfig" ? (
+                      <a
+                        href="/settings"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#0066CC] hover:text-[#0066CC]/80"
+                      >
+                        Open Settings
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    ) : (
+                      <span className="text-[13px] font-['Aileron'] text-muted-foreground italic">
+                        Upload a corrected intake file to fix these issues.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Detail rows */}
+              <div className="space-y-1.5 max-h-[250px] overflow-y-auto">
+                {group.details.map((d, i) => (
+                  <div key={i} className="flex items-start gap-2 text-[12px] font-['Aileron'] p-2 bg-white/40 rounded">
+                    <span className="font-mono text-muted-foreground shrink-0 w-[100px] truncate" title={d.clientClaimId}>
+                      {d.clientClaimId}
+                    </span>
+                    {d.cptHcpcs && (
+                      <span className="font-mono text-foreground shrink-0">
+                        CPT {d.cptHcpcs}{d.modifier ? ` / ${d.modifier}` : ""}
+                      </span>
+                    )}
+                    {d.payerName && (
+                      <span className="text-muted-foreground truncate" title={d.payerName}>
+                        {d.payerName}
+                      </span>
+                    )}
+                    {d.additionalInfo && (
+                      <span className="text-muted-foreground truncate flex-1" title={d.additionalInfo}>
+                        — {d.additionalInfo}
+                      </span>
+                    )}
+                  </div>
+                ))}
+                {group.affectedClaimCount > group.details.length && (
+                  <p className="text-[12px] text-muted-foreground italic pl-2">
+                    ...and {group.affectedClaimCount - group.details.length} more
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
