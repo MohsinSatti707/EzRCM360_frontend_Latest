@@ -7,7 +7,9 @@
       "WebFetch(domain:www.figma.com)",
       "Bash(npm run build)",
       "Read(//d/RCM/Updated 3102026/EzRCM360_Backend_Latest/**)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(chmod +x \"c:/Users/Shariq Abbasi/Documents/EzRCM360_frontend_Latest/.git/hooks/pre-commit\")",
+      "Bash(bash .git/hooks/pre-commit)"
     ],
     "additionalDirectories": [
       "D:\\RCM\\Updated 3102026\\EzRCM360_Backend_Latest\\src\\Infrastructure\\Services"

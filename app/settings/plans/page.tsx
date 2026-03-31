@@ -536,7 +536,7 @@ export default function PlansPage() {
                           </div>
                           <div className="flex items-center gap-3 shrink-0 ml-4">
                             <select
-                              value={plan.status}
+                              value={resolveEnum(plan.status, ENUMS.PayerStatus)}
                               onChange={(e) => handleStatusChange(plan, Number(e.target.value))}
                               disabled={!canUpdate || statusUpdatingId === plan.id}
                               className="input-enterprise w-[100px] rounded-[5px] px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0"

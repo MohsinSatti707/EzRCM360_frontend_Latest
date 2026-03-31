@@ -208,7 +208,7 @@ export default function InsuranceArAnalysisListPage() {
 
       {data && (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="max-h-[calc(100vh-340px)] overflow-x-auto overflow-y-auto rounded-[5px] border-y border-border bg-card shadow-sm">
+          <div className="max-h-[calc(100vh-340px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
             <Table className="w-[1700px] table-fixed">
                 <TableHead className="sticky top-0 z-20">
                   <TableRow className="bg-[hsl(210,100%,97%)] ">

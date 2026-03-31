@@ -31,7 +31,7 @@ import type {
   CreateGroupProviderPlanParticipationRequest,
   UpdateGroupProviderPlanParticipationRequest,
 } from "@/lib/services/groupParticipations";
-import type { EntityLookupDto, PayerLookupDto, EntityProviderLookupDto, PlanLookupDto } from "@/lib/services/lookups";
+import type { PayerLookupDto, PlanLookupDto } from "@/lib/services/lookups";
 import type { ValueLabelDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
 import { useDebounce } from "@/lib/hooks";
@@ -54,12 +54,10 @@ const defaultForm: CreateGroupProviderPlanParticipationRequest = {
 
 export default function GroupParticipationPage() {
   const [data, setData] = useState<PaginatedList<GroupProviderPlanParticipationListItemDto> | null>(null);
-  const [entities, setEntities] = useState<EntityLookupDto[]>([]);
   const [payers, setPayers] = useState<PayerLookupDto[]>([]);
-  const [allEntityProviders, setAllEntityProviders] = useState<EntityProviderLookupDto[]>([]);
   const [allPlans, setAllPlans] = useState<PlanLookupDto[]>([]);
-  const [selectedEntityId, setSelectedEntityId] = useState("");
   const [selectedPayerId, setSelectedPayerId] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [participationStatuses, setParticipationStatuses] = useState<ValueLabelDto[]>([]);
   const [participationSources, setParticipationSources] = useState<ValueLabelDto[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -83,30 +81,25 @@ export default function GroupParticipationPage() {
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Group Provider Plan Participations");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
 
   const loadList = useCallback(() => {
     setError(null);
-    api.getList({ pageNumber: page, pageSize, search: debouncedSearch || undefined }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize, debouncedSearch]);
+    const isActive = statusFilter === "active" ? true : statusFilter === "inactive" ? false : undefined;
+    api.getList({ pageNumber: page, pageSize, search: debouncedSearch || undefined, isActive }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
+  }, [page, pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     loadList();
   }, [loadList]);
 
   useEffect(() => {
-    lookupsApi().getEntities().then(setEntities).catch(() => setEntities([]));
     lookupsApi().getPayers().then(setPayers).catch(() => setPayers([]));
-    lookupsApi().getEntityProviders().then(setAllEntityProviders).catch(() => setAllEntityProviders([]));
     lookupsApi().getPlans().then(setAllPlans).catch(() => setAllPlans([]));
     lookupsApi().getParticipationStatuses().then(setParticipationStatuses).catch(() => setParticipationStatuses([]));
     lookupsApi().getParticipationSources().then(setParticipationSources).catch(() => setParticipationSources([]));
   }, []);
 
-  const filteredProviders = useMemo(
-    () => selectedEntityId ? allEntityProviders.filter((p) => p.entityId === selectedEntityId) : allEntityProviders,
-    [allEntityProviders, selectedEntityId]
-  );
   const filteredPlans = useMemo(
     () => selectedPayerId ? allPlans.filter((p) => p.payerId === selectedPayerId) : allPlans,
     [allPlans, selectedPayerId]
@@ -114,7 +107,6 @@ export default function GroupParticipationPage() {
 
   const openCreate = () => {
     setEditId(null);
-    setSelectedEntityId("");
     setSelectedPayerId("");
     setForm({
       ...defaultForm,
@@ -130,9 +122,6 @@ export default function GroupParticipationPage() {
     setFormError(null);
     try {
       const detail = await api.getById(row.id);
-      // Derive parent entity from provider
-      const provider = allEntityProviders.find((p) => p.id === detail.entityProviderId);
-      setSelectedEntityId(provider?.entityId ?? "");
       // Derive parent payer from plan
       const plan = allPlans.find((p) => p.id === detail.planId);
       setSelectedPayerId(plan?.payerId ?? "");
@@ -153,8 +142,8 @@ export default function GroupParticipationPage() {
 
   const handleSubmit = async () => {
     setFormError(null);
-    if (!selectedEntityId || !form.entityProviderId || !selectedPayerId || !form.planId) {
-      setFormError("Entity, provider, payer, and plan are all required.");
+    if (!selectedPayerId || !form.planId) {
+      setFormError("Payer and plan are required.");
       return;
     }
     setSubmitLoading(true);
@@ -264,26 +253,11 @@ export default function GroupParticipationPage() {
   };
 
   const statusLabel = (n: number) => participationStatuses.find((o) => Number(o.value) === n)?.label ?? String(n);
-  const entityNameById = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const e of entities) m.set(e.id, e.displayName);
-    return m;
-  }, [entities]);
   const payerNameById = useMemo(() => {
     const m = new Map<string, string>();
     for (const p of payers) m.set(p.id, p.payerName);
     return m;
   }, [payers]);
-  const providerNameById = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const p of allEntityProviders) m.set(p.id, p.displayName);
-    return m;
-  }, [allEntityProviders]);
-  const providerEntityIdById = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const p of allEntityProviders) m.set(p.id, p.entityId);
-    return m;
-  }, [allEntityProviders]);
   const planPayerIdById = useMemo(() => {
     const m = new Map<string, string>();
     for (const p of allPlans) m.set(p.id, p.payerId);
@@ -312,7 +286,7 @@ export default function GroupParticipationPage() {
       {/* Toolbar: search + add button */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
-          <Select value="" onValueChange={() => {}}>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
@@ -365,7 +339,7 @@ export default function GroupParticipationPage() {
       {data && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-            <Table className="min-w-[1600px] table-fixed">
+            <Table className="min-w-[1200px] table-fixed">
               <TableHead className="sticky top-0 z-20">
                 <TableRow>
                   {canDelete && (
@@ -376,8 +350,6 @@ export default function GroupParticipationPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[180px] min-w-[180px]">Entity</TableHeaderCell>
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Provider</TableHeaderCell>
                   <TableHeaderCell className="w-[160px] min-w-[160px]">Payer</TableHeaderCell>
                   <TableHeaderCell className="w-[200px] min-w-[200px]">Plan</TableHeaderCell>
                   <TableHeaderCell className="w-[140px] min-w-[140px]">Status</TableHeaderCell>
@@ -400,18 +372,6 @@ export default function GroupParticipationPage() {
                         />
                       </TableCell>
                     )}
-                    <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[140px] truncate">
-                        {entityNameById.get(providerEntityIdById.get(row.entityProviderId) ?? "") ?? "—"}
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-[200px] min-w-[200px]">
-                      <div className="max-w-xs truncate">
-                        {row.entityProviderDisplayName ??
-                          providerNameById.get(row.entityProviderId) ??
-                          row.entityProviderId}
-                      </div>
-                    </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <div className="max-w-[140px] truncate">
                         {payerNameById.get(planPayerIdById.get(row.planId) ?? "") ?? "—"}
@@ -501,24 +461,6 @@ export default function GroupParticipationPage() {
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
           <div className="flex flex-col gap-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Entity <span className="text-red-500">*</span></label>
-              <select value={selectedEntityId} onChange={(e) => { setSelectedEntityId(e.target.value); setForm((f) => ({ ...f, entityProviderId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
-                <option value="">Select entity</option>
-                {entities.map((e) => (
-                  <option key={e.id} value={e.id}>{e.displayName}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Provider <span className="text-red-500">*</span></label>
-              <select value={form.entityProviderId} onChange={(e) => setForm((f) => ({ ...f, entityProviderId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required disabled={!selectedEntityId}>
-                <option value="">{selectedEntityId ? "Select provider" : "Select entity first"}</option>
-                {filteredProviders.map((p) => (
-                  <option key={p.id} value={p.id}>{p.displayName}</option>
-                ))}
-              </select>
-            </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Payer <span className="text-red-500">*</span></label>
               <select value={selectedPayerId} onChange={(e) => { setSelectedPayerId(e.target.value); setForm((f) => ({ ...f, planId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
