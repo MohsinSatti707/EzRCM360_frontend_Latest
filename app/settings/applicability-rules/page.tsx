@@ -48,32 +48,32 @@ const CLAIM_CATEGORIES = [
   { value: "WC", name: "Workers' Compensation" },
 ];
 const PROVIDER_PARTICIPATION = [
-  { value: 0, name: "In Network" },
-  { value: 1, name: "Out of Network" },
-  { value: 2, name: "N/A" },
+  { value: "InNetwork", name: "In Network" },
+  { value: "OutOfNetwork", name: "Out of Network" },
+  { value: "NA", name: "N/A" },
 ];
 const PAYER_CATEGORY = [
-  { value: 0, name: "Attorney/Employer/Other" },
-  { value: 1, name: "Medicare" },
-  { value: 2, name: "Railroad Medicare" },
-  { value: 3, name: "Tricare" },
-  { value: 4, name: "Medicaid" },
-  { value: 5, name: "Commercial IN" },
-  { value: 6, name: "Commercial OON" },
-  { value: 7, name: "MVA" },
-  { value: 8, name: "Workers Compensation" },
+  { value: "AttorneyOrEmployerOrOther", name: "Attorney/Employer/Other" },
+  { value: "Medicare", name: "Medicare" },
+  { value: "RailroadMedicare", name: "Railroad Medicare" },
+  { value: "Tricare", name: "Tricare" },
+  { value: "Medicaid", name: "Medicaid" },
+  { value: "CommercialIN", name: "Commercial IN" },
+  { value: "CommercialOON", name: "Commercial OON" },
+  { value: "MVA", name: "MVA" },
+  { value: "WorkersCompensation", name: "Workers Compensation" },
 ];
 const FEE_SCHEDULE_APPLIED = [
-  { value: 0, name: "UCR" },
-  { value: 1, name: "Medicare" },
-  { value: 2, name: "Medicare Multiplier" },
-  { value: 3, name: "MVA" },
-  { value: 4, name: "WC" },
+  { value: "UCR", name: "UCR" },
+  { value: "Medicare", name: "Medicare" },
+  { value: "MedicareMultiplier", name: "Medicare Multiplier" },
+  { value: "MVA", name: "MVA" },
+  { value: "WC", name: "WC" },
 ];
 const MER_CALCULATION_SCOPE = [
-  { value: 0, name: "None" },
-  { value: 1, name: "No Pay Denial Only" },
-  { value: 2, name: "Full MER" },
+  { value: "None", name: "None" },
+  { value: "NoPayDenialOnly", name: "No Pay Denial Only" },
+  { value: "FullMer", name: "Full MER" },
 ];
 const ACTIVE_OPTIONS = [{ value: 1, name: "Yes" }, { value: 0, name: "No" }];
 const PLAN_CATEGORIES = [
@@ -94,10 +94,10 @@ const defaultForm: CreateApplicabilityRuleCommand = {
   payerEntityType: "",
   planCategory: "",
   claimCategory: "",
-  providerParticipation: 0,
-  payerCategory: 0,
-  feeScheduleApplied: 0,
-  merCalculationScope: 0,
+  providerParticipation: "InNetwork",
+  payerCategory: "AttorneyOrEmployerOrOther",
+  feeScheduleApplied: "UCR",
+  merCalculationScope: "None",
   isActive: true,
   state: null,
   placeOfService: null,
@@ -416,7 +416,7 @@ export default function ApplicabilityRulesPage() {
     }
   };
 
-  const payerCategoryLabel = (n: number) =>
+  const payerCategoryLabel = (n: string) =>
     PAYER_CATEGORY.find((c) => c.value === n)?.name ?? String(n);
 
   const filteredItems = data?.items.filter((row) => {
@@ -730,7 +730,7 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    providerParticipation: Number(e.target.value),
+                    providerParticipation: e.target.value,
                   }))
                 }
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -751,7 +751,7 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    payerCategory: Number(e.target.value),
+                    payerCategory: e.target.value,
                   }))
                 }
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -772,7 +772,7 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    feeScheduleApplied: Number(e.target.value),
+                    feeScheduleApplied: e.target.value,
                   }))
                 }
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -793,7 +793,7 @@ export default function ApplicabilityRulesPage() {
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    merCalculationScope: Number(e.target.value),
+                    merCalculationScope: e.target.value,
                   }))
                 }
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"

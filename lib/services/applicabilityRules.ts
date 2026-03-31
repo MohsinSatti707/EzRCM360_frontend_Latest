@@ -9,10 +9,10 @@ export interface ApplicabilityRuleDto {
   payerEntityType: string;
   planCategory: string;
   claimCategory: string;
-  providerParticipation: number;
-  payerCategory: number;
-  feeScheduleApplied: number;
-  merCalculationScope: number;
+  providerParticipation: string;
+  payerCategory: string;
+  feeScheduleApplied: string;
+  merCalculationScope: string;
   isActive: boolean;
   state?: string | null;
   placeOfService?: string | null;
@@ -30,10 +30,10 @@ export interface CreateApplicabilityRuleCommand {
   payerEntityType: string;
   planCategory: string;
   claimCategory: string;
-  providerParticipation: number;
-  payerCategory: number;
-  feeScheduleApplied: number;
-  merCalculationScope: number;
+  providerParticipation: string;
+  payerCategory: string;
+  feeScheduleApplied: string;
+  merCalculationScope: string;
   isActive?: boolean;
   state?: string | null;
   placeOfService?: string | null;
@@ -47,7 +47,7 @@ export interface CreateApplicabilityRuleCommand {
 export function applicabilityRulesApi() {
   return {
     getList: (params: {
-      payerCategory?: number;
+      payerCategory?: string;
       isActive?: boolean;
       pageNumber?: number;
       pageSize?: number;
