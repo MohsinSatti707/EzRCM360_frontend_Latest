@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 
-export type ToastVariant = "success" | "error";
+export type ToastVariant = "success" | "error" | "warning";
 
 export interface ToastItem {
   id: string;
@@ -14,6 +14,7 @@ interface ToastContextValue {
   toasts: ToastItem[];
   success: (message: string) => void;
   error: (message: string) => void;
+  warning: (message: string) => void;
   dismiss: (id: string) => void;
 }
 
@@ -60,8 +61,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const success = useCallback((message: string) => addToast(message, "success"), [addToast]);
   const error = useCallback((message: string) => addToast(message, "error"), [addToast]);
+  const warning = useCallback((message: string) => addToast(message, "warning"), [addToast]);
 
-  const value: ToastContextValue = { toasts, success, error, dismiss };
+  const value: ToastContextValue = { toasts, success, error, warning, dismiss };
   return (
     <ToastContext.Provider value={value}>
       {children}

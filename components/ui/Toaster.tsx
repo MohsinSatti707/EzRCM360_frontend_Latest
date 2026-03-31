@@ -20,6 +20,8 @@ export function Toaster() {
           className={`flex items-center justify-between rounded-lg border px-4 py-3 shadow-lg ${
             t.variant === "success"
               ? "border-green-200 bg-green-50 text-green-800"
+              : t.variant === "warning"
+              ? "border-amber-200 bg-amber-50 text-amber-800"
               : "border-red-200 bg-red-50 text-red-800"
           }`}
         >

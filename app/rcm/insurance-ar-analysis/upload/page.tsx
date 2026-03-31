@@ -204,7 +204,7 @@ export default function InsuranceArAnalysisUploadPage() {
       } else if (result.hasBlockingIssues) {
         toast.error(`Dry run found ${result.totalIssuesFound} issue(s) that must be resolved before analysis.`);
       } else {
-        toast.success(`Dry run found ${result.totalIssuesFound} warning(s). Analysis can proceed but some results may be affected.`);
+        toast.warning(`Dry run found ${result.totalIssuesFound} warning(s). Analysis can proceed but some results may be affected.`);
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Dry run failed.");
