@@ -77,18 +77,24 @@ export default function RenderingParticipationPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const api = renderingParticipationsApi();
   const toast = useToast();
   const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Rendering Provider Plan Participations");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
 
   const loadList = useCallback(async () => {
     setError(null);
-    await api.getList({ pageNumber: page, pageSize, search: debouncedSearch || undefined }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize, debouncedSearch]);
+    await api.getList({
+      pageNumber: page,
+      pageSize,
+      search: debouncedSearch || undefined,
+      isActive: statusFilter === "active" ? true : statusFilter === "inactive" ? false : undefined,
+    }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
+  }, [page, pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     loadList();
@@ -312,7 +318,7 @@ export default function RenderingParticipationPage() {
       {/* Toolbar: search + add button */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
-          <Select value="" onValueChange={() => {}}>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>

@@ -50,6 +50,21 @@ const defaultForm: CreateFeeScheduleCommand = {
   notes: "",
 };
 
+function resolveFromLookup(val: unknown, items?: { value: number; name: string }[]): number {
+  if (typeof val === "number") return val;
+  if (!items) return 0;
+  const str = String(val);
+  const found = items.find((i) => i.name === str);
+  if (found) return found.value;
+  const n = Number(str);
+  return isNaN(n) ? 0 : n;
+}
+
+function resolveFromLookupNullable(val: unknown, items?: { value: number; name: string }[]): number | null {
+  if (val == null || val === "") return null;
+  return resolveFromLookup(val, items);
+}
+
 function resolveCategoryStr(category: number | string): string {
   const catStr = String(category);
   const catMap: Record<string, string> = {
@@ -188,19 +203,19 @@ export default function FeeSchedulesPage() {
     api.getById(row.id).then((detail: FeeScheduleDetailDto) => {
       setForm({
         scheduleCode: detail.scheduleCode ?? "",
-        category: detail.category,
+        category: resolveFromLookup(detail.category, lookups?.categories),
         state: detail.state ?? "",
-        geoType: detail.geoType,
+        geoType: resolveFromLookup(detail.geoType, lookups?.geoTypes),
         geoCode: detail.geoCode ?? "",
         geoName: detail.geoName ?? "",
-        billingType: detail.billingType,
+        billingType: resolveFromLookup(detail.billingType, lookups?.billingTypes),
         years: detail.years ?? [],
         quarters: detail.quarters ?? [],
-        calculationModel: detail.calculationModel,
+        calculationModel: resolveFromLookup(detail.calculationModel, lookups?.calculationModels),
         adoptFeeScheduleId: detail.adoptFeeScheduleId ?? null,
         multiplierPct: detail.multiplierPct,
-        fallbackCategory: detail.fallbackCategory ?? null,
-        status: detail.status,
+        fallbackCategory: resolveFromLookupNullable(detail.fallbackCategory, lookups?.categories),
+        status: resolveFromLookup(detail.status, STATUS_OPTIONS.map((o) => ({ value: o.value, name: o.name }))),
         source: detail.source ?? "",
         notes: detail.notes ?? "",
       });
@@ -629,7 +644,7 @@ export default function FeeSchedulesPage() {
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select
-                        value={row.status}
+                        value={resolveFromLookup(row.status, STATUS_OPTIONS.map((o) => ({ value: o.value, name: o.name })))}
                         onChange={(e) => handleStatusChange(row, Number(e.target.value))}
                         disabled={!canUpdate || statusUpdatingId === row.id}
                         className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
