@@ -129,6 +129,7 @@ export default function ModifiersPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
+      toast.error(msg);
     } finally {
       setSubmitLoading(false);
     }
