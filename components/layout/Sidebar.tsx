@@ -330,7 +330,7 @@ function CollapsibleNavGroup({
         </button>
       </CollapsiblePrimitive.Trigger>
       <CollapsiblePrimitive.Content>
-        <div className="pt-3 relative">
+        <div className="pt-2 relative">
           {/* Vertical line indicator */}
           <div className="absolute left-[30px] top-1 bottom-1 w-[1.5px] bg-[hsl(210,30%,88%)]" />
           <ul>
@@ -343,7 +343,7 @@ function CollapsibleNavGroup({
                   )}
                   <Link
                     href={item.href}
-                    className={`sidebar-item-text block py-2 ml-10 mr-0 pl-3 pr-3 rounded-[5px] text-[14px] transition-colors ${
+                    className={`sidebar-item-text block py-3 ml-10 mr-0 pl-3 pr-3 rounded-[5px] text-[14px] transition-colors ${
                       active
                         ? "bg-[hsl(210,100%,96%)] text-primary font-medium"
                         : "text-sidebar-foreground hover:bg-sidebar-accent/50"
