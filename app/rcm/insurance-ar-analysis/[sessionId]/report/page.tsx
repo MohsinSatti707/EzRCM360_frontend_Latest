@@ -454,12 +454,22 @@ const formattedSession = formatSessionDetails(
             <div className="grid gap-5 sm:grid-cols-2 mb-5">
               <div className="bg-background rounded-lg p-6 sm:p-7 text-center border border-border">
                 <div className="text-[32px] font-bold font-['Aileron'] text-foreground mb-2">
+                  {formatCurrency(totalUnderpayment)}
+                </div>
+                <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-muted-foreground">
+                  Total Underpayment
+                </div>
+              </div>
+              {/* Maximum Potential Recovery card — commented out for future use
+              <div className="bg-background rounded-lg p-6 sm:p-7 text-center border border-border">
+                <div className="text-[32px] font-bold font-['Aileron'] text-foreground mb-2">
                   {formatCurrency(report.recoveryProjectionSummary.maxPotentialRecovery)}
                 </div>
                 <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-muted-foreground">
                   Maximum Potential Recovery
                 </div>
               </div>
+              */}
               <div className=" rounded-lg p-6 sm:p-7 text-center border-2 border-[#16A34A] bg-green-50/50">
                 <div className="text-[32px] font-bold font-['Aileron'] text-[#16A34A] mb-2">
                   {formatCurrency(report.recoveryProjectionSummary.riskAdjustedRecovery)}
