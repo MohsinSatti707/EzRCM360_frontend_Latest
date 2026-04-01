@@ -9,6 +9,7 @@ export interface ModalFooterProps {
   submitLabel?: React.ReactNode;
   onSubmit: () => void;
   loading?: boolean;
+  disabled?: boolean;
   className?: string;
 }
 
@@ -41,6 +42,7 @@ export function DrawerFooter({
   submitLabel = "Save",
   onSubmit,
   loading,
+  disabled,
   className,
 }: ModalFooterProps) {
   return (
@@ -48,7 +50,7 @@ export function DrawerFooter({
       <Button
         type="submit"
         onClick={onSubmit}
-        disabled={loading}
+        disabled={loading || disabled}
         className="h-10 rounded-[5px] px-[18px] py-3 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
       >
         {loading ? "Saving…" : <>{submitLabel} <ArrowRight className="ml-1 h-4 w-4" /></>}

@@ -8,6 +8,8 @@ import { NativeSelect as Select } from "@/components/ui/Select";
 import type { CreateModifierCommand } from "@/lib/services/modifiers";
 import type { SelectOption } from "@/components/ui/Select";
 
+const MAX_MODIFIER_CODE_LENGTH = 25;
+
 const MODIFIER_TYPE_OPTIONS: SelectOption<number>[] = [
   { value: 0, label: "Procedure" },
   { value: 1, label: "Financial" },
@@ -35,6 +37,8 @@ export function ModifierFormModal({
   loading,
   error,
 }: ModifierFormModalProps) {
+  const modifierCodeOverLimit = form.modifierCode.length > MAX_MODIFIER_CODE_LENGTH;
+
   return (
     <DrawerForm
       open={open}
@@ -46,11 +50,19 @@ export function ModifierFormModal({
           submitLabel={editId ? "Update" : "Create"}
           onSubmit={onSubmit}
           loading={loading}
+          disabled={modifierCodeOverLimit}
           className="p-0"
         />
       }
     >
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
+        {modifierCodeOverLimit && (
+          <div className="mb-4">
+            <Alert variant="error">
+              {`The length of 'Modifier Code' must be ${MAX_MODIFIER_CODE_LENGTH} characters or fewer. You entered ${form.modifierCode.length} characters.`}
+            </Alert>
+          </div>
+        )}
         {error && (
           <div className="mb-4">
             <Alert variant="error">{error}</Alert>
