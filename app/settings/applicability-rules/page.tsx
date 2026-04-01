@@ -926,6 +926,9 @@ export default function ApplicabilityRulesPage() {
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
+            <p className="text-xs text-muted-foreground">
+              Effective dates are matched against the claim&apos;s Date of Service, not today&apos;s date.
+            </p>
             <div className="flex items-center">
               <label htmlFor="applicability-rule-active" className="inline-flex w-fit cursor-pointer items-center gap-2">
                 <input
