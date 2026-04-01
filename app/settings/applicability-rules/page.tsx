@@ -927,7 +927,7 @@ export default function ApplicabilityRulesPage() {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Effective dates are matched against the claim&apos;s Date of Service, not today&apos;s date.
+              Effective dates are matched against the claim&apos;s Date of Service.
             </p>
             <div className="flex items-center">
               <label htmlFor="applicability-rule-active" className="inline-flex w-fit cursor-pointer items-center gap-2">
