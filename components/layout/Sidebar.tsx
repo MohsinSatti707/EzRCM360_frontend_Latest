@@ -287,12 +287,6 @@ function CollapsibleNavGroup({
   );
   const [isOpen, setIsOpen] = useState(defaultOpen || isGroupActive);
 
-  useEffect(() => {
-    if (!isGroupActive) {
-      setIsOpen(false);
-    }
-  }, [isGroupActive, pathname]);
-
   const isItemActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
 
@@ -323,13 +317,13 @@ function CollapsibleNavGroup({
         <button
           type="button"
           className={`sidebar-item-text w-[95%] flex items-center justify-between ml-3 mr-0 pl-3 pr-3 py-2.5 rounded-lg transition-colors ${
-            isGroupActive || isOpen
+            isGroupActive
               ? "bg-[hsl(210,100%,96%)] text-primary font-medium"
               : "text-sidebar-foreground hover:bg-sidebar-accent/50"
           }`}
         >
           <div className="flex items-center gap-3">
-            <Icon className="h-[18px] w-[18px] flex-shrink-0" color={isGroupActive || isOpen ? activeColor : defaultColor} />
+            <Icon className="h-[18px] w-[18px] flex-shrink-0" color={isGroupActive ? activeColor : defaultColor} />
             <span className="text-[14px]">{label}</span>
           </div>
           <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
@@ -349,7 +343,7 @@ function CollapsibleNavGroup({
                   )}
                   <Link
                     href={item.href}
-                    className={`sidebar-item-text block py-2 ml-10 mr-0 pl-3 pr-3 rounded-lg text-[14px] transition-colors ${
+                    className={`sidebar-item-text block py-2 ml-10 mr-0 pl-3 pr-3 rounded-[5px] text-[14px] transition-colors ${
                       active
                         ? "bg-[hsl(210,100%,96%)] text-primary font-medium"
                         : "text-sidebar-foreground hover:bg-sidebar-accent/50"

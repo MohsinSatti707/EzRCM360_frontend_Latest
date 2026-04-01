@@ -15,7 +15,7 @@ export function Header() {
         <span className="hidden sm:inline">Notifications</span>
         <Badge
           variant="secondary"
-          className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-muted-foreground text-white"
+          className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-muted-foreground text-white hover:bg-muted-foreground"
         >
           3
         </Badge>

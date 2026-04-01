@@ -27,6 +27,7 @@ function nextId() {
 }
 
 const AUTO_DISMISS_MS = 5000;
+const LONG_AUTO_DISMISS_MS = 45000;
 // Approximate single-line length; messages longer than this are considered "long"
 const LONG_MESSAGE_THRESHOLD = 80;
 
@@ -47,12 +48,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       setToasts((prev) => {
         if (prev.some((t) => t.message === message && t.variant === variant)) return prev;
         const id = nextId();
-        // Long error messages stay until manually dismissed; short ones auto-dismiss
-        const isLong = message.length > LONG_MESSAGE_THRESHOLD;
-        if (!(variant === "error" && isLong)) {
-          const t = setTimeout(() => dismiss(id), AUTO_DISMISS_MS);
-          timeoutsRef.current.set(id, t);
-        }
+        const isLong = variant === "error" && message.length > LONG_MESSAGE_THRESHOLD;
+        const delay = isLong ? LONG_AUTO_DISMISS_MS : AUTO_DISMISS_MS;
+        const t = setTimeout(() => dismiss(id), delay);
+        timeoutsRef.current.set(id, t);
         return [...prev, { id, message, variant }];
       });
     },

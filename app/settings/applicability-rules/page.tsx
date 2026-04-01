@@ -75,7 +75,7 @@ const MER_CALCULATION_SCOPE = [
   { value: "NoPayDenialOnly", name: "No Pay Denial Only" },
   { value: "FullMer", name: "Full MER" },
 ];
-const ACTIVE_OPTIONS = [{ value: 1, name: "Yes" }, { value: 0, name: "No" }];
+const ACTIVE_OPTIONS = [{ value: 1, name: "Active" }, { value: 0, name: "Inactive" }];
 const PLAN_CATEGORIES = [
   { value: "Commercial", name: "Commercial" },
   { value: "Medicaid", name: "Medicaid" },
@@ -448,7 +448,7 @@ export default function ApplicabilityRulesPage() {
         
       />
       {/* Toolbar: search + add button */}
-      <div className="mb-6 flex items-center justify-between gap-3">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
             <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
@@ -522,7 +522,7 @@ export default function ApplicabilityRulesPage() {
                   <TableHeaderCell className="w-[240px] min-w-[240px]">Rule set / Display</TableHeaderCell>
                   <TableHeaderCell className="w-[180px] min-w-[180px]">Payer category</TableHeaderCell>
                   <TableHeaderCell className="w-[100px] min-w-[100px]">Multiplier</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Active</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px]">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
                   )}

@@ -287,7 +287,7 @@ export default function EntitiesPage() {
       {data && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-            <Table className="min-w-[900px]">
+            <Table className="min-w-[1200px] table-fixed">
               <TableHead className="sticky top-0 z-20">
                 <TableRow>
                   {canDelete && (
@@ -298,13 +298,13 @@ export default function EntitiesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell>Legal / Display name</TableHeaderCell>
-                  <TableHeaderCell>Organization</TableHeaderCell>
-                  <TableHeaderCell>Group NPI</TableHeaderCell>
-                  <TableHeaderCell>Tax ID</TableHeaderCell>
-                  <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell className="w-[250px] min-w-[250px]"> Legal / Display name</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Organization</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Group NPI</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Tax ID</TableHeaderCell>
+                  <TableHeaderCell className="w-[190px] min-w-[190px]">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <TableHeaderCell className="!w-[120px]">Actions</TableHeaderCell>
+                    <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
                   )}
                 </TableRow>
               </TableHead>

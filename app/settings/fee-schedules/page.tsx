@@ -535,7 +535,7 @@ export default function FeeSchedulesPage() {
           <span className={`text-sm ${wizardStep === s ? "font-medium text-foreground" : "text-muted-foreground"}`}>
             {s === 1 ? "Category" : s === 2 ? "Configuration" : "CPT Fees"}
           </span>
-          {s < 3 && <div className={`h-0.5 w-8 ${wizardStep > s ? "bg-green-500" : "bg-gray-200"}`} />}
+          {s < 3 && <div className={`h-0.5 w-20 ${wizardStep > s ? "bg-green-500" : "bg-gray-200"}`} />}
         </div>
       ))}
     </div>
