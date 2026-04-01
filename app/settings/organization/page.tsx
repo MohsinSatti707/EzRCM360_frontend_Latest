@@ -119,6 +119,7 @@ export default function OrganizationPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [form, setForm] = useState<UpdateCurrentOrganizationRequest>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -156,6 +157,14 @@ export default function OrganizationPage() {
       logoUrl: profile.logoUrl ?? undefined,
     });
     setLogoFile(null);
+    if (profile.logoUrl) {
+      const url = profile.logoUrl.startsWith("http")
+        ? profile.logoUrl
+        : getApiUrl("/api/files/" + profile.logoUrl);
+      setLogoPreview(url);
+    } else {
+      setLogoPreview(null);
+    }
     setFormError(null);
     setEditOpen(true);
   };
@@ -257,7 +266,7 @@ export default function OrganizationPage() {
       </Card>
 
       {/* Organization Information */}
-      <Card className="overflow-auto border-none  shadow-none mx-6 h-[calc(100vh-395px)]">
+      <Card className="overflow-auto border-none  shadow-none mx-6 h-[calc(100vh-385px)]">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center">
             <OrganizationIcon className="h-5 w-5 text-[#6B7280]" />
@@ -322,7 +331,7 @@ export default function OrganizationPage() {
 
       </Card>
       {canUpdate && (
-          <div className="px-6 py-2">
+          <div className="px-6 pt-2">
             <Button
               onClick={openEdit}
               className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8]"
@@ -478,13 +487,38 @@ export default function OrganizationPage() {
                 <span className="h-3 w-px bg-border" aria-hidden />
                 <span>Maximum file size: {MAX_LOGO_MB} MB</span>
               </div>
-              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-8 transition-colors hover:bg-[#F1F5F9] focus-within:border-primary-500 focus-within:outline-none focus-within:ring-1 focus-within:ring-primary-500">
-                <Upload className="h-8 w-8 text-[#0066CC]" />
-                <span className="text-sm font-medium text-[#0066CC]">Upload File(s)</span>
+              <label className="relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] overflow-hidden transition-colors hover:bg-[#F1F5F9] focus-within:border-primary-500 focus-within:outline-none focus-within:ring-1 focus-within:ring-primary-500" style={{ minHeight: logoPreview ? undefined : '120px' }}>
+                {logoPreview ? (
+                  <>
+                    <img
+                      src={logoPreview}
+                      alt="Logo preview"
+                      className="w-full max-h-48 object-contain p-3"
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-sm font-medium text-white opacity-0 transition-opacity hover:opacity-100">
+                      Change File
+                    </span>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2 py-8">
+                    <Upload className="h-8 w-8 text-[#0066CC]" />
+                    <span className="text-sm font-medium text-[#0066CC]">Upload File(s)</span>
+                  </div>
+                )}
                 <input
                   type="file"
                   accept={ALLOWED_LOGO_TYPES}
-                  onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] ?? null;
+                    if (!file) return;
+                    setLogoFile(file);
+                    if (logoPreview) URL.revokeObjectURL(logoPreview);
+                    if (file.type.startsWith("image/")) {
+                      setLogoPreview(URL.createObjectURL(file));
+                    } else {
+                      setLogoPreview(null);
+                    }
+                  }}
                   className="sr-only"
                 />
               </label>
