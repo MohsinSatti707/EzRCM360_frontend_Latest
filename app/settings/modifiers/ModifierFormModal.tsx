@@ -50,14 +50,14 @@ export function ModifierFormModal({
           submitLabel={editId ? "Update" : "Create"}
           onSubmit={onSubmit}
           loading={loading}
-          disabled={modifierCodeOverLimit}
+          disabled={modifierCodeOverLimit || form.description.trim().length < 1}
           className="p-0"
         />
       }
     >
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
         {modifierCodeOverLimit && (
-          <div className="mb-4">
+          <div className="mb-4 text-sm">
             <Alert variant="error">
               {`The length of 'Modifier Code' must be ${MAX_MODIFIER_CODE_LENGTH} characters or fewer. You entered ${form.modifierCode.length} characters.`}
             </Alert>
