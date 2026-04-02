@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { Search, ArrowRight, Play, ChevronDown, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -576,7 +577,19 @@ export default function UsersPage() {
         </div>
       )}
 
-      {data && (
+      {data && data.items.length === 0 && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Image
+            src="/icons/svg/no-data-found.svg"
+            alt="No Data Found"
+            width={180}
+            height={180}
+          />
+          <h3 className="mt-4 text-2xl font-bold font-['Aileron'] text-gray-800">No Data Found</h3>
+          <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
+        </div>
+      )}
+      {data && data.items.length > 0 && (
         <div className="flex flex-1 flex-col min-h-0 mx-6">
         <div className="max-h-[calc(100vh-341px)] flex-1 min-h-0 overflow-x-auto overflow-y-auto rounded-[5px]">
           <Table className="min-w-[1500px]">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { PageShell } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/Button";
@@ -440,6 +441,17 @@ export default function RolesPermissionsPage() {
           </div>
           {rolesLoading ? (
             <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
+          ) : roles.length === 0 ? (
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+              <Image
+                src="/icons/svg/no-data-found.svg"
+                alt="No Data Found"
+                width={180}
+                height={180}
+              />
+              <h3 className="mt-4 text-2xl font-bold font-['Aileron'] text-gray-800">No Data Found</h3>
+              <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
+            </div>
           ) : (
             <ul className="flex flex-col flex-1 overflow-y-auto custom-scrollbar">
               {roles.map((role) => (

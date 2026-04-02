@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { Search, ArrowRight, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
@@ -285,7 +286,20 @@ export default function EntitiesPage() {
         </div>
       )}
 
-      {data && (
+      {data && data.items.length === 0 && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Image
+            src="/icons/svg/no-data-found.svg"
+            alt="No Data Found"
+            width={180}
+            height={180}
+          />
+          <h3 className="mt-4 text-2xl font-bold font-['Aileron'] text-gray-800">No Data Found</h3>
+          <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
+        </div>
+      )}
+
+      {data && data.items.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
             <Table className="min-w-[1200px] table-fixed">

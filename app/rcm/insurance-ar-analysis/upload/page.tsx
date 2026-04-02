@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, AlertTriangle, CheckCircle, XCircle, Info, Search, ExternalLink, Upload } from "lucide-react";
@@ -488,6 +489,19 @@ export default function InsuranceArAnalysisUploadPage() {
               </Link>
             </div>
           </Card>
+        )}
+
+        {step === 3 && !sessionDetail && (
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+            <Image
+              src="/icons/svg/no-data-found.svg"
+              alt="No Data Found"
+              width={180}
+              height={180}
+            />
+            <h3 className="mt-4 text-2xl font-bold font-['Aileron'] text-gray-800">No Data Found</h3>
+            <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
+          </div>
         )}
 
         {step === 3 && sessionDetail && (

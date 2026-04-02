@@ -28,6 +28,7 @@ import type { IcdCodeDto } from "@/lib/types";
 import type { PaginatedList } from "@/lib/types";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import Image from "next/image";
 
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
@@ -308,7 +309,19 @@ export default function IcdCodesPage() {
           {error}
         </div>
       )}
-      {data && (
+      {data && data.items.length === 0 && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Image
+            src="/icons/svg/no-data-found.svg"
+            alt="No Data Found"
+            width={180}
+            height={180}
+          />
+          <h3 className="mt-4 text-2xl font-bold font-['Aileron'] text-gray-800">No Data Found</h3>
+          <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
+        </div>
+      )}
+      {data && data.items.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col">
         <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
           <Table className="min-w-[900px]">

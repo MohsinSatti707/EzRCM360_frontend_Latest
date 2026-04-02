@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, ArrowRight, ArrowUpDown, Trash2 } from "lucide-react";
@@ -331,10 +332,17 @@ export default function InsuranceArAnalysisListPage() {
                 <TableBody>
                   {displayedItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="py-16 text-center text-sm text-muted-foreground">
-                        {canCreate
-                          ? "No sessions found. Click \"Upload Data\" to create one."
-                          : "No sessions found."}
+                      <TableCell colSpan={7} className="py-0 border-0">
+                        <div className="flex min-h-0 flex-1 flex-col items-center justify-center py-12">
+                          <Image
+                            src="/icons/svg/no-data-found.svg"
+                            alt="No Data Found"
+                            width={180}
+                            height={180}
+                          />
+                          <h3 className="mt-4 text-2xl font-bold font-['Aileron'] text-gray-800">No Data Found</h3>
+                          <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ) : (

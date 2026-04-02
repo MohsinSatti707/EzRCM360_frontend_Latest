@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { Search, ArrowRight, Trash2, ChevronUp, Pencil, Trash } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
@@ -450,8 +451,22 @@ export default function PlansPage() {
         </div>
       )}
 
+      {/* No Data Found empty state */}
+      {data && data.items.length === 0 && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Image
+            src="/icons/svg/no-data-found.svg"
+            alt="No Data Found"
+            width={180}
+            height={180}
+          />
+          <h3 className="mt-4 text-2xl font-bold font-['Aileron'] text-gray-800">No Data Found</h3>
+          <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
+        </div>
+      )}
+
       {/* Grouped-by-payer accordion list */}
-      {data && (
+      {data && data.items.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-y-auto space-y-0 rounded-[5px] border border-[#E2E8F0]">
             {groupedByPayer.map((group) => {
@@ -574,11 +589,6 @@ export default function PlansPage() {
                 </div>
               );
             })}
-            {data.items.length === 0 && (
-              <div className="px-6 py-8 text-center text-sm text-muted-foreground">
-                No plans found.
-              </div>
-            )}
           </div>
           <div className="shrink-0 pt-4">
             <Pagination

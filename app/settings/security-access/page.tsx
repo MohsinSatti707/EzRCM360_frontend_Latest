@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card } from "@/components/ui/Card";
@@ -358,9 +359,18 @@ export default function SecurityAccessPage() {
                         <TableRow className="border-b border-[#E2E8F0]">
                           <TableCell
                             colSpan={2}
-                            className="border-none px-0 text-center font-['Aileron'] text-[14px] font-normal leading-[130%] tracking-normal text-[#64748B]"
+                            className="border-none px-0 text-center"
                           >
-                            No users found.
+                            <div className="flex flex-col items-center justify-center py-6">
+                              <Image
+                                src="/icons/svg/no-data-found.svg"
+                                alt="No Data Found"
+                                width={180}
+                                height={180}
+                              />
+                              <h3 className="mt-4 text-2xl font-bold font-['Aileron'] text-gray-800">No Data Found</h3>
+                              <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ) : (
