@@ -360,6 +360,7 @@ export default function UsersPage() {
     setDeleteLoading(true);
     try {
       await api.delete(deleteId);
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       loadList();
       toast.success("Deleted successfully.");

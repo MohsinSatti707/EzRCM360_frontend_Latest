@@ -246,6 +246,7 @@ export default function PlansPage() {
     setOverlayLoading(true);
     try {
       await api.delete(deleteId);
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       await reload();
       toast.success("Deleted successfully.");

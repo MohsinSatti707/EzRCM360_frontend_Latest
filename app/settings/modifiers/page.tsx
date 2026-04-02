@@ -165,6 +165,7 @@ export default function ModifiersPage() {
     setDeleteLoading(true);
     try {
       await api.delete(deleteId);
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       reload();
       toast.success("Deleted successfully.");

@@ -190,6 +190,7 @@ export default function RenderingParticipationPage() {
     setOverlayLoading(true);
     try {
       await api.delete(deleteId);
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       await loadList();
       toast.success("Deleted successfully.");
