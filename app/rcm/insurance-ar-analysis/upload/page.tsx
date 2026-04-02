@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, AlertTriangle, CheckCircle, XCircle, Info, Search, ExternalLink } from "lucide-react";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessDenied } from "@/components/auth/AccessDenied";
@@ -37,6 +37,7 @@ const MODULE_NAME = "Insurance AR Analysis";
 
 export default function InsuranceArAnalysisUploadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const toast = useToast();
   const api = insuranceArAnalysisApi();
   const { canCreate, loading: permLoading } = useModulePermission(MODULE_NAME);
@@ -212,6 +213,15 @@ export default function InsuranceArAnalysisUploadPage() {
       setDryRunLoading(false);
     }
   }, [sessionId, api, toast]);
+
+  // Resume at step 3 when navigating back from the session list with ?sessionId=
+  useEffect(() => {
+    const resumeId = searchParams.get("sessionId");
+    if (resumeId && !sessionId) {
+      setSessionId(resumeId);
+      setStep(3);
+    }
+  }, [searchParams, sessionId]);
 
   useEffect(() => {
     if (step === 3 && sessionId && !sessionDetail) {

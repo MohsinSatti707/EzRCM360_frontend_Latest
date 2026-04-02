@@ -289,7 +289,17 @@ export default function InsuranceArAnalysisListPage() {
                             >
                               View Report
                             </Link>
-                          ) : ["Processing", "ConflictResolution", "EnrichmentPending", "PmUploaded", "ValidationCompleted"].includes(
+                          ) : ["PmUploaded", "ValidationCompleted"].includes(
+                            row.sessionStatus
+                          ) ? (
+                            <Link
+                              href={`/rcm/insurance-ar-analysis/upload?sessionId=${row.id}`}
+                              prefetch={false}
+                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                            >
+                              Start Analysis
+                            </Link>
+                          ) : ["Processing", "ConflictResolution", "EnrichmentPending"].includes(
                             row.sessionStatus
                           ) ? (
                             <Link
