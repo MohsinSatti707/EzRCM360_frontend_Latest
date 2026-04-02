@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, AlertTriangle, CheckCircle, XCircle, Info, Search, ExternalLink } from "lucide-react";
+import { ArrowRight, AlertTriangle, CheckCircle, XCircle, Info, Search, ExternalLink, Upload } from "lucide-react";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { Button } from "@/components/ui/Button";
@@ -561,8 +561,21 @@ export default function InsuranceArAnalysisUploadPage() {
                 {submitLoading ? "Starting…" : "Start AR Analysis"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button variant="secondary" onClick={() => setStep(2)}>
-                Back
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setStep(1);
+                  setIntakeFile(null);
+                  setValidationResult(null);
+                  setColumnsPassed(false);
+                  setRowsPassed(false);
+                  setDryRunResult(null);
+                  setSessionDetail(null);
+                }}
+                className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] font-['Aileron'] text-[14px]"
+              >
+                <Upload className="h-4 w-4" />
+                Re-upload Intake
               </Button>
               <Link href="/rcm/insurance-ar-analysis">
                 <Button variant="secondary">Cancel</Button>

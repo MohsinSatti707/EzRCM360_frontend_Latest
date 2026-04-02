@@ -671,5 +671,16 @@ export function insuranceArAnalysisApi() {
       }
       return res.blob();
     },
+
+    deleteSession: async (sessionId: string): Promise<void> => {
+      await apiRequest(`${BASE}/${sessionId}`, { method: "DELETE" });
+    },
+
+    bulkDelete: async (ids: string[]): Promise<void> => {
+      await apiRequest(`${BASE}/bulk-delete`, {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      });
+    },
   };
 }

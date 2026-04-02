@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, ArrowUpDown } from "lucide-react";
+import { Search, ArrowRight, ArrowUpDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
@@ -19,6 +19,7 @@ import {
   TableCell,
 } from "@/components/ui/Table";
 import { Loader } from "@/components/ui/Loader";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { insuranceArAnalysisApi, type ArAnalysisSessionListItemDto, type ArAnalysisSessionStatus } from "@/lib/services/insuranceArAnalysis";
 import { usePaginatedList } from "@/lib/hooks";
@@ -67,6 +68,10 @@ export default function InsuranceArAnalysisListPage() {
   const [uploadedBy, setUploadedBy] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<ArAnalysisSessionStatus | "">("");
   const [downloading, setDownloading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
@@ -123,6 +128,54 @@ export default function InsuranceArAnalysisListPage() {
 
   const handleUploadData = () => {
     router.push("/rcm/insurance-ar-analysis/upload");
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setDeleteLoading(true);
+    try {
+      await api.deleteSession(deleteId);
+      setDeleteId(null);
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
+      toast.success("Session deleted.");
+      await reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteLoading(true);
+    try {
+      await api.bulkDelete(Array.from(selectedIds));
+      setBulkDeleteConfirm(false);
+      setSelectedIds(new Set());
+      toast.success(`${selectedIds.size} session(s) deleted.`);
+      await reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === displayedItems.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(displayedItems.map((r) => r.id)));
+    }
   };
 
   if (permLoading) {
@@ -186,18 +239,30 @@ export default function InsuranceArAnalysisListPage() {
             />
           </div>
         </div>
-        {canCreate && (
-          <div className="flex shrink-0 items-center gap-2">
-            <Button onClick={handleDownloadTemplate} disabled={downloading} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
-              {downloading ? "Downloading…" : "Download AR Intake Template"}
-              <ArrowRight className="h-4 w-4" />
+        <div className="flex shrink-0 items-center gap-2">
+          {selectedIds.size > 0 && (
+            <Button
+              onClick={() => setBulkDeleteConfirm(true)}
+              variant="secondary"
+              className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] border-red-300 text-red-600 hover:bg-red-50 font-['Aileron'] text-[14px]"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete ({selectedIds.size})
             </Button>
-            <Button onClick={handleUploadData} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
-              Upload Data
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
+          )}
+          {canCreate && (
+            <>
+              <Button onClick={handleDownloadTemplate} disabled={downloading} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
+                {downloading ? "Downloading…" : "Download AR Intake Template"}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button onClick={handleUploadData} className="h-10 rounded-[5px] py-3 px-[18px] gap-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-['Aileron'] text-[14px]">
+                Upload Data
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -209,9 +274,17 @@ export default function InsuranceArAnalysisListPage() {
       {data && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="max-h-[calc(100vh-340px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-            <Table className="w-[1700px] table-fixed">
+            <Table className="w-[1750px] table-fixed">
                 <TableHead className="sticky top-0 z-20">
                   <TableRow className="bg-[hsl(210,100%,97%)] ">
+                    <TableHeaderCell className="w-[50px] min-w-[50px] !bg-[hsl(210,100%,97%)] border-border">
+                      <input
+                        type="checkbox"
+                        checked={displayedItems.length > 0 && selectedIds.size === displayedItems.length}
+                        onChange={toggleSelectAll}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                    </TableHeaderCell>
                     <TableHeaderCell className="w-[300px] min-w-[300px] first:rounded-bl-[5px] !bg-[hsl(210,100%,97%)] border-border">
                       <div className="flex items-center gap-3 font-['Aileron'] font-bold text-[13px] leading-none text-[#0066CC]">
                         Session Name
@@ -258,7 +331,7 @@ export default function InsuranceArAnalysisListPage() {
                 <TableBody>
                   {displayedItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-16 text-center text-sm text-muted-foreground">
+                      <TableCell colSpan={8} className="py-16 text-center text-sm text-muted-foreground">
                         {canCreate
                           ? "No sessions found. Click \"Upload Data\" to create one."
                           : "No sessions found."}
@@ -274,6 +347,14 @@ export default function InsuranceArAnalysisListPage() {
                           animationFillMode: "forwards",
                         }}
                       >
+                        <TableCell className="w-[50px] min-w-[50px]">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(row.id)}
+                            onChange={() => toggleSelect(row.id)}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                        </TableCell>
                         <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sessionName}</TableCell>
                         <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.practiceName ?? "—"}</TableCell>
                         <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sessionStatus}</TableCell>
@@ -309,9 +390,30 @@ export default function InsuranceArAnalysisListPage() {
                             >
                               View Progress
                             </Link>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">—</span>
-                          )}
+                          ) : row.sessionStatus === "Failed" ? (
+                            <Link
+                              href={`/rcm/insurance-ar-analysis/${row.id}/processing`}
+                              prefetch={false}
+                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-red-600 hover:text-red-500 transition-colors"
+                            >
+                              Retry
+                            </Link>
+                          ) : row.sessionStatus === "ValidationFailed" ? (
+                            <Link
+                              href={`/rcm/insurance-ar-analysis/upload?sessionId=${row.id}`}
+                              prefetch={false}
+                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                            >
+                              Re-upload
+                            </Link>
+                          ) : null}
+                          <button
+                            onClick={() => setDeleteId(row.id)}
+                            className="inline-flex items-center rounded-md p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                            title="Delete session"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </TableCell>
                       </TableRow>
                     ))
@@ -343,6 +445,27 @@ export default function InsuranceArAnalysisListPage() {
         </div>
       )}
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete session"
+        message="Are you sure you want to delete this AR Analysis session? All related claim data will be permanently removed."
+        confirmLabel="Delete"
+        variant="danger"
+        loading={deleteLoading}
+      />
+      <ConfirmDialog
+        open={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete selected sessions"
+        message={`Are you sure you want to delete ${selectedIds.size} session(s)? All related claim data will be permanently removed.`}
+        confirmLabel="Delete All"
+        variant="danger"
+        loading={deleteLoading}
+      />
     </PageShell>
   );
 }
