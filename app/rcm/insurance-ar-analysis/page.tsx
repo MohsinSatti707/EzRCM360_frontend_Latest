@@ -370,58 +370,61 @@ export default function InsuranceArAnalysisListPage() {
                         <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{formatDate(row.uploadedAt)}</TableCell>
                         <TableCell className="w-[300px] min-w-[300px] border-r-0 truncate whitespace-nowrap">{row.sourceType}</TableCell>
                         <TableCell className="w-[180px] min-w-[150px] border-r-0 border-l-0">
-                          {row.sessionStatus === "Completed" ? (
-                            <Link
-                              href={`/rcm/insurance-ar-analysis/${row.id}/report`}
-                              prefetch={false}
-                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                          <div className="flex items-center gap-0">
+                            <span className="min-w-[100px]">
+                              {row.sessionStatus === "Completed" ? (
+                                <Link
+                                  href={`/rcm/insurance-ar-analysis/${row.id}/report`}
+                                  prefetch={false}
+                                  className="inline-flex items-center gap-1.5 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                                >
+                                  View Report
+                                </Link>
+                              ) : ["PmUploaded", "ValidationCompleted"].includes(row.sessionStatus) ? (
+                                <Link
+                                  href={`/rcm/insurance-ar-analysis/upload?sessionId=${row.id}`}
+                                  prefetch={false}
+                                  className="inline-flex items-center gap-1.5 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                                >
+                                  Start Analysis
+                                </Link>
+                              ) : ["Processing", "ConflictResolution", "EnrichmentPending"].includes(row.sessionStatus) ? (
+                                <Link
+                                  href={`/rcm/insurance-ar-analysis/${row.id}/processing`}
+                                  prefetch={false}
+                                  className="inline-flex items-center gap-1.5 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                                >
+                                  View Progress
+                                </Link>
+                              ) : row.sessionStatus === "Failed" ? (
+                                <Link
+                                  href={`/rcm/insurance-ar-analysis/${row.id}/processing`}
+                                  prefetch={false}
+                                  className="inline-flex items-center gap-1.5 py-1.5 text-[14px] font-['Aileron'] font-normal text-red-600 hover:text-red-500 transition-colors"
+                                >
+                                  Retry
+                                </Link>
+                              ) : row.sessionStatus === "ValidationFailed" ? (
+                                <Link
+                                  href={`/rcm/insurance-ar-analysis/upload?sessionId=${row.id}`}
+                                  prefetch={false}
+                                  className="inline-flex items-center gap-1.5 py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
+                                >
+                                  Re-upload
+                                </Link>
+                              ) : (
+                                <span className="text-sm text-muted-foreground">—</span>
+                              )}
+                            </span>
+                            <span className="mx-2 h-5 w-px bg-[#E2E8F0]" />
+                            <button
+                              onClick={() => setDeleteId(row.id)}
+                              className="inline-flex items-center rounded-md p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                              title="Delete session"
                             >
-                              View Report
-                            </Link>
-                          ) : ["PmUploaded", "ValidationCompleted"].includes(
-                            row.sessionStatus
-                          ) ? (
-                            <Link
-                              href={`/rcm/insurance-ar-analysis/upload?sessionId=${row.id}`}
-                              prefetch={false}
-                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
-                            >
-                              Start Analysis
-                            </Link>
-                          ) : ["Processing", "ConflictResolution", "EnrichmentPending"].includes(
-                            row.sessionStatus
-                          ) ? (
-                            <Link
-                              href={`/rcm/insurance-ar-analysis/${row.id}/processing`}
-                              prefetch={false}
-                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
-                            >
-                              View Progress
-                            </Link>
-                          ) : row.sessionStatus === "Failed" ? (
-                            <Link
-                              href={`/rcm/insurance-ar-analysis/${row.id}/processing`}
-                              prefetch={false}
-                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-red-600 hover:text-red-500 transition-colors"
-                            >
-                              Retry
-                            </Link>
-                          ) : row.sessionStatus === "ValidationFailed" ? (
-                            <Link
-                              href={`/rcm/insurance-ar-analysis/upload?sessionId=${row.id}`}
-                              prefetch={false}
-                              className="inline-flex items-center gap-1.5 rounded-md py-1.5 text-[14px] font-['Aileron'] font-normal text-[#0066CC] hover:text-[#0066CC]/80 transition-colors"
-                            >
-                              Re-upload
-                            </Link>
-                          ) : null}
-                          <button
-                            onClick={() => setDeleteId(row.id)}
-                            className="inline-flex items-center rounded-md p-1.5 text-gray-400 hover:text-red-600 transition-colors"
-                            title="Delete session"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
