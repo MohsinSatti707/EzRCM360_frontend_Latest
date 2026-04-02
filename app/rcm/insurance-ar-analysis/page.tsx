@@ -370,8 +370,8 @@ export default function InsuranceArAnalysisListPage() {
                         <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{formatDate(row.uploadedAt)}</TableCell>
                         <TableCell className="w-[300px] min-w-[300px] border-r-0 truncate whitespace-nowrap">{row.sourceType}</TableCell>
                         <TableCell className="w-[180px] min-w-[150px] border-r-0 border-l-0">
-                          <div className="flex items-center gap-0">
-                            <span className="min-w-[100px]">
+                          <div className="flex w-full items-center justify-between">
+                            <span>
                               {row.sessionStatus === "Completed" ? (
                                 <Link
                                   href={`/rcm/insurance-ar-analysis/${row.id}/report`}
@@ -416,14 +416,16 @@ export default function InsuranceArAnalysisListPage() {
                                 <span className="text-sm text-muted-foreground">—</span>
                               )}
                             </span>
-                            <span className="mx-2 h-5 w-px bg-[#E2E8F0]" />
-                            <button
-                              onClick={() => setDeleteId(row.id)}
-                              className="inline-flex items-center rounded-md p-1.5 text-gray-400 hover:text-red-600 transition-colors"
-                              title="Delete session"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
+                            <div className="flex items-center">
+                              <span className="mr-2 h-5 w-px bg-[#E2E8F0]" />
+                              <button
+                                onClick={() => setDeleteId(row.id)}
+                                className="inline-flex items-center rounded-md p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                                title="Delete session"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
                           </div>
                         </TableCell>
                       </TableRow>
