@@ -368,7 +368,7 @@ export default function InsuranceArAnalysisListPage() {
                         <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sessionStatus}</TableCell>
                         <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.uploadedBy}</TableCell>
                         <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{formatDate(row.uploadedAt)}</TableCell>
-                        <TableCell className="w-[300px] min-w-[300px] border-r-0 truncate whitespace-nowrap">{row.sourceType}</TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sourceType}</TableCell>
                         <TableCell className="w-[180px] min-w-[150px] border-r-0 border-l-0">
                           <div className="flex w-full items-center justify-between">
                             <span>
