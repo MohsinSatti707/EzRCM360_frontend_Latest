@@ -7,9 +7,11 @@ import { cn } from "@/lib/utils";
 export function CellTooltip({
   text,
   className,
+  children,
 }: {
-  text: string;
+  text: string | number;
   className?: string;
+  children?: React.ReactNode;
 }) {
   const textRef = useRef<HTMLSpanElement>(null);
   const [show, setShow] = useState(false);
@@ -41,7 +43,7 @@ export function CellTooltip({
       <div className="truncate max-w-full">
         {/* INNER → real text width */}
         <span ref={textRef} className="inline-block">
-          {text}
+          {children ?? text}
         </span>
       </div>
 
