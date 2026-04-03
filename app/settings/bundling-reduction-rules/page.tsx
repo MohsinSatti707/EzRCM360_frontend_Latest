@@ -18,6 +18,7 @@ import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { BundlingReductionRuleDto, CreateBundlingReductionRuleCommand } from "@/lib/services/bundlingReductionRules";
 import type { PaginatedList } from "@/lib/types";
+import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { toDateInput } from "@/lib/utils";
@@ -30,6 +31,8 @@ import {
   TableHeaderCell,
   TableCell,
 } from "@/components/ui/Table";
+
+const MAX_CPT_CODE_LENGTH = 20;
 
 const RULE_TYPE_OPTIONS = [
   { value: 0, label: "Bundling" },
@@ -71,6 +74,10 @@ export default function BundlingReductionRulesPage() {
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+
+  const primaryCptOverLimit = form.primaryCptCode.length > MAX_CPT_CODE_LENGTH;
+  const secondaryCptOverLimit = form.secondaryCptCode.length > MAX_CPT_CODE_LENGTH;
+  const cptCodeOverLimit = primaryCptOverLimit || secondaryCptOverLimit;
 
   const api = bundlingReductionRulesApi();
   const toast = useToast();
@@ -434,11 +441,25 @@ export default function BundlingReductionRulesPage() {
             }
             onSubmit={handleSubmit}
             loading={submitLoading}
+            disabled={cptCodeOverLimit}
           />
         }
       >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
+          {cptCodeOverLimit && (
+            <div className="mb-4 text-sm">
+              <Alert variant="error">
+                {primaryCptOverLimit && <>{`The length of 'Primary Cpt Code' must be ${MAX_CPT_CODE_LENGTH} characters or fewer. You entered ${form.primaryCptCode.length} characters.`}</>}
+                {primaryCptOverLimit && secondaryCptOverLimit && <br />}
+                {secondaryCptOverLimit && <>{`The length of 'Secondary Cpt Code' must be ${MAX_CPT_CODE_LENGTH} characters or fewer. You entered ${form.secondaryCptCode.length} characters.`}</>}
+              </Alert>
+            </div>
+          )}
+          {formError && (
+            <div className="mb-4">
+              <Alert variant="error">{formError}</Alert>
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">

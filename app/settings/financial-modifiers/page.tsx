@@ -26,10 +26,13 @@ import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { FinancialModifierDto, CreateFinancialModifierCommand } from "@/lib/services/financialModifiers";
 import type { PaginatedList } from "@/lib/types";
+import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { toDateInput } from "@/lib/utils";
 import { CellTooltip } from "@/components/ui/CellTooltip";
+
+const MAX_MODIFIER_CODE_LENGTH = 10;
 
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
@@ -63,6 +66,8 @@ export default function FinancialModifiersPage() {
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+
+  const modifierCodeOverLimit = form.modifierCode.length > MAX_MODIFIER_CODE_LENGTH;
 
   const api = financialModifiersApi();
   const toast = useToast();
@@ -425,11 +430,23 @@ export default function FinancialModifiersPage() {
             }
             onSubmit={handleSubmit}
             loading={submitLoading}
+            disabled={modifierCodeOverLimit}
           />
         }
       >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
+          {modifierCodeOverLimit && (
+            <div className="mb-4 text-sm">
+              <Alert variant="error">
+                {`The length of 'Modifier Code' must be ${MAX_MODIFIER_CODE_LENGTH} characters or fewer. You entered ${form.modifierCode.length} characters.`}
+              </Alert>
+            </div>
+          )}
+          {formError && (
+            <div className="mb-4">
+              <Alert variant="error">{formError}</Alert>
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">

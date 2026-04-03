@@ -18,13 +18,14 @@ export function ModalFooter({
   submitLabel = "Save",
   onSubmit,
   loading,
+  disabled,
 }: ModalFooterProps) {
   return (
     <div className="flex flex-1 justify-start gap-3 border-t border-border px-6 py-4">
       <Button
         type="submit"
         onClick={onSubmit}
-        disabled={loading}
+        disabled={loading || disabled}
         className="inline-flex items-center gap-2"
       >
         {loading ? "Saving…" : submitLabel}

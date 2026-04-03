@@ -26,10 +26,15 @@ import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedConte
 import type { ProcedureGroupingRuleDto, CreateProcedureGroupingRuleCommand } from "@/lib/services/procedureGroupingRules";
 import type { PaginatedList } from "@/lib/types";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { toDateInput } from "@/lib/utils";
 import { CellTooltip } from "@/components/ui/CellTooltip";
+
+const MAX_GROUP_CODE_LENGTH = 20;
+const MAX_GROUP_NAME_LENGTH = 100;
+const MAX_CPT_HCPCS_CODE_LENGTH = 20;
 
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
@@ -64,6 +69,12 @@ export default function ProcedureGroupingRulesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
+
+  const groupCodeOverLimit = form.groupCode.length > MAX_GROUP_CODE_LENGTH;
+  const groupNameOverLimit = form.groupName.length > MAX_GROUP_NAME_LENGTH;
+  const cptHcpcsCodeOverLimit = form.cptHcpcsCode.length > MAX_CPT_HCPCS_CODE_LENGTH;
+  const hasOverLimit = groupCodeOverLimit || groupNameOverLimit || cptHcpcsCodeOverLimit;
+  const formDisabled = hasOverLimit || form.groupName.trim().length < 1;
 
   const api = procedureGroupingRulesApi();
   const toast = useToast();
@@ -421,11 +432,27 @@ export default function ProcedureGroupingRulesPage() {
             }
             onSubmit={handleSubmit}
             loading={submitLoading}
+            disabled={formDisabled}
           />
         }
       >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
+          {hasOverLimit && (
+            <div className="mb-4 text-sm">
+              <Alert variant="error">
+                {groupCodeOverLimit && <>{`The length of 'Group Code' must be ${MAX_GROUP_CODE_LENGTH} characters or fewer. You entered ${form.groupCode.length} characters.`}</>}
+                {groupCodeOverLimit && (groupNameOverLimit || cptHcpcsCodeOverLimit) && <br />}
+                {groupNameOverLimit && <>{`The length of 'Group Name' must be ${MAX_GROUP_NAME_LENGTH} characters or fewer. You entered ${form.groupName.length} characters.`}</>}
+                {groupNameOverLimit && cptHcpcsCodeOverLimit && <br />}
+                {cptHcpcsCodeOverLimit && <>{`The length of 'CPT/HCPCS Code' must be ${MAX_CPT_HCPCS_CODE_LENGTH} characters or fewer. You entered ${form.cptHcpcsCode.length} characters.`}</>}
+              </Alert>
+            </div>
+          )}
+          {formError && (
+            <div className="mb-4">
+              <Alert variant="error">{formError}</Alert>
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">

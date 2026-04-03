@@ -304,7 +304,7 @@ export default function ModifiersPage() {
           <Alert variant="error">{error}</Alert>
         </div>
       )}
-      {data && data.items.length === 0 && (
+      {data && filteredItems.length === 0 && (
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Image
             src="/icons/svg/no-data-found.svg"
@@ -316,7 +316,7 @@ export default function ModifiersPage() {
           <p className="mt-1 text-[15px] font-['Aileron'] text-[#151529]">No data available yet.</p>
         </div>
       )}
-      {data && data.items.length > 0 && (
+      {data && filteredItems.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
             <Table className="min-w-[900px] table-fixed">
