@@ -22,6 +22,7 @@ import {
 import { Pagination } from "@/components/ui/Pagination";
 import { entityProvidersApi } from "@/lib/services/entityProviders";
 import { lookupsApi } from "@/lib/services/lookups";
+import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { useDebounce } from "@/lib/hooks";
 import { resolveEnum, ENUMS } from "@/lib/utils";
@@ -33,6 +34,9 @@ import type { EntityProviderListItemDto, CreateEntityProviderRequest, UpdateEnti
 import type { EntityLookupDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
 import { CellTooltip } from "@/components/ui/CellTooltip";
+
+const MAX_PROVIDER_NAME_LENGTH = 200;
+const MAX_NPI_LENGTH = 10;
 
 const PROVIDER_TYPES = [{ value: 0, name: "Physician" }, { value: 1, name: "Non-Physician" }];
 
@@ -66,6 +70,11 @@ export default function EntityProvidersPage() {
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const providerNameOverLimit = form.providerName.length > MAX_PROVIDER_NAME_LENGTH;
+  const npiOverLimit = form.npi.length > MAX_NPI_LENGTH;
+  const hasOverLimit = providerNameOverLimit || npiOverLimit;
+  const formDisabled = hasOverLimit || !form.entityId || form.providerName.trim().length < 1 || form.npi.trim().length < 1;
 
   const api = entityProvidersApi();
   const toast = useToast();
@@ -451,14 +460,28 @@ export default function EntityProvidersPage() {
             }
             onSubmit={handleSubmit}
             loading={submitLoading}
+            disabled={formDisabled}
           />
         }
       >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          {formError && <div className="mb-4 rounded-[5px] bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
+          {hasOverLimit && (
+            <div className="mb-4 text-sm">
+              <Alert variant="error">
+                {providerNameOverLimit && <>{`The length of 'Provider Name' must be ${MAX_PROVIDER_NAME_LENGTH} characters or fewer. You entered ${form.providerName.length} characters.`}</>}
+                {providerNameOverLimit && npiOverLimit && <br />}
+                {npiOverLimit && <>{`The length of 'NPI' must be ${MAX_NPI_LENGTH} characters or fewer. You entered ${form.npi.length} characters.`}</>}
+              </Alert>
+            </div>
+          )}
+          {formError && (
+            <div className="mb-4">
+              <Alert variant="error">{formError}</Alert>
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Provider Name</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Provider Name <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={form.providerName}
@@ -469,7 +492,7 @@ export default function EntityProvidersPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Provider NPI</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Provider NPI <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={form.npi}
@@ -523,7 +546,7 @@ export default function EntityProvidersPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Linked Entity</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Linked Entity <span className="text-red-500">*</span></label>
               <select
                 value={form.entityId}
                 onChange={(e) => setForm((f) => ({ ...f, entityId: e.target.value }))}

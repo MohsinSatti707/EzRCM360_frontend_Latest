@@ -26,10 +26,14 @@ import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedConte
 import type { CreateIcdCodeCommand } from "@/lib/services/icdCodes";
 import type { IcdCodeDto } from "@/lib/types";
 import type { PaginatedList } from "@/lib/types";
+import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { CellTooltip } from "@/components/ui/CellTooltip";
 import Image from "next/image";
+
+const MAX_CODE_LENGTH = 20;
+const MAX_DESCRIPTION_LENGTH = 500;
 
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
@@ -76,6 +80,11 @@ export default function IcdCodesPage() {
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+
+  const codeOverLimit = form.code.length > MAX_CODE_LENGTH;
+  const descriptionOverLimit = form.description.length > MAX_DESCRIPTION_LENGTH;
+  const hasOverLimit = codeOverLimit || descriptionOverLimit;
+  const formDisabled = hasOverLimit || form.description.trim().length < 1;
 
   const api = icdCodesApi();
   const toast = useToast();
@@ -445,6 +454,7 @@ export default function IcdCodesPage() {
             }
             onSubmit={handleSubmit}
             loading={submitLoading}
+            disabled={formDisabled}
           />
         }
       >
@@ -454,9 +464,18 @@ export default function IcdCodesPage() {
             handleSubmit();
           }}
         >
+          {hasOverLimit && (
+            <div className="mb-4 text-sm">
+              <Alert variant="error">
+                {codeOverLimit && <>{`The length of 'Code' must be ${MAX_CODE_LENGTH} characters or fewer. You entered ${form.code.length} characters.`}</>}
+                {codeOverLimit && descriptionOverLimit && <br />}
+                {descriptionOverLimit && <>{`The length of 'Description' must be ${MAX_DESCRIPTION_LENGTH} characters or fewer. You entered ${form.description.length} characters.`}</>}
+              </Alert>
+            </div>
+          )}
           {formError && (
-            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-              {formError}
+            <div className="mb-4">
+              <Alert variant="error">{formError}</Alert>
             </div>
           )}
           <div className="flex flex-col gap-4">

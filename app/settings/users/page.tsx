@@ -20,6 +20,7 @@ import { TooltipProvider } from "@/components/ui/Tooltip";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Alert } from "@/components/ui/Alert";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { usersApi } from "@/lib/services/users";
 import { lookupsApi } from "@/lib/services/lookups";
@@ -31,6 +32,9 @@ import type { UserListItemDto, CreateUserRequest, UpdateUserRequest } from "@/li
 import { USER_STATUS_NAMES } from "@/lib/services/users";
 import type { LookupDto, ModuleLookupDto, ValueLabelDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
+
+const MAX_USER_NAME_LENGTH = 100;
+const MAX_EMAIL_LENGTH = 256;
 
 const STATUS_OPTIONS = [
   { value: 0, name: "Pending" },
@@ -236,6 +240,13 @@ export default function UsersPage() {
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+
+  const userNameOverLimit = form.userName.length > MAX_USER_NAME_LENGTH;
+  const emailOverLimit = form.email.length > MAX_EMAIL_LENGTH;
+  const emailInvalid = form.email.trim().length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
+  const hasOverLimit = userNameOverLimit || emailOverLimit;
+  const hasValidationError = hasOverLimit || emailInvalid;
+  const formDisabled = hasValidationError || form.userName.trim().length < 1 || form.email.trim().length < 1;
 
   const api = usersApi();
   const toast = useToast();
@@ -747,16 +758,30 @@ export default function UsersPage() {
             }
             onSubmit={handleSubmit}
             loading={submitLoading}
+            disabled={formDisabled}
           />
         }
       >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          {hasValidationError && (
+            <div className="mb-4 text-sm">
+              <Alert variant="error">
+                {userNameOverLimit && <>{`The length of 'User Name' must be ${MAX_USER_NAME_LENGTH} characters or fewer. You entered ${form.userName.length} characters.`}</>}
+                {userNameOverLimit && (emailOverLimit || emailInvalid) && <br />}
+                {emailOverLimit && <>{`The length of 'Email' must be ${MAX_EMAIL_LENGTH} characters or fewer. You entered ${form.email.length} characters.`}</>}
+                {emailOverLimit && emailInvalid && <br />}
+                {emailInvalid && !emailOverLimit && <>Please enter a valid email address.</>}
+              </Alert>
+            </div>
+          )}
           {formError && (
-            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>
+            <div className="mb-4">
+              <Alert variant="error">{formError}</Alert>
+            </div>
           )}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">User Name</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">User Name <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={form.userName}
@@ -766,7 +791,7 @@ export default function UsersPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Email</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Email <span className="text-red-500">*</span></label>
               <input
                 type="email"
                 value={form.email}

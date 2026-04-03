@@ -26,10 +26,14 @@ import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { NdcCodeDto, CreateNdcCodeCommand } from "@/lib/services/ndcCodes";
 import type { PaginatedList } from "@/lib/types";
+import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { toDateInput } from "@/lib/utils";
 import { CellTooltip } from "@/components/ui/CellTooltip";
+
+const MAX_NDC_CODE_LENGTH = 20;
+const MAX_DESCRIPTION_LENGTH = 500;
 
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
@@ -64,6 +68,11 @@ export default function NdcCodesPage() {
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+
+  const ndcCodeOverLimit = form.ndcCodeValue.length > MAX_NDC_CODE_LENGTH;
+  const descriptionOverLimit = form.description.length > MAX_DESCRIPTION_LENGTH;
+  const hasOverLimit = ndcCodeOverLimit || descriptionOverLimit;
+  const formDisabled = hasOverLimit || form.description.trim().length < 1;
 
   const api = ndcCodesApi();
   const toast = useToast();
@@ -432,11 +441,25 @@ export default function NdcCodesPage() {
             }
             onSubmit={handleSubmit}
             loading={submitLoading}
+            disabled={formDisabled}
           />
         }
       >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
+          {hasOverLimit && (
+            <div className="mb-4 text-sm">
+              <Alert variant="error">
+                {ndcCodeOverLimit && <>{`The length of 'NDC Code Value' must be ${MAX_NDC_CODE_LENGTH} characters or fewer. You entered ${form.ndcCodeValue.length} characters.`}</>}
+                {ndcCodeOverLimit && descriptionOverLimit && <br />}
+                {descriptionOverLimit && <>{`The length of 'Description' must be ${MAX_DESCRIPTION_LENGTH} characters or fewer. You entered ${form.description.length} characters.`}</>}
+              </Alert>
+            </div>
+          )}
+          {formError && (
+            <div className="mb-4">
+              <Alert variant="error">{formError}</Alert>
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">NDC code value <span className="text-red-500">*</span></label>

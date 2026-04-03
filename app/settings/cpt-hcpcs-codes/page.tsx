@@ -25,11 +25,15 @@ import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { CptHcpcsCodeDto, CreateCptHcpcsCodeCommand } from "@/lib/services/cptHcpcsCodes";
 import type { PaginatedList } from "@/lib/types";
+import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import Image from "next/image";
 import { toDateInput } from "@/lib/utils";
 import { CellTooltip } from "@/components/ui/CellTooltip";
+
+const MAX_CODE_LENGTH = 20;
+const MAX_SHORT_DESCRIPTION_LENGTH = 200;
 
 const CODE_TYPE_OPTIONS = [{ value: 0, label: "CPT" }, { value: 1, label: "HCPCS" }];
 
@@ -67,6 +71,11 @@ export default function CptHcpcsCodesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
+
+  const codeOverLimit = form.code.length > MAX_CODE_LENGTH;
+  const shortDescOverLimit = form.shortDescription.length > MAX_SHORT_DESCRIPTION_LENGTH;
+  const hasOverLimit = codeOverLimit || shortDescOverLimit;
+  const formDisabled = hasOverLimit || form.shortDescription.trim().length < 1;
 
   const api = cptHcpcsCodesApi();
   const toast = useToast();
@@ -429,11 +438,25 @@ export default function CptHcpcsCodesPage() {
             }
             onSubmit={handleSubmit}
             loading={submitLoading}
+            disabled={formDisabled}
           />
         }
       >
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
+          {hasOverLimit && (
+            <div className="mb-4 text-sm">
+              <Alert variant="error">
+                {codeOverLimit && <>{`The length of 'Code' must be ${MAX_CODE_LENGTH} characters or fewer. You entered ${form.code.length} characters.`}</>}
+                {codeOverLimit && shortDescOverLimit && <br />}
+                {shortDescOverLimit && <>{`The length of 'Short Description' must be ${MAX_SHORT_DESCRIPTION_LENGTH} characters or fewer. You entered ${form.shortDescription.length} characters.`}</>}
+              </Alert>
+            </div>
+          )}
+          {formError && (
+            <div className="mb-4">
+              <Alert variant="error">{formError}</Alert>
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">

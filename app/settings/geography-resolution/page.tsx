@@ -34,6 +34,15 @@ import type {
 } from "@/lib/services/geography";
 import type { PaginatedList } from "@/lib/types";
 
+const US_STATES = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+  "DC", "AS", "GU", "MP", "PR", "VI",
+];
+
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
   { value: 1, name: "Active" },
@@ -595,7 +604,7 @@ export default function GeographyResolutionPage() {
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 <option value="">Select</option>
-                {lookups?.states?.map((s) => (
+                {US_STATES.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -608,10 +617,12 @@ export default function GeographyResolutionPage() {
               </label>
               <input
                 type="text"
+                maxLength={6}
                 value={form.zip}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, zip: e.target.value }))
-                }
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "");
+                  setForm((f) => ({ ...f, zip: val }));
+                }}
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
