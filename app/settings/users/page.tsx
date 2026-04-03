@@ -15,7 +15,7 @@ import {
   TableCell,
 } from "@/components/ui/Table";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
-import { TruncatedWithTooltip } from "@/components/ui/TruncatedWithTooltip";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 import { TooltipProvider } from "@/components/ui/Tooltip";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { Checkbox } from "@/components/ui/Checkbox";
@@ -659,34 +659,22 @@ export default function UsersPage() {
                       </TableCell>
                     )}
                     <TableCell>
-                      <TruncatedWithTooltip className="max-w-[300px]">
-                        {toUserDisplayId(row.id)}
-                      </TruncatedWithTooltip>
+                      <CellTooltip text={toUserDisplayId(row.id)} />
                     </TableCell>
                     <TableCell>
-                      <TruncatedWithTooltip className="max-w-[300px]">
-                        {row.userName}
-                      </TruncatedWithTooltip>
+                      <CellTooltip text={row.userName} />
                     </TableCell>
                     <TableCell>
-                      <TruncatedWithTooltip className="max-w-[300px]">
-                        {row.email}
-                      </TruncatedWithTooltip>
+                      <CellTooltip text={row.email} />
                     </TableCell>
                     <TableCell>
-                      <TruncatedWithTooltip className="max-w-[300px]">
-                        {row.organizationName ?? "—"}
-                      </TruncatedWithTooltip>
+                      <CellTooltip text={row.organizationName ?? "—"} />
                     </TableCell>
                     <TableCell>
-                      <TruncatedWithTooltip className="max-w-[300px]">
-                        {row.roleName ?? "—"}
-                      </TruncatedWithTooltip>
+                      <CellTooltip text={row.roleName ?? "—"} />
                     </TableCell>
                     <TableCell>
-                      <TruncatedWithTooltip className="max-w-[100px]">
-                        {moduleNames(row.moduleIds ?? [])}
-                      </TruncatedWithTooltip>
+                      <CellTooltip text={moduleNames(row.moduleIds ?? [])} />
                     </TableCell>
                     <TableCell>
                       <select

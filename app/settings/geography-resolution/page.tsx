@@ -25,6 +25,8 @@ import { geographyApi } from "@/lib/services/geography";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
+import { CellTooltip } from "@/components/ui/CellTooltip";
+
 import type {
   ZipGeoMappingDto,
   ZipGeoMappingLookupsDto,
@@ -436,19 +438,33 @@ export default function GeographyResolutionPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[160px] truncate">{row.mappingName}</div>
+                      <div className="max-w-[160px] truncate">
+                        <CellTooltip text={row.mappingName} />
+
+                      </div>
                     </TableCell>
                     <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">{fsCategoryLabel(row.fsCategory)}</div>
+                      <div className="max-w-[100px] truncate">
+                        <CellTooltip text={fsCategoryLabel(row.fsCategory)} />
+
+                      </div>
                     </TableCell>
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{row.state} / {row.zip}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={`${row.state ?? "—"} / ${row.zip ?? "—"}`} />
+                      </div>
                     </TableCell>
+
                     <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[160px] truncate">{row.geoCode ?? "—"} / {row.geoName ?? "—"}</div>
+                      <div className="max-w-[160px] truncate">
+                        <CellTooltip text={`${row.geoCode ?? "—"} / ${row.geoName ?? "—"}`} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[80px] min-w-[80px]">
-                      <div className="max-w-[60px] truncate">{row.year}</div>
+                      <div className="max-w-[60px] truncate">
+                        <CellTooltip text={row.year} />
+
+                      </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select

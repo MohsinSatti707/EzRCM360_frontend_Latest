@@ -32,6 +32,7 @@ import type { PaginatedList } from "@/lib/types";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const PAYER_ENTITY_TYPES = [
   { value: "Insurance", name: "Insurance" },
@@ -554,13 +555,20 @@ export default function ApplicabilityRulesPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[80px] min-w-[80px]">
-                      <div className="max-w-[60px] truncate">{row.sortOrder}</div>
+                      <div className="max-w-[60px] truncate">
+                        <CellTooltip text={row.sortOrder} />
+                        
+                        </div>
                     </TableCell>
                     <TableCell className="w-[240px] min-w-[240px]">
-                      <div className="max-w-[220px] truncate">{row.ruleSetName} / {row.displayName}</div>
+                      <div className="max-w-[220px] truncate">
+                        <CellTooltip text={`${row.ruleSetName ?? "—"} / ${row.displayName ?? "—"}`} />
+                     </div>
                     </TableCell>
                     <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[160px] truncate">{payerCategoryLabel(row.payerCategory)}</div>
+                      <div className="max-w-[160px] truncate">
+                        <CellTooltip text={payerCategoryLabel(row.payerCategory)} />
+                        </div>
                     </TableCell>
                     <TableCell className="w-[100px] min-w-[100px]">
                       <div className="max-w-[80px] truncate">{row.multiplierPct != null ? `${(row.multiplierPct * 100).toFixed(0)}%` : "—"}</div>

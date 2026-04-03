@@ -32,6 +32,7 @@ import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import type { EntityProviderListItemDto, CreateEntityProviderRequest, UpdateEntityProviderRequest } from "@/lib/services/entityProviders";
 import type { EntityLookupDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const PROVIDER_TYPES = [{ value: 0, name: "Physician" }, { value: 1, name: "Non-Physician" }];
 
@@ -355,32 +356,38 @@ export default function EntityProvidersPage() {
                     )}
                   <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-xs truncate">
-                        {row.entityDisplayName}
+                        <CellTooltip text={row.entityDisplayName} />
+                        
                       </div>
                     </TableCell>
                   <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-xs truncate">
-                        {row.providerName}
+                        <CellTooltip text={row.providerName} />
+                        
                       </div>
                     </TableCell>
                   <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-[140px] truncate">
-                        {row.npi}
+                        <CellTooltip text={row.npi} />
+                        
                       </div>
                     </TableCell>
                   <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-[140px] truncate">
-                        {providerTypeLabel(row.providerType)}
+                        <CellTooltip text={providerTypeLabel(row.providerType)} />
+                        
                       </div>
                     </TableCell>
                   <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-xs truncate">
-                        {row.primarySpecialty ?? "—"}
+                        <CellTooltip text={row.primarySpecialty ?? "—"} />
+                        
                       </div>
                     </TableCell>
                   <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-xs truncate">
-                        {row.secondarySpecialty ?? "—"}
+                        <CellTooltip text={row.secondarySpecialty ?? "—"} />
+                        
                       </div>
                     </TableCell>
                   <TableCell className="w-[250px] min-w-[250px]">

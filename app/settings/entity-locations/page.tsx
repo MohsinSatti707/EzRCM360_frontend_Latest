@@ -23,6 +23,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { EntityLocationFormModal } from "./EntityLocationFormModal";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 import { entityLocationsApi } from "@/lib/services/entityLocations";
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
@@ -343,29 +344,19 @@ export default function EntityLocationsPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[250px] min-w-[250px]">
-                      <div className="max-w-xs truncate">
-                        {row.entityDisplayName}
-                      </div>
+                      <CellTooltip text={row.entityDisplayName} />
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">
-                      <div className="max-w-xs truncate">
-                        {row.locationName}
-                      </div>
+                      <CellTooltip text={row.locationName} />
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">
-                      <div className="max-w-[140px] truncate">
-                        {row.locationType}
-                      </div>
+                      <CellTooltip text={row.locationType} />
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">
-                      <div className="max-w-xs truncate">
-                        {row.physicalAddress ?? "—"}
-                      </div>
+                      <CellTooltip text={row.physicalAddress ?? "—"} />
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">
-                      <div className="max-w-[140px] truncate">
-                        {row.posCode ?? "—"}
-                      </div>
+                      <CellTooltip text={row.posCode ?? "—"} />
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">
                       <select

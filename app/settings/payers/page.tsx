@@ -32,6 +32,8 @@ import { resolveEnum, ENUMS } from "@/lib/utils";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
+import { CellTooltip } from "@/components/ui/CellTooltip";
+
 import type {
   PayerListItemDto,
   CreatePayerRequest,
@@ -455,14 +457,21 @@ export default function PayersPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[250px] min-w-[250px]">
-                      <div className="max-w-xs truncate">{row.payerName}</div>
+                      <div className="max-w-xs truncate">
+                        <CellTooltip text={row.payerName} />
+                        
+                        </div>
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">
-                      <div className="max-w-xs truncate">{row.aliases ?? "—"}</div>
+                      <div className="max-w-xs truncate">
+                        <CellTooltip text={row.aliases ?? "—"} />
+                        
+                        </div>
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-[140px] truncate">
-                        {entityTypeLabel(row.entityType)}
+                        <CellTooltip text={entityTypeLabel(row.entityType)} />
+                        
                       </div>
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">

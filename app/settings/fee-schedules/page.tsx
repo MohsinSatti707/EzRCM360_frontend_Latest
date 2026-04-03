@@ -30,6 +30,7 @@ import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { FeeScheduleDto, FeeScheduleDetailDto, FeeScheduleLineDto, CreateFeeScheduleCommand, CreateFeeScheduleLineRequest } from "@/lib/services/feeSchedules";
 import type { PaginatedList } from "@/lib/types";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const STATUS_OPTIONS = [{ value: 0, name: "Active" }, { value: 1, name: "Inactive" }];
 
@@ -181,7 +182,7 @@ export default function FeeSchedulesPage() {
   }, [loadList]);
   useEffect(() => {
     api.getLookups().then(setLookups).catch(() => setLookups(null));
-    api.getList({ pageSize: 500, status: 0 }).then((res) => setFsOptions(res.items)).catch(() => {});
+    api.getList({ pageSize: 500, status: 0 }).then((res) => setFsOptions(res.items)).catch(() => { });
   }, []);
 
   // Debounced search for fee schedule lines
@@ -190,7 +191,7 @@ export default function FeeSchedulesPage() {
       setLinesPage(1);
       loadLines(linesSchedule.id, 1, debouncedLinesSearch);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedLinesSearch]);
 
   const openCreate = () => {
@@ -369,7 +370,7 @@ export default function FeeSchedulesPage() {
     setWizardLinesLoading(true);
     api.getLines(id, { pageNumber: 1, pageSize: 20 })
       .then(setWizardLinesData)
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setWizardLinesLoading(false));
   };
 
@@ -529,9 +530,8 @@ export default function FeeSchedulesPage() {
     <div className="flex items-center gap-2">
       {[1, 2, 3].map((s) => (
         <div key={s} className="flex items-center gap-2">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
-            wizardStep === s ? "bg-[#0066CC] text-white" : wizardStep > s ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"
-          }`}>
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${wizardStep === s ? "bg-[#0066CC] text-white" : wizardStep > s ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"
+            }`}>
             {wizardStep > s ? "✓" : s}
           </div>
           <span className={`text-sm ${wizardStep === s ? "font-medium text-foreground" : "text-muted-foreground"}`}>
@@ -624,8 +624,8 @@ export default function FeeSchedulesPage() {
       )}
       {data && data.items.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-          <Table className="min-w-[1200px] table-fixed">
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
+            <Table className="min-w-[1200px] table-fixed">
               <TableHead className="sticky top-0 z-20">
                 <TableRow>
                   {canDelete && (
@@ -659,16 +659,36 @@ export default function FeeSchedulesPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[160px] min-w-[160px]">
-                      <div className="max-w-[140px] truncate">{row.scheduleCode ?? "—"}</div>
+                      <div className="max-w-[140px] truncate">
+                        <CellTooltip text={row.scheduleCode ?? "—"} />
+
+                      </div>
                     </TableCell>
                     <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[160px] truncate">{categoryLabel(row.category)}</div>
+                      <div className="max-w-[160px] truncate">
+                        <CellTooltip text={categoryLabel(row.category)} />
+
+                      </div>
                     </TableCell>
                     <TableCell className="w-[110px] min-w-[110px]">
-                      <div className="max-w-[90px] truncate">{row.state ?? "—"}</div>
+                      <div className="max-w-[90px] truncate">
+                        <CellTooltip text={row.state ?? "—"} />
+
+                      </div>
                     </TableCell>
                     <TableCell className="w-[110px] min-w-[110px]">
-                      <div className="max-w-[90px] truncate" title={`${row.years?.join(", ") ?? ""}${row.quarters?.length ? ` / Q${row.quarters.join(",")}` : ""}`}>{row.years?.join(", ") ?? ""}{row.quarters?.length ? ` / Q${row.quarters.join(",")}` : ""}</div>
+                      {(() => {
+                        const text = `${row.years?.join(", ") ?? ""}${row.quarters?.length ? ` / Q${row.quarters.join(",")}` : ""
+                          }`;
+
+                        return (
+                          <CellTooltip text={text}>
+                            <span className="block max-w-[90px] truncate">
+                              {text}
+                            </span>
+                          </CellTooltip>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select
@@ -1174,7 +1194,7 @@ export default function FeeSchedulesPage() {
                   onNext={() => { const p = linesPage + 1; setLinesPage(p); loadLines(linesSchedule!.id, p, linesSearch); }}
                   onPageChange={(p) => { setLinesPage(p); loadLines(linesSchedule!.id, p, linesSearch); }}
                   pageSize={20}
-                  onPageSizeChange={() => {}}
+                  onPageSizeChange={() => { }}
                 />
               </div>
             )}

@@ -31,6 +31,7 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { EntityListItemDto, CreateEntityRequest, UpdateEntityRequest } from "@/lib/services/entities";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const MODULE_NAME = "Entities";
 
@@ -336,22 +337,27 @@ export default function EntitiesPage() {
                     )}
                     <TableCell>
                       <div className="max-w-xs truncate">
-                        <span className="font-medium">{row.legalName}</span> / {row.displayName}
+                        <CellTooltip text={`${row.legalName} / ${row.displayName}`}>
+                          {row.legalName} / {row.displayName}
+                        </CellTooltip>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="max-w-xs truncate">
-                        {row.organizationName ?? "—"}
+                        <CellTooltip text={row.organizationName ?? "—"} />
+
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="max-w-[140px] truncate">
-                        {row.groupNpi}
+                        <CellTooltip text={row.groupNpi} />
+                        
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="max-w-[140px] truncate">
-                        {row.taxId}
+                        <CellTooltip text={row.taxId} />
+                        
                       </div>
                     </TableCell>
                     <TableCell>

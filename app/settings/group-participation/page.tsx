@@ -37,6 +37,7 @@ import type { ValueLabelDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
 import { useDebounce } from "@/lib/hooks";
 import { toDateInput, resolveEnum, ENUMS } from "@/lib/utils";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
@@ -388,22 +389,33 @@ export default function GroupParticipationPage() {
                     )}
                     <TableCell className="w-[160px] min-w-[160px]">
                       <div className="max-w-[140px] truncate">
-                        {payerNameById.get(planPayerIdById.get(row.planId) ?? "") ?? "—"}
+                        <CellTooltip text={payerNameById.get(planPayerIdById.get(row.planId) ?? "") ?? "—"} />
+                        
                       </div>
                     </TableCell>
                     <TableCell className="w-[200px] min-w-[200px]">
                       <div className="max-w-xs truncate">
-                        {row.planDisplayName ?? planNameById.get(row.planId) ?? row.planId}
+                        <CellTooltip text={row.planDisplayName ?? planNameById.get(row.planId) ?? row.planId} />
+                        
                       </div>
                     </TableCell>
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{statusLabel(row.participationStatus)}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={statusLabel(row.participationStatus)} />
+                        
+                        </div>
                     </TableCell>
                     <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">{row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"}</div>
+                      <div className="max-w-[100px] truncate">
+                        <CellTooltip text={row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"} />
+                        
+                        </div>
                     </TableCell>
                     <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">{row.effectiveTo ? toDateInput(row.effectiveTo) : "—"}</div>
+                      <div className="max-w-[100px] truncate">
+                        <CellTooltip text={row.effectiveTo ? toDateInput(row.effectiveTo) : "—"} />
+                        
+                        </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select

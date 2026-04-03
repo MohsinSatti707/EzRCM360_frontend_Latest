@@ -31,6 +31,7 @@ import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { FacilityListItemDto, CreateFacilityRequest, UpdateFacilityRequest } from "@/lib/services/facilities";
 import type { EntityLookupDto } from "@/lib/services/lookups";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const MODULE_NAME = "Facilities";
 const ACTIVE_OPTIONS = [
@@ -350,19 +351,31 @@ export default function FacilitiesPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[200px] min-w-[200px]">
-                      <div className="max-w-xs truncate">{row.name}</div>
+                      <div className="max-w-xs truncate">
+                        <CellTooltip text={row.name} />
+                        </div>
                     </TableCell>
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{row.facilityType}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={row.facilityType} />
+                        
+                        </div>
                     </TableCell>
                     <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[140px] truncate">{row.entityDisplayName ?? "—"}</div>
+                      <div className="max-w-[140px] truncate">
+                        <CellTooltip text={row.entityDisplayName ?? "—"} />
+                        
+                        </div>
                     </TableCell>
                     <TableCell className="w-[220px] min-w-[220px]">
-                      <div className="max-w-[180px] truncate">{[row.addressLine1, row.addressLine2, row.zipCode].filter(Boolean).join(", ") || "—"}</div>
+                      <div className="max-w-[180px] truncate">
+                        <CellTooltip text={[row.addressLine1, row.addressLine2, row.zipCode].filter(Boolean).join(", ") || "—"} />
+                        </div>
                     </TableCell>
                     <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">{row.posCode ?? "—"}</div>
+                      <div className="max-w-[100px] truncate">
+                        <CellTooltip text={row.posCode ?? "—"} />
+                        </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select
