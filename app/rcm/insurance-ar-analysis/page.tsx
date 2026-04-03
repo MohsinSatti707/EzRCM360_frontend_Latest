@@ -24,6 +24,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { insuranceArAnalysisApi, type ArAnalysisSessionListItemDto, type ArAnalysisSessionStatus } from "@/lib/services/insuranceArAnalysis";
 import { usePaginatedList } from "@/lib/hooks";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const STATUS_OPTIONS: { value: ArAnalysisSessionStatus | ""; label: string }[] = [
   { value: "", label: "All Statuses" },
@@ -363,12 +364,24 @@ export default function InsuranceArAnalysisListPage() {
                             className="h-4 w-4 rounded border-gray-300"
                           />
                         </TableCell>
-                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sessionName}</TableCell>
-                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.practiceName ?? "—"}</TableCell>
-                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sessionStatus}</TableCell>
-                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.uploadedBy}</TableCell>
-                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{formatDate(row.uploadedAt)}</TableCell>
-                        <TableCell className="w-[300px] min-w-[300px] truncate whitespace-nowrap">{row.sourceType}</TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
+                          <CellTooltip text={row.sessionName} />
+                        </TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
+                          <CellTooltip text={row.practiceName ?? "—"} />
+                        </TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
+                          <CellTooltip text={row.sessionStatus} />
+                        </TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
+                          <CellTooltip text={row.uploadedBy} />
+                        </TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
+                          <CellTooltip text={formatDate(row.uploadedAt)} />
+                        </TableCell>
+                        <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
+                          <CellTooltip text={row.sourceType} />
+                        </TableCell>
                         <TableCell className="w-[180px] min-w-[150px] border-r-0 border-l-0">
                           <div className="flex w-full items-center justify-between">
                             <span>

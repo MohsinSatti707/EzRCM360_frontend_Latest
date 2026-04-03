@@ -29,6 +29,7 @@ import type { PaginatedList } from "@/lib/types";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { toDateInput } from "@/lib/utils";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
@@ -336,19 +337,29 @@ export default function FinancialModifiersPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{row.modifierCode}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={row.modifierCode} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[100px] min-w-[100px]">
-                      <div className="max-w-[80px] truncate">{row.factor}</div>
+                      <div className="max-w-[80px] truncate">
+                        <CellTooltip text={row.factor} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[220px] min-w-[220px]">
-                      <div className="max-w-[200px] truncate">{row.description ?? "—"}</div>
+                      <div className="max-w-[200px] truncate">
+                        <CellTooltip text={row.description ?? "—"} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[110px] min-w-[110px]">
-                      <div className="max-w-[90px] truncate">{row.effectiveStartDate ? toDateInput(row.effectiveStartDate) : "—"}</div>
+                      <div className="max-w-[90px] truncate">
+                        <CellTooltip text={row.effectiveStartDate ? toDateInput(row.effectiveStartDate) : "—"} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[110px] min-w-[110px]">
-                      <div className="max-w-[90px] truncate">{row.effectiveEndDate ? toDateInput(row.effectiveEndDate) : "—"}</div>
+                      <div className="max-w-[90px] truncate">
+                        <CellTooltip text={row.effectiveEndDate ? toDateInput(row.effectiveEndDate) : "—"} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select

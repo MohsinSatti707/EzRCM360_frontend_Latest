@@ -21,6 +21,7 @@ import type { PaginatedList } from "@/lib/types";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { toDateInput } from "@/lib/utils";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 import {
   Table,
   TableHead,
@@ -350,16 +351,24 @@ export default function BundlingReductionRulesPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{row.primaryCptCode}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={row.primaryCptCode} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{row.secondaryCptCode}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={row.secondaryCptCode} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{row.reductionFactor}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={row.reductionFactor} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{ruleTypeLabel(row.ruleType)}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={ruleTypeLabel(row.ruleType)} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select

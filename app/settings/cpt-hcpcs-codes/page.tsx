@@ -29,6 +29,7 @@ import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import Image from "next/image";
 import { toDateInput } from "@/lib/utils";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const CODE_TYPE_OPTIONS = [{ value: 0, label: "CPT" }, { value: 1, label: "HCPCS" }];
 
@@ -345,16 +346,24 @@ export default function CptHcpcsCodesPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">{row.code}</div>
+                      <div className="max-w-[100px] truncate">
+                        <CellTooltip text={row.code} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[260px] min-w-[260px]">
-                      <div className="max-w-[240px] truncate">{row.shortDescription}</div>
+                      <div className="max-w-[240px] truncate">
+                        <CellTooltip text={row.shortDescription} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">{codeTypeLabel(row.codeType)}</div>
+                      <div className="max-w-[100px] truncate">
+                        <CellTooltip text={codeTypeLabel(row.codeType)} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[100px] min-w-[100px]">
-                      <div className="max-w-[80px] truncate">{row.isAddOn ? "Yes" : "No"}</div>
+                      <div className="max-w-[80px] truncate">
+                        <CellTooltip text={row.isAddOn ? "Yes" : "No"} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select

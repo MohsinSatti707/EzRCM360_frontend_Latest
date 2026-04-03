@@ -29,6 +29,7 @@ import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedConte
 import type { ModifierDto, CreateModifierCommand } from "@/lib/services/modifiers";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const MODULE_NAME = "Modifiers";
 const MODIFIER_TYPE_OPTIONS = [
@@ -361,17 +362,17 @@ export default function ModifiersPage() {
                     )}
                     <TableCell className="w-[140px] min-w-[140px]">
                       <div className="max-w-[120px] truncate">
-                        {row.modifierCode}
+                        <CellTooltip text={row.modifierCode} />
                       </div>
                     </TableCell>
                     <TableCell className="w-[260px] min-w-[260px]">
                       <div className="max-w-[240px] truncate">
-                        {row.description}
+                        <CellTooltip text={row.description} />
                       </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <div className="max-w-[140px] truncate">
-                        {modifierTypeLabel(row.modifierType)}
+                        <CellTooltip text={modifierTypeLabel(row.modifierType)} />
                       </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">

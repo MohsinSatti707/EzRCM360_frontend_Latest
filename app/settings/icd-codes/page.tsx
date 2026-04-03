@@ -28,6 +28,7 @@ import type { IcdCodeDto } from "@/lib/types";
 import type { PaginatedList } from "@/lib/types";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 import Image from "next/image";
 
 const ACTIVE_OPTIONS = [
@@ -357,16 +358,24 @@ export default function IcdCodesPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">{row.code}</div>
+                      <div className="max-w-[100px] truncate">
+                        <CellTooltip text={row.code} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[280px] min-w-[280px]">
-                      <div className="max-w-[260px] truncate">{row.description}</div>
+                      <div className="max-w-[260px] truncate">
+                        <CellTooltip text={row.description} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[100px] min-w-[100px]">
-                      <div className="max-w-[80px] truncate">{row.version}</div>
+                      <div className="max-w-[80px] truncate">
+                        <CellTooltip text={row.version} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[100px] min-w-[100px]">
-                      <div className="max-w-[80px] truncate">{row.isBillable ? "Yes" : "No"}</div>
+                      <div className="max-w-[80px] truncate">
+                        <CellTooltip text={row.isBillable ? "Yes" : "No"} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select

@@ -29,6 +29,7 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { toDateInput } from "@/lib/utils";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const ACTIVE_OPTIONS = [
   { value: 0, name: "Inactive" },
@@ -337,16 +338,24 @@ export default function ProcedureGroupingRulesPage() {
                       </TableCell>
                     )}
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{row.groupCode}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={row.groupCode} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[200px] min-w-[200px]">
-                      <div className="max-w-[180px] truncate">{row.groupName}</div>
+                      <div className="max-w-[180px] truncate">
+                        <CellTooltip text={row.groupName} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">{row.cptHcpcsCode}</div>
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={row.cptHcpcsCode} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[100px] min-w-[100px]">
-                      <div className="max-w-[80px] truncate">{row.sortOrder}</div>
+                      <div className="max-w-[80px] truncate">
+                        <CellTooltip text={row.sortOrder} />
+                      </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select
