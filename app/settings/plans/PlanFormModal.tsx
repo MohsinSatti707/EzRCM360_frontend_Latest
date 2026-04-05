@@ -22,6 +22,14 @@ const CATEGORY_TO_TYPES: Record<number, number[]> = {
   [CATEGORY.MVA]: [TYPE.Na],
   [CATEGORY.WC]: [TYPE.Na],
   [CATEGORY.HmoManaged]: [TYPE.Hmo, TYPE.Na],
+  [CATEGORY.Na]: [TYPE.Na],
+};
+
+const ENTITY_TYPE_LABELS: Record<number, string> = {
+  [ENUMS.PayerEntityType.Insurance]: "Insurance",
+  [ENUMS.PayerEntityType.Attorney]: "Attorney",
+  [ENUMS.PayerEntityType.Employer]: "Employer",
+  [ENUMS.PayerEntityType.Other]: "Other",
 };
 
 const inputCls =
@@ -70,7 +78,9 @@ function PayerDropdown({
         className={`${inputCls} flex items-center justify-between text-left`}
       >
         <span className={selected ? "text-foreground" : "text-muted-foreground"}>
-          {selected?.payerName ?? "Select payer"}
+          {selected
+            ? `${selected.payerName} (${ENTITY_TYPE_LABELS[selected.entityType] ?? "Unknown"})`
+            : "Select payer"}
         </span>
         <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
       </button>
@@ -93,11 +103,18 @@ function PayerDropdown({
                 key={p.id}
                 type="button"
                 onClick={() => { onChange(p.id); setOpen(false); setSearch(""); }}
-                className={`w-full px-4 py-2.5 text-left text-sm hover:bg-[#F7F8F9] ${
+                className={`w-full px-4 py-2.5 text-left text-sm hover:bg-[#F7F8F9] flex items-center justify-between ${
                   p.id === value ? "bg-[#F0F7FF] font-medium text-[#0066CC]" : "text-foreground"
                 }`}
               >
-                {p.payerName}
+                <span>{p.payerName}</span>
+                <span className={`ml-2 shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium ${
+                  p.entityType === ENUMS.PayerEntityType.Insurance
+                    ? "bg-[#DBEAFE] text-[#1E40AF]"
+                    : "bg-[#FEF3C7] text-[#92400E]"
+                }`}>
+                  {ENTITY_TYPE_LABELS[p.entityType] ?? "Unknown"}
+                </span>
               </button>
             ))}
             {filtered.length === 0 && (
@@ -152,6 +169,9 @@ export function PlanFormModal({
   error,
   onCreatePayer,
 }: PlanFormModalProps) {
+  const selectedPayer = payers.find((p) => p.id === form.payerId);
+  const isNonInsurance = selectedPayer != null && selectedPayer.entityType !== ENUMS.PayerEntityType.Insurance;
+
   const filteredPlanTypes = useMemo(() => {
     const allowed = CATEGORY_TO_TYPES[form.planCategory];
     if (!allowed) return planTypes;
@@ -224,7 +244,14 @@ export function PlanFormModal({
               <label className={labelCls}>Linked Payer</label>
               <PayerDropdown
                 value={form.payerId}
-                onChange={(id) => set({ payerId: id })}
+                onChange={(id) => {
+                  const payer = payers.find((p) => p.id === id);
+                  const nonIns = payer != null && payer.entityType !== ENUMS.PayerEntityType.Insurance;
+                  set({
+                    payerId: id,
+                    ...(nonIns ? { planCategory: CATEGORY.Na, planType: TYPE.Na } : {}),
+                  });
+                }}
                 payers={payers}
                 onCreatePayer={onCreatePayer}
               />
@@ -244,11 +271,15 @@ export function PlanFormModal({
                   set({ planCategory: cat, planType: allowed?.[0] ?? 0 });
                 }}
                 className={inputCls}
+                disabled={isNonInsurance}
               >
                 {planCategories.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
+              {isNonInsurance && (
+                <p className="mt-1 text-xs text-[#92400E]">Non-insurance payers are automatically set to N/A.</p>
+              )}
             </div>
             <div>
               <label className={labelCls}>Plan Type</label>
@@ -256,6 +287,7 @@ export function PlanFormModal({
                 value={form.planType}
                 onChange={(e) => set({ planType: Number(e.target.value) })}
                 className={inputCls}
+                disabled={isNonInsurance}
               >
                 {filteredPlanTypes.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>

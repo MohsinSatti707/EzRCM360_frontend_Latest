@@ -26,7 +26,7 @@ export function resolveEnumNullable(val: unknown, map: Record<string, number>): 
 
 // Backend enum maps (must match C# enum member names exactly)
 export const ENUMS = {
-  PlanCategory: { Commercial: 0, Medicaid: 1, Medicare: 2, MVA: 3, Tricare: 4, WC: 5, HmoManaged: 6, RailroadMedicare: 7 },
+  PlanCategory: { Commercial: 0, Medicaid: 1, Medicare: 2, MVA: 3, Tricare: 4, WC: 5, HmoManaged: 6, RailroadMedicare: 7, Na: 8 },
   PlanType: { Hmo: 0, Ppo: 1, Epo: 2, Pos: 3, PartA: 4, PartB: 5, PartC: 6, PartD: 7, CHAMPUS: 8, CHAMPVA: 9, Na: 10 },
   MarketType: { Individual: 0, Group: 1, Aso: 2, FullyInsured: 3, SelfFunded: 4 },
   NsaCategory: { None: 0, State: 1, Federal: 2 },

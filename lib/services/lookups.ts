@@ -18,6 +18,7 @@ export interface EntityLookupDto {
 export interface PayerLookupDto {
   id: string;
   payerName: string;
+  entityType: number;
 }
 
 export interface PlanLookupDto {
