@@ -6,9 +6,13 @@ import { DrawerForm } from "@/components/ui/DrawerForm";
 import { Alert } from "@/components/ui/Alert";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { ENUMS } from "@/lib/utils";
+import { ENUMS, resolveEnum } from "@/lib/utils";
 import type { CreatePlanRequest } from "@/lib/services/plans";
 import type { PayerLookupDto } from "@/lib/services/lookups";
+
+function isInsurancePayer(p: PayerLookupDto): boolean {
+  return resolveEnum(p.entityType, ENUMS.PayerEntityType) === ENUMS.PayerEntityType.Insurance;
+}
 
 const CATEGORY = ENUMS.PlanCategory;
 const TYPE = ENUMS.PlanType;
@@ -25,11 +29,15 @@ const CATEGORY_TO_TYPES: Record<number, number[]> = {
   [CATEGORY.Na]: [TYPE.Na],
 };
 
-const ENTITY_TYPE_LABELS: Record<number, string> = {
+const ENTITY_TYPE_LABELS: Record<string | number, string> = {
   [ENUMS.PayerEntityType.Insurance]: "Insurance",
   [ENUMS.PayerEntityType.Attorney]: "Attorney",
   [ENUMS.PayerEntityType.Employer]: "Employer",
   [ENUMS.PayerEntityType.Other]: "Other",
+  Insurance: "Insurance",
+  Attorney: "Attorney",
+  Employer: "Employer",
+  Other: "Other",
 };
 
 const inputCls =
@@ -109,7 +117,7 @@ function PayerDropdown({
               >
                 <span>{p.payerName}</span>
                 <span className={`ml-2 shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium ${
-                  p.entityType === ENUMS.PayerEntityType.Insurance
+                  isInsurancePayer(p)
                     ? "bg-[#DBEAFE] text-[#1E40AF]"
                     : "bg-[#FEF3C7] text-[#92400E]"
                 }`}>
@@ -170,7 +178,7 @@ export function PlanFormModal({
   onCreatePayer,
 }: PlanFormModalProps) {
   const selectedPayer = payers.find((p) => p.id === form.payerId);
-  const isNonInsurance = selectedPayer != null && selectedPayer.entityType !== ENUMS.PayerEntityType.Insurance;
+  const isNonInsurance = selectedPayer != null && !isInsurancePayer(selectedPayer);
 
   const filteredPlanTypes = useMemo(() => {
     const allowed = CATEGORY_TO_TYPES[form.planCategory];
@@ -246,7 +254,7 @@ export function PlanFormModal({
                 value={form.payerId}
                 onChange={(id) => {
                   const payer = payers.find((p) => p.id === id);
-                  const nonIns = payer != null && payer.entityType !== ENUMS.PayerEntityType.Insurance;
+                  const nonIns = payer != null && !isInsurancePayer(payer);
                   set({
                     payerId: id,
                     ...(nonIns ? { planCategory: CATEGORY.Na, planType: TYPE.Na } : {}),
