@@ -150,7 +150,7 @@ export function PayerFormModal({
               </>
             )}
           </Button>
-          {!editId && isInsurance && onSubmitAndAddPlan && (
+          {!editId && isInsurance && form.insuranceSubCategory === 0 && onSubmitAndAddPlan && (
             <Button
               type="button"
               onClick={onSubmitAndAddPlan}
