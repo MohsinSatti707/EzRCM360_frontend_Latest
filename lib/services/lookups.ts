@@ -19,6 +19,7 @@ export interface PayerLookupDto {
   id: string;
   payerName: string;
   entityType: number | string;
+  insuranceSubCategory: number | string | null;
 }
 
 export interface PlanLookupDto {

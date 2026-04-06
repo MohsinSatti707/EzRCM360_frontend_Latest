@@ -71,6 +71,7 @@ export default function PlansPage() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -244,6 +245,7 @@ export default function PlansPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setDeleteError(null);
     setOverlayLoading(true);
     try {
       await api.delete(deleteId);
@@ -252,7 +254,7 @@ export default function PlansPage() {
       await reload();
       toast.success("Deleted successfully.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      setDeleteError(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -497,15 +499,21 @@ export default function PlansPage() {
                       />
                     </button>
                     <div className="flex items-center gap-3">
-                      {canCreate && (
-                        <button
-                          type="button"
-                          onClick={() => openCreate(group.payerId)}
-                          className="text-sm font-medium text-[#0066CC] hover:underline"
-                        >
-                          Add Plan
-                        </button>
-                      )}
+                      {canCreate && (() => {
+                        const payer = payers.find((p) => p.id === group.payerId);
+                        const subCat = payer?.insuranceSubCategory;
+                        const isCommercial = payer != null && resolveEnum(payer.entityType, ENUMS.PayerEntityType) === ENUMS.PayerEntityType.Insurance
+                          && subCat != null && resolveEnum(subCat, ENUMS.PlanCategory) === ENUMS.PlanCategory.Commercial;
+                        return isCommercial ? (
+                          <button
+                            type="button"
+                            onClick={() => openCreate(group.payerId)}
+                            className="text-sm font-medium text-[#0066CC] hover:underline"
+                          >
+                            Add Plan
+                          </button>
+                        ) : null;
+                      })()}
                       {canUpdate && (
                         <button
                           type="button"
@@ -654,7 +662,7 @@ export default function PlansPage() {
         error={createPayerError}
       />
 
-      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete plan" message={<>Are you sure you want to delete the plan <strong>{data?.items.find((r) => r.id === deleteId)?.planName ?? ""}</strong>?</>} confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <ConfirmDialog open={!!deleteId} onClose={() => { setDeleteId(null); setDeleteError(null); }} onConfirm={handleDelete} title="Delete plan" message={deleteError ? deleteError : <>Are you sure you want to delete the plan <strong>{data?.items.find((r) => r.id === deleteId)?.planName ?? ""}</strong>?</>} confirmLabel="Delete" variant="danger" loading={deleteLoading} />
       <ConfirmDialog
         open={bulkDeleteConfirm}
         onClose={() => setBulkDeleteConfirm(false)}
