@@ -48,7 +48,10 @@ export function ConfirmDialog({
         {children}
         <AlertDialogFooter className="flex flex-row justify-start gap-3 sm:justify-start">
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
             disabled={loading}
             className={
               variant === "danger"
