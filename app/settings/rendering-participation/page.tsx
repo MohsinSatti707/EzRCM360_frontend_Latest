@@ -265,6 +265,7 @@ export default function RenderingParticipationPage() {
       const detail = await api.getById(row.id);
       await api.update(row.id, {
         entityProviderId: detail.entityProviderId,
+        payerId: detail.payerId,
         planId: detail.planId,
         participationStatus: detail.participationStatus,
         effectiveFrom: detail.effectiveFrom ?? null,
