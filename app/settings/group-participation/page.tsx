@@ -103,6 +103,11 @@ export default function GroupParticipationPage() {
     lookupsApi().getParticipationSources().then(setParticipationSources).catch(() => setParticipationSources([]));
   }, []);
 
+  const selectedPayer = payers.find((p) => p.id === selectedPayerId);
+  const isSelectedPayerCommercialInsurance = selectedPayer != null
+    && resolveEnum(selectedPayer.entityType, ENUMS.PayerEntityType) === ENUMS.PayerEntityType.Insurance
+    && selectedPayer.insuranceSubCategory != null
+    && resolveEnum(selectedPayer.insuranceSubCategory, ENUMS.PlanCategory) === ENUMS.PlanCategory.Commercial;
   const filteredPlans = useMemo(
     () => selectedPayerId ? allPlans.filter((p) => p.payerId === selectedPayerId) : allPlans,
     [allPlans, selectedPayerId]
@@ -512,15 +517,17 @@ export default function GroupParticipationPage() {
                 ))}
               </select>
             </div>
-            <div className="overflow-hidden">
-              <label className="mb-1 block text-sm font-medium text-foreground">Plan <span className="text-red-500">*</span></label>
-              <select value={form.planId} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" title={filteredPlans.find((p) => p.id === form.planId)?.displayName || ""} required disabled={!selectedPayerId}>
-                <option value="">{selectedPayerId ? "Select plan" : "Select payer first"}</option>
-                {filteredPlans.map((p) => (
-                  <option key={p.id} value={p.id} title={p.displayName}>{p.displayName.length > 60 ? p.displayName.substring(0, 60) + "..." : p.displayName}</option>
-                ))}
-              </select>
-            </div>
+            {isSelectedPayerCommercialInsurance && (
+              <div className="overflow-hidden">
+                <label className="mb-1 block text-sm font-medium text-foreground">Plan <span className="text-red-500">*</span></label>
+                <select value={form.planId} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" title={filteredPlans.find((p) => p.id === form.planId)?.displayName || ""} required disabled={!selectedPayerId}>
+                  <option value="">{selectedPayerId ? "Select plan" : "Select payer first"}</option>
+                  {filteredPlans.map((p) => (
+                    <option key={p.id} value={p.id} title={p.displayName}>{p.displayName.length > 60 ? p.displayName.substring(0, 60) + "..." : p.displayName}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Participation status</label>
               <select value={form.participationStatus} onChange={(e) => setForm((f) => ({ ...f, participationStatus: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
