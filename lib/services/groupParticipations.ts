@@ -6,6 +6,7 @@ export interface GroupProviderPlanParticipationListItemDto {
   entityProviderId: string;
   entityProviderDisplayName?: string | null;
   payerId: string;
+  payerName?: string | null;
   planId: string;
   planDisplayName?: string | null;
   participationStatus: number;

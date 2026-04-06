@@ -410,7 +410,7 @@ export default function GroupParticipationPage() {
                     )}
                     <TableCell className="w-[160px] min-w-[160px]">
                       <div className="max-w-[140px] truncate">
-                        <CellTooltip text={payerNameById.get(planPayerIdById.get(row.planId) ?? "") ?? "—"} />
+                        <CellTooltip text={row.payerName ?? "—"} />
                         
                       </div>
                     </TableCell>

@@ -6,6 +6,8 @@ export interface RenderingProviderPlanParticipationListItemDto {
   entityProviderId: string;
   payerId: string;
   planId: string;
+  /** From API: payer display name */
+  payerName?: string | null;
   /** From API: provider display name */
   providerName?: string | null;
   /** From API: plan display name */
