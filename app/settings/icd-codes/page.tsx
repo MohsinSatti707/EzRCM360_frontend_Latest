@@ -601,7 +601,7 @@ export default function IcdCodesPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete ICD code"
-        message="Are you sure you want to delete this ICD code? This cannot be undone."
+        message={<>Are you sure you want to delete the ICD code <strong>{data?.items.find((r) => r.id === deleteId)?.code ?? ""}</strong>? This cannot be undone.</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

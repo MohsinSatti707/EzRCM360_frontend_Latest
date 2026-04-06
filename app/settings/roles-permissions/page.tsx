@@ -736,7 +736,7 @@ export default function RolesPermissionsPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDeleteRole}
         title="Delete role"
-        message="Are you sure you want to delete this role?"
+        message={<>Are you sure you want to delete the role <strong>{roles.find((r) => r.id === deleteId)?.name ?? ""}</strong>?</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

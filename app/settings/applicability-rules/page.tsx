@@ -956,7 +956,7 @@ export default function ApplicabilityRulesPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete applicability rule"
-        message="Are you sure you want to delete this rule? This cannot be undone."
+        message={<>Are you sure you want to delete the rule <strong>{data?.items.find((r) => r.id === deleteId)?.displayName ?? ""}</strong>? This cannot be undone.</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

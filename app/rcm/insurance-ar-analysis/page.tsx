@@ -477,7 +477,7 @@ export default function InsuranceArAnalysisListPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete session"
-        message="Are you sure you want to delete this AR Analysis session? All related claim data will be permanently removed."
+        message={<>Are you sure you want to delete the AR Analysis session <strong>{displayedItems.find((r) => r.id === deleteId)?.sessionName ?? ""}</strong>? All related claim data will be permanently removed.</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

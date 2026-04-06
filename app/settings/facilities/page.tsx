@@ -457,7 +457,7 @@ export default function FacilitiesPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete facility"
-        message="Are you sure you want to delete this facility?"
+        message={<>Are you sure you want to delete the facility <strong>{data?.items.find((r) => r.id === deleteId)?.name ?? ""}</strong>?</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

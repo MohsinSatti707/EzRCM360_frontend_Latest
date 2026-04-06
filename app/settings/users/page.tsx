@@ -903,7 +903,7 @@ export default function UsersPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete user"
-        message="Are you sure you want to delete this user?"
+        message={<>Are you sure you want to delete the user <strong>{data?.items.find((r) => r.id === deleteId)?.userName ?? ""}</strong>?</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

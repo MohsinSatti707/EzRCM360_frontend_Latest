@@ -552,7 +552,7 @@ export default function ProcedureGroupingRulesPage() {
         </form>
       </Modal>
 
-      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete rule" message="Are you sure you want to delete this rule?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete rule" message={<>Are you sure you want to delete the rule <strong>{data?.items.find((r) => r.id === deleteId)?.groupName ?? ""}</strong>?</>} confirmLabel="Delete" variant="danger" loading={deleteLoading} />
       <ConfirmDialog
         open={bulkDeleteConfirm}
         onClose={() => setBulkDeleteConfirm(false)}

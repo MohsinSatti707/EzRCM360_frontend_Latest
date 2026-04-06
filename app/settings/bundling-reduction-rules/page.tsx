@@ -586,7 +586,7 @@ export default function BundlingReductionRulesPage() {
         </form>
       </Modal>
 
-      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete rule" message="Are you sure you want to delete this rule?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete rule" message={<>Are you sure you want to delete the rule <strong>{data?.items.find((r) => r.id === deleteId)?.primaryCptCode ?? ""}</strong>?</>} confirmLabel="Delete" variant="danger" loading={deleteLoading} />
       <ConfirmDialog
         open={bulkDeleteConfirm}
         onClose={() => setBulkDeleteConfirm(false)}

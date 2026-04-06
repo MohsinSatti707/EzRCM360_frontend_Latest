@@ -547,7 +547,7 @@ export default function NdcCodesPage() {
         </form>
       </Modal>
 
-      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete NDC code" message="Are you sure you want to delete this NDC code?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete NDC code" message={<>Are you sure you want to delete the NDC code <strong>{data?.items.find((r) => r.id === deleteId)?.ndcCodeValue ?? ""}</strong>?</>} confirmLabel="Delete" variant="danger" loading={deleteLoading} />
       <ConfirmDialog
         open={bulkDeleteConfirm}
         onClose={() => setBulkDeleteConfirm(false)}

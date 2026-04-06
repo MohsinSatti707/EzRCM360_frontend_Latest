@@ -569,7 +569,7 @@ export default function CptHcpcsCodesPage() {
         </form>
       </Modal>
 
-      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete code" message="Are you sure you want to delete this code?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete code" message={<>Are you sure you want to delete the code <strong>{data?.items.find((r) => r.id === deleteId)?.code ?? ""}</strong>?</>} confirmLabel="Delete" variant="danger" loading={deleteLoading} />
       <ConfirmDialog
         open={bulkDeleteConfirm}
         onClose={() => setBulkDeleteConfirm(false)}

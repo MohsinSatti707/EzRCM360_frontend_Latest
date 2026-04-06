@@ -459,7 +459,7 @@ export default function ModifiersPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete modifier"
-        message="Are you sure you want to delete this modifier?"
+        message={<>Are you sure you want to delete the modifier <strong>{data?.items.find((r) => r.id === deleteId)?.modifierCode ?? ""}</strong>?</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

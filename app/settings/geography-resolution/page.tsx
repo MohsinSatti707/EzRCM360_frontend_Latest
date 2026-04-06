@@ -763,7 +763,7 @@ export default function GeographyResolutionPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete mapping"
-        message="Are you sure you want to delete this zip-geo mapping? This cannot be undone."
+        message={<>Are you sure you want to delete the zip-geo mapping <strong>{data?.items.find((r) => r.id === deleteId)?.mappingName ?? ""}</strong>? This cannot be undone.</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

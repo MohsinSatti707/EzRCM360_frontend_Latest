@@ -536,7 +536,7 @@ export default function FinancialModifiersPage() {
         </form>
       </Modal>
 
-      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete financial modifier" message="Are you sure you want to delete this financial modifier?" confirmLabel="Delete" variant="danger" loading={deleteLoading} />
+      <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete financial modifier" message={<>Are you sure you want to delete the financial modifier <strong>{data?.items.find((r) => r.id === deleteId)?.modifierCode ?? ""}</strong>?</>} confirmLabel="Delete" variant="danger" loading={deleteLoading} />
       <ConfirmDialog
         open={bulkDeleteConfirm}
         onClose={() => setBulkDeleteConfirm(false)}

@@ -437,7 +437,7 @@ export default function EntityLocationsPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete location"
-        message="Are you sure you want to delete this location?"
+        message={<>Are you sure you want to delete the location <strong>{data?.items.find((r) => r.id === deleteId)?.locationName ?? ""}</strong>?</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}

@@ -577,7 +577,7 @@ export default function PayersPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete payer"
-        message="Are you sure you want to delete this payer?"
+        message={<>Are you sure you want to delete the payer <strong>{data?.items.find((r) => r.id === deleteId)?.payerName ?? ""}</strong>?</>}
         confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}
