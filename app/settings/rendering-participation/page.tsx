@@ -47,6 +47,7 @@ const ACTIVE_OPTIONS = [
 
 const defaultForm: CreateRenderingProviderPlanParticipationRequest = {
   entityProviderId: "",
+  payerId: "",
   planId: "",
   participationStatus: 0,
   effectiveFrom: null,
@@ -147,11 +148,12 @@ export default function RenderingParticipationPage() {
       // Derive parent entity from provider
       const provider = allEntityProviders.find((p) => p.id === detail.entityProviderId);
       setSelectedEntityId(provider?.entityId ?? "");
-      // Derive parent payer from plan
-      const plan = allPlans.find((p) => p.id === detail.planId);
-      setSelectedPayerId(plan?.payerId ?? "");
+      // Derive parent payer from detail or fallback to plan's payer
+      const payerId = detail.payerId || allPlans.find((p) => p.id === detail.planId)?.payerId || "";
+      setSelectedPayerId(payerId);
       setForm({
         entityProviderId: detail.entityProviderId,
+        payerId: payerId,
         planId: detail.planId,
         participationStatus: resolveEnum(detail.participationStatus, ENUMS.ParticipationStatus),
         effectiveFrom: detail.effectiveFrom ?? null,
@@ -575,7 +577,7 @@ export default function RenderingParticipationPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Payer <span className="text-red-500">*</span></label>
-              <select value={selectedPayerId} onChange={(e) => { setSelectedPayerId(e.target.value); setForm((f) => ({ ...f, planId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
+              <select value={selectedPayerId} onChange={(e) => { setSelectedPayerId(e.target.value); setForm((f) => ({ ...f, payerId: e.target.value, planId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
                 <option value="">Select payer</option>
                 {payers.map((p) => (
                   <option key={p.id} value={p.id}>{p.payerName}</option>

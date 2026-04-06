@@ -5,6 +5,7 @@ export interface GroupProviderPlanParticipationListItemDto {
   id: string;
   entityProviderId: string;
   entityProviderDisplayName?: string | null;
+  payerId: string;
   planId: string;
   planDisplayName?: string | null;
   participationStatus: number;
@@ -17,6 +18,7 @@ export interface GroupProviderPlanParticipationListItemDto {
 export interface GroupProviderPlanParticipationDetailDto {
   id: string;
   entityProviderId: string;
+  payerId: string;
   planId: string;
   participationStatus: number;
   effectiveFrom?: string | null;
@@ -27,6 +29,7 @@ export interface GroupProviderPlanParticipationDetailDto {
 
 export interface CreateGroupProviderPlanParticipationRequest {
   entityProviderId: string;
+  payerId: string;
   planId: string;
   participationStatus: number;
   effectiveFrom?: string | null;
@@ -37,6 +40,7 @@ export interface CreateGroupProviderPlanParticipationRequest {
 
 export interface UpdateGroupProviderPlanParticipationRequest {
   entityProviderId: string;
+  payerId: string;
   planId: string;
   participationStatus: number;
   effectiveFrom?: string | null;

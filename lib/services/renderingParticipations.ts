@@ -4,6 +4,7 @@ import type { PaginatedList } from "@/lib/types";
 export interface RenderingProviderPlanParticipationListItemDto {
   id: string;
   entityProviderId: string;
+  payerId: string;
   planId: string;
   /** From API: provider display name */
   providerName?: string | null;
@@ -19,6 +20,7 @@ export interface RenderingProviderPlanParticipationListItemDto {
 export interface RenderingProviderPlanParticipationDetailDto {
   id: string;
   entityProviderId: string;
+  payerId: string;
   planId: string;
   participationStatus: number;
   effectiveFrom?: string | null;
@@ -29,6 +31,7 @@ export interface RenderingProviderPlanParticipationDetailDto {
 
 export interface CreateRenderingProviderPlanParticipationRequest {
   entityProviderId: string;
+  payerId: string;
   planId: string;
   participationStatus: number;
   effectiveFrom?: string | null;
@@ -39,6 +42,7 @@ export interface CreateRenderingProviderPlanParticipationRequest {
 
 export interface UpdateRenderingProviderPlanParticipationRequest {
   entityProviderId: string;
+  payerId: string;
   planId: string;
   participationStatus: number;
   effectiveFrom?: string | null;
