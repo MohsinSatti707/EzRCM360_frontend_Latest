@@ -25,6 +25,7 @@ import { facilitiesApi } from "@/lib/services/facilities";
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
@@ -69,7 +70,7 @@ export default function FacilitiesPage() {
 
   const api = facilitiesApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
@@ -229,6 +230,17 @@ export default function FacilitiesPage() {
       setStatusUpdatingId(null);
     }
   };
+
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Facility Configuration" description="Independent service locations." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
 
   if (!canView) {
     return (
@@ -423,7 +435,9 @@ export default function FacilitiesPage() {
         </div>
       )}
       {loading && !data && !error && (
-        <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
       )}
 
       <FacilityFormModal

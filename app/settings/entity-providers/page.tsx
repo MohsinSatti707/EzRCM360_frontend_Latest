@@ -30,6 +30,7 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import type { EntityProviderListItemDto, CreateEntityProviderRequest, UpdateEntityProviderRequest } from "@/lib/services/entityProviders";
 import type { EntityLookupDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
@@ -78,7 +79,7 @@ export default function EntityProvidersPage() {
 
   const api = entityProvidersApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Entity Providers");
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("Entity Providers");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch]);
@@ -245,6 +246,17 @@ export default function EntityProvidersPage() {
       setStatusUpdatingId(null);
     }
   };
+
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Entity Providers" description="Manage entity providers." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
 
   if (!canView) {
     return (
@@ -441,7 +453,11 @@ export default function EntityProvidersPage() {
           </div>
         </div>
       )}
-      {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
+      {!data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
 
       <Modal
         open={modalOpen}

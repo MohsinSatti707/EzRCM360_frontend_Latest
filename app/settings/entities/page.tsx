@@ -67,7 +67,7 @@ export default function EntitiesPage() {
 
   const api = entitiesApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
@@ -213,6 +213,17 @@ export default function EntitiesPage() {
   };
 
   const statusLabel = (n: number) => STATUS_OPTIONS.find((o) => o.value === n)?.name ?? String(n);
+
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Entity Information" description="Define entity identity and structure." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
 
   if (!canView) {
     return (
@@ -406,7 +417,11 @@ export default function EntitiesPage() {
         </div>
       )}
 
-      {loading && !data && !error && <Loader variant="inline" />}
+      {loading && !data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
 
       <EntityFormModal
         open={modalOpen}

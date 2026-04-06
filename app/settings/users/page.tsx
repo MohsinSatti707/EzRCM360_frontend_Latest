@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Alert } from "@/components/ui/Alert";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { usersApi } from "@/lib/services/users";
 import { lookupsApi } from "@/lib/services/lookups";
 import { useToast } from "@/lib/contexts/ToastContext";
@@ -500,9 +501,8 @@ export default function UsersPage() {
   if (loading) {
     return (
       <PageShell title="Users Access">
-        <div className="space-y-4">
-          <div className="h-12 w-full animate-shimmer-bg rounded-lg" />
-          <div className="h-72 animate-shimmer-bg rounded-xl" />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
         </div>
       </PageShell>
     );
@@ -733,7 +733,9 @@ export default function UsersPage() {
         </div>
       )}
       {!data && !error && (
-        <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
       )}
 
       {/* Add User / Edit User modal */}

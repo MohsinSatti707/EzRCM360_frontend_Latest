@@ -72,7 +72,7 @@ export default function EntityLocationsPage() {
 
   const api = entityLocationsApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
@@ -222,6 +222,17 @@ export default function EntityLocationsPage() {
       setStatusUpdatingId(null);
     }
   };
+
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Entity Locations" description="Manage entity locations." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
 
   if (!canView) {
     return (
@@ -403,7 +414,11 @@ export default function EntityLocationsPage() {
           </div>
         </div>
       )}
-      {loading && !data && !error && <Loader variant="inline" />}
+      {loading && !data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
 
       <EntityLocationFormModal
         open={modalOpen}

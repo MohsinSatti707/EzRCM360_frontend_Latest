@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AUTH_TOKEN_KEY } from "@/lib/env";
+import { Loader } from "@/components/ui/Loader";
 
 const PUBLIC_PATHS = ["/login", "/set-password", "/authentication/verify", "/authentication/setup"];
 const LOGIN_PATH = "/login";
@@ -39,7 +40,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (!allowed) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface">
-        <div className="text-sm text-muted-foreground">Loading…</div>
+        <Loader variant="page" label="Loading" />
       </div>
     );
   }

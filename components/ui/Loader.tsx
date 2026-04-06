@@ -1,22 +1,21 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type LoaderProps = {
   /** "inline" = minimal height for tables/cards, "page" = centered full-height block */
   variant?: "inline" | "page";
-  /** Spinner size */
+  /** Dot size */
   size?: "sm" | "md" | "lg";
-  /** Optional label below spinner (e.g. "Loading…") */
+  /** Optional label below dots (e.g. "Loading…") */
   label?: string;
   className?: string;
 };
 
-const sizeClasses = {
-  sm: "h-5 w-5",
-  md: "h-8 w-8",
-  lg: "h-10 w-10",
+const dotSizes = {
+  sm: "h-2 w-2",
+  md: "h-3 w-3",
+  lg: "h-4 w-4",
 };
 
 export function Loader({
@@ -25,12 +24,19 @@ export function Loader({
   label = "Loading…",
   className = "",
 }: LoaderProps) {
-  const spinner = (
-    <Loader2
-      className={cn("animate-spin text-primary", sizeClasses[size])}
-      role="status"
-      aria-label={label}
-    />
+  const dots = (
+    <div className="flex items-center gap-1.5" role="status" aria-label={label}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <span
+          key={i}
+          className={cn(
+            "rounded-full bg-primary animate-bounce-dot",
+            dotSizes[size],
+          )}
+          style={{ animationDelay: `${i * 0.15}s` }}
+        />
+      ))}
+    </div>
   );
 
   if (variant === "page") {
@@ -41,9 +47,9 @@ export function Loader({
           className,
         )}
       >
-        {spinner}
+        {dots}
         {label && (
-          <p className="font-aileron text-sm font-medium text-muted-foreground">{label}</p>
+          <p className="font-aileron text-[16px] font-semibold text-primary">{label}</p>
         )}
       </div>
     );
@@ -56,9 +62,9 @@ export function Loader({
         className,
       )}
     >
-      {spinner}
+      {dots}
       {label && (
-        <p className="font-aileron text-sm text-muted-foreground">{label}</p>
+        <p className="font-aileron text-[16px] font-semibold text-primary">{label}</p>
       )}
     </div>
   );

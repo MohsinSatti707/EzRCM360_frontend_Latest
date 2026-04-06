@@ -22,6 +22,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { feeSchedulesApi } from "@/lib/services/feeSchedules";
 import { useToast } from "@/lib/contexts/ToastContext";
@@ -133,7 +134,7 @@ export default function FeeSchedulesPage() {
 
   const api = feeSchedulesApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Fee Schedules");
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("Fee Schedules");
 
   const loadList = useCallback(() => {
     setError(null);
@@ -543,6 +544,17 @@ export default function FeeSchedulesPage() {
     </div>
   ) : null;
 
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Fee Schedules" description="Centralized valuation datasets." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
+
   if (!canView) {
     return (
       <div>
@@ -740,7 +752,11 @@ export default function FeeSchedulesPage() {
           </div>
         </div>
       )}
-      {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
+      {!data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
 
       {/* 3-step wizard / edit modal */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={wizardTitle} size="lg" position="right" headerContent={wizardStepper} footer={wizardFooter}>

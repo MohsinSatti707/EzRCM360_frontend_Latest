@@ -8,6 +8,7 @@ import {
   MFA_SETUP_USER_ID_KEY,
   MFA_VERIFIED_KEY,
 } from "@/lib/env";
+import { Loader } from "@/components/ui/Loader";
 
 const PUBLIC_PATHS = ["/login", "/set-password", "/authentication/verify", "/authentication/setup"];
 const MFA_VERIFY_PATH = "/authentication/verify";
@@ -59,7 +60,7 @@ export function MfaRouteGuard({ children }: { children: React.ReactNode }) {
   if (!allowed) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface">
-        <div className="text-sm text-muted-foreground">Loading…</div>
+        <Loader variant="page" label="Loading" />
       </div>
     );
   }

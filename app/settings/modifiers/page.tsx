@@ -29,6 +29,7 @@ import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedConte
 import type { ModifierDto, CreateModifierCommand } from "@/lib/services/modifiers";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { CellTooltip } from "@/components/ui/CellTooltip";
 
 const MODULE_NAME = "Modifiers";
@@ -69,7 +70,7 @@ export default function ModifiersPage() {
 
   const api = modifiersApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission(MODULE_NAME);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
@@ -225,6 +226,17 @@ export default function ModifiersPage() {
 
   const modifierTypeLabel = (n: number) =>
     MODIFIER_TYPE_OPTIONS.find((o) => o.value === n)?.label ?? String(n);
+
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Modifiers" description="Procedure and billing modifiers." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
 
   if (!canView) {
     return (
@@ -426,7 +438,9 @@ export default function ModifiersPage() {
         </div>
       )}
       {loading && !data && !error && (
-        <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
       )}
 
       <ModifierFormModal

@@ -31,6 +31,7 @@ import type {
 import type { PaginatedList } from "@/lib/types";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { CellTooltip } from "@/components/ui/CellTooltip";
 
@@ -230,7 +231,7 @@ export default function ApplicabilityRulesPage() {
   const api = applicabilityRulesApi();
   const fsApi = feeSchedulesApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Applicability Rules");
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("Applicability Rules");
 
   useEffect(() => {
     fsApi.getList({ pageSize: 500, status: 0 }).then((res) => setFeeScheduleOptions(res.items)).catch(() => {});
@@ -432,6 +433,17 @@ export default function ApplicabilityRulesPage() {
       payerCategoryLabel(row.payerCategory).toLowerCase().includes(q);
   }) ?? [];
 
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Applicability Rules" description="Fee schedule applicability rules." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
+
   if (!canView) {
     return (
       <div>
@@ -619,8 +631,8 @@ export default function ApplicabilityRulesPage() {
         </div>
       )}
       {!data && !error && (
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          Loading…
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
         </div>
       )}
 

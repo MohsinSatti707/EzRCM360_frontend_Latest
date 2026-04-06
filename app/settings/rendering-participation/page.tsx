@@ -26,6 +26,7 @@ import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedConte
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { CellTooltip } from "@/components/ui/CellTooltip";
 import type {
@@ -83,7 +84,7 @@ export default function RenderingParticipationPage() {
 
   const api = renderingParticipationsApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Rendering Provider Plan Participations");
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("Rendering Provider Plan Participations");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
@@ -304,6 +305,17 @@ export default function RenderingParticipationPage() {
     return m;
   }, [allPlans]);
 
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Rendering Provider-Plan Participation" description="Network participation status." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
+
   if (!canView) {
     return (
       <div>
@@ -508,7 +520,11 @@ export default function RenderingParticipationPage() {
           </div>
         </div>
       )}
-      {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
+      {!data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
 
       <Modal
         open={modalOpen}

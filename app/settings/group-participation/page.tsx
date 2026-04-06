@@ -24,6 +24,7 @@ import { groupParticipationsApi } from "@/lib/services/groupParticipations";
 import { lookupsApi } from "@/lib/services/lookups";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -80,7 +81,7 @@ export default function GroupParticipationPage() {
 
   const api = groupParticipationsApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Group Provider Plan Participations");
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("Group Provider Plan Participations");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
@@ -272,6 +273,17 @@ export default function GroupParticipationPage() {
     return m;
   }, [allPlans]);
 
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Group Provider-Plan Participation" description="Network participation status." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
+
   if (!canView) {
     return (
       <div>
@@ -462,7 +474,11 @@ export default function GroupParticipationPage() {
           </div>
         </div>
       )}
-      {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
+      {!data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
 
       <Modal
         open={modalOpen}

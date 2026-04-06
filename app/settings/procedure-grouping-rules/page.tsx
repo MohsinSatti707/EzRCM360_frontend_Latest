@@ -29,6 +29,7 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { toDateInput } from "@/lib/utils";
 import { CellTooltip } from "@/components/ui/CellTooltip";
 
@@ -78,7 +79,7 @@ export default function ProcedureGroupingRulesPage() {
 
   const api = procedureGroupingRulesApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Procedure Grouping Rules");
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("Procedure Grouping Rules");
 
   const loadList = useCallback(() => {
     setError(null);
@@ -233,6 +234,17 @@ export default function ProcedureGroupingRulesPage() {
       setOverlayLoading(false);
     }
   };
+
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Procedure Grouping Rules" description="Procedure grouping for ranking and reporting." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
 
   if (!canView) {
     return (
@@ -413,7 +425,11 @@ export default function ProcedureGroupingRulesPage() {
           </div>
         </div>
       )}
-      {!data && !error && <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}
+      {!data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
 
       <Modal
         open={modalOpen}

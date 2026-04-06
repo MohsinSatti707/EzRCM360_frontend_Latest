@@ -21,6 +21,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { geographyApi } from "@/lib/services/geography";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
@@ -89,7 +90,7 @@ export default function GeographyResolutionPage() {
 
   const api = geographyApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission("Zip Geo Mappings");
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("Zip Geo Mappings");
 
   const loadList = useCallback(() => {
     setError(null);
@@ -315,6 +316,17 @@ export default function GeographyResolutionPage() {
       fsCategoryLabel(row.fsCategory).toLowerCase().includes(q);
   }) ?? [];
 
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Geography Resolution" description="Zip-to-geography mappings for fee schedule resolution." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
+
   if (!canView) {
     return (
       <div>
@@ -521,8 +533,8 @@ export default function GeographyResolutionPage() {
         </div>
       )}
       {!data && !error && (
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          Loading…
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
         </div>
       )}
 

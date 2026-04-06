@@ -29,6 +29,7 @@ import type { PaginatedList } from "@/lib/types";
 import { Alert } from "@/components/ui/Alert";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
+import { Loader } from "@/components/ui/Loader";
 import { CellTooltip } from "@/components/ui/CellTooltip";
 import Image from "next/image";
 
@@ -88,7 +89,7 @@ export default function IcdCodesPage() {
 
   const api = icdCodesApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission("ICD Codes");
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("ICD Codes");
 
   const loadList = useCallback(() => {
     setError(null);
@@ -243,6 +244,17 @@ export default function IcdCodesPage() {
       setOverlayLoading(false);
     }
   };
+
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="ICD Codes" description="Standardized diagnosis codes (e.g. ICD-10)." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
 
   if (!canView) {
     return (
@@ -432,8 +444,8 @@ export default function IcdCodesPage() {
         </div>
       )}
       {!data && !error && (
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          Loading…
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
         </div>
       )}
 

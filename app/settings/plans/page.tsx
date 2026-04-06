@@ -95,7 +95,7 @@ export default function PlansPage() {
 
   const api = plansApi();
   const toast = useToast();
-  const { canView, canCreate, canUpdate, canDelete } = useModulePermission(MODULE_NAME);
+  const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
@@ -378,6 +378,17 @@ export default function PlansPage() {
   const planCategoryLabel = (n: number) => planCategories.find((c) => Number(c.value) === n)?.label ?? String(n);
   const planTypeLabel = (n: number) => planTypes.find((t) => Number(t.value) === n)?.label ?? String(n);
 
+  if (permLoading) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Plan Configurations" description="Centralized plan registry." />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      </div>
+    );
+  }
+
   if (!canView) {
     return (
       <div>
@@ -606,7 +617,11 @@ export default function PlansPage() {
           </div>
         </div>
       )}
-      {loading && !data && !error && <Loader variant="inline" />}
+      {loading && !data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
 
       <PlanFormModal
         open={modalOpen}
