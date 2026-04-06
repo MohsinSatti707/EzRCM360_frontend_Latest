@@ -57,10 +57,10 @@ export class HttpClient implements IHttpClient {
             if (fieldErrors.length > 0) {
               message = fieldErrors.join(" ");
             } else {
-              message = json.message || json.title || json.detail || text;
+              message = json.detail || json.message || json.title || text;
             }
           } else {
-            message = json.message || json.title || json.detail || text;
+            message = json.detail || json.message || json.title || text;
           }
         }
       } catch {
