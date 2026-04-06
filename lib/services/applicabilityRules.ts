@@ -8,7 +8,7 @@ export interface ApplicabilityRuleDto {
   displayName: string;
   payerEntityType: string;
   planCategory: string;
-  claimCategory: string;
+
   providerParticipation: string;
   payerCategory: string;
   feeScheduleApplied: string;
@@ -29,7 +29,7 @@ export interface CreateApplicabilityRuleCommand {
   displayName: string;
   payerEntityType: string;
   planCategory: string;
-  claimCategory: string;
+
   providerParticipation: string;
   payerCategory: string;
   feeScheduleApplied: string;

@@ -41,15 +41,6 @@ const PAYER_ENTITY_TYPES = [
   { value: "Employer", name: "Employer" },
   { value: "Other", name: "Other" },
 ];
-const CLAIM_CATEGORIES = [
-  { value: "Medicare", name: "Medicare" },
-  { value: "Medicaid", name: "Medicaid" },
-  { value: "Tricare", name: "Tricare" },
-  { value: "Railroad Medicare", name: "Railroad Medicare" },
-  { value: "Commercial", name: "Commercial" },
-  { value: "MVA", name: "MVA" },
-  { value: "WC", name: "Workers' Compensation" },
-];
 const PROVIDER_PARTICIPATION = [
   { value: "InNetwork", name: "In Network" },
   { value: "OutOfNetwork", name: "Out of Network" },
@@ -96,7 +87,6 @@ const defaultForm: CreateApplicabilityRuleCommand = {
   displayName: "",
   payerEntityType: "",
   planCategory: "",
-  claimCategory: "",
   providerParticipation: "InNetwork",
   payerCategory: "AttorneyOrEmployerOrOther",
   feeScheduleApplied: "UCR",
@@ -275,7 +265,6 @@ export default function ApplicabilityRulesPage() {
       displayName: row.displayName,
       payerEntityType: row.payerEntityType,
       planCategory: row.planCategory,
-      claimCategory: row.claimCategory,
       providerParticipation: row.providerParticipation,
       payerCategory: row.payerCategory,
       feeScheduleApplied: row.feeScheduleApplied,
@@ -299,11 +288,10 @@ export default function ApplicabilityRulesPage() {
       !form.ruleSetName.trim() ||
       !form.displayName.trim() ||
       !form.payerEntityType.trim() ||
-      !form.planCategory.trim() ||
-      !form.claimCategory.trim()
+      !form.planCategory.trim()
     ) {
       setFormError(
-        "Rule set name, display name, payer entity type, plan category, and claim category are required."
+        "Rule set name, display name, payer entity type, and plan category are required."
       );
       return;
     }
@@ -397,7 +385,6 @@ export default function ApplicabilityRulesPage() {
         displayName: row.displayName,
         payerEntityType: row.payerEntityType,
         planCategory: row.planCategory,
-        claimCategory: row.claimCategory,
         providerParticipation: row.providerParticipation,
         payerCategory: row.payerCategory,
         feeScheduleApplied: row.feeScheduleApplied,
@@ -737,23 +724,6 @@ export default function ApplicabilityRulesPage() {
                   setForm((f) => ({ ...f, planCategory: csv }))
                 }
               />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">
-                Claim category <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={form.claimCategory}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, claimCategory: e.target.value }))
-                }
-                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                <option value="">— Select —</option>
-                {CLAIM_CATEGORIES.map((o) => (
-                  <option key={o.value} value={o.value}>{o.name}</option>
-                ))}
-              </select>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
