@@ -7,6 +7,7 @@ export interface PayerListItemDto {
   payerName: string;
   aliases?: string | null;
   entityType: number;
+  insuranceSubCategory?: number | null;
   status: number | string;
   organizationId: string;
   organizationName?: string | null;
@@ -41,6 +42,7 @@ export interface PayerDetailDto {
   payerName: string;
   aliases?: string | null;
   entityType: number;
+  insuranceSubCategory?: number | null;
   /** API may return number (0/1) or string ("Active"/"Inactive"). */
   status: number | string;
   addresses: PayerAddressDto[];
@@ -73,6 +75,7 @@ export interface CreatePayerRequest {
   payerName: string;
   aliases?: string | null;
   entityType: number;
+  insuranceSubCategory?: number | null;
   status?: number;
   planIds?: string[] | null;
   addresses?: PayerAddressRequest[] | null;
@@ -84,6 +87,7 @@ export interface UpdatePayerRequest {
   payerName: string;
   aliases?: string | null;
   entityType: number;
+  insuranceSubCategory?: number | null;
   status: number;
   planIdsToAdd?: string[] | null;
   planIdsToRemove?: string[] | null;

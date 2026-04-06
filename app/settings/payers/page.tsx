@@ -52,6 +52,7 @@ const defaultForm: CreatePayerRequest = {
   payerName: "",
   aliases: "",
   entityType: 0,
+  insuranceSubCategory: null,
   status: 1,
   planIds: [],
   addresses: [],
@@ -139,6 +140,7 @@ export default function PayersPage() {
         payerName: detail.payerName,
         aliases: detail.aliases ?? "",
         entityType: resolveEnum(detail.entityType, ENUMS.PayerEntityType),
+        insuranceSubCategory: detail.insuranceSubCategory ?? null,
         status: resolveEnum(detail.status, ENUMS.PayerStatus),
         planIds,
         addresses: mapAddresses(),
@@ -307,6 +309,7 @@ export default function PayersPage() {
         payerName: detail.payerName,
         aliases: detail.aliases ?? "",
         entityType: detail.entityType,
+        insuranceSubCategory: detail.insuranceSubCategory ?? null,
         status: statusValue,
         addresses: (detail.addresses ?? []).map((a) => ({
           addressLine1: a.addressLine1,

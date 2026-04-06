@@ -20,6 +20,18 @@ const STATUS_OPTIONS: SelectOption<number>[] = [
   { value: 1, label: "Active" },
 ];
 
+const INSURANCE_SUB_CATEGORY_OPTIONS: SelectOption<number | string>[] = [
+  { value: "", label: "Select sub-category" },
+  { value: 0, label: "Commercial" },
+  { value: 1, label: "Medicaid" },
+  { value: 2, label: "Medicare" },
+  { value: 3, label: "MVA" },
+  { value: 4, label: "Tricare" },
+  { value: 5, label: "WC" },
+  { value: 6, label: "HMO / Managed" },
+  { value: 7, label: "Railroad Medicare" },
+];
+
 const emptyAddress: PayerAddressRequest = {
   addressLine1: "",
   addressLine2: "",
@@ -184,8 +196,16 @@ export function PayerFormModal({
               label="Entity type"
               options={entityTypeOptions}
               value={form.entityType}
-              onChange={(e) => onFormChange({ ...form, entityType: Number(e.target.value) })}
+              onChange={(e) => onFormChange({ ...form, entityType: Number(e.target.value), insuranceSubCategory: Number(e.target.value) === Number(insuranceEntityTypeValue) ? form.insuranceSubCategory : null })}
             />
+            {isInsurance && (
+              <Select
+                label="Insurance sub-category"
+                options={INSURANCE_SUB_CATEGORY_OPTIONS}
+                value={form.insuranceSubCategory ?? ""}
+                onChange={(e) => onFormChange({ ...form, insuranceSubCategory: e.target.value ? Number(e.target.value) : null })}
+              />
+            )}
             <Select
               label="Status"
               options={STATUS_OPTIONS}
