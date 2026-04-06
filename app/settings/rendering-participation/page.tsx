@@ -167,8 +167,9 @@ export default function RenderingParticipationPage() {
 
   const handleSubmit = async () => {
     setFormError(null);
-    if (!selectedEntityId || !form.entityProviderId || !selectedPayerId || !form.planId) {
-      setFormError("Entity, provider, payer, and plan are all required.");
+    const planRequired = isSelectedPayerCommercialInsurance;
+    if (!selectedEntityId || !form.entityProviderId || !selectedPayerId || (planRequired && !form.planId)) {
+      setFormError(planRequired ? "Entity, provider, payer, and plan are all required." : "Entity, provider, and payer are all required.");
       return;
     }
     setSubmitLoading(true);

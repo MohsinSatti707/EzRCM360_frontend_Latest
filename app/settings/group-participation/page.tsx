@@ -150,8 +150,9 @@ export default function GroupParticipationPage() {
 
   const handleSubmit = async () => {
     setFormError(null);
-    if (!selectedPayerId || !form.planId) {
-      setFormError("Payer and plan are required.");
+    const planRequired = isSelectedPayerCommercialInsurance;
+    if (!selectedPayerId || (planRequired && !form.planId)) {
+      setFormError(planRequired ? "Payer and plan are required." : "Payer is required.");
       return;
     }
     setSubmitLoading(true);
