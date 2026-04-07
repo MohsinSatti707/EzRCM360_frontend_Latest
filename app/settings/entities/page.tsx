@@ -441,7 +441,7 @@ export default function EntitiesPage() {
         onConfirm={handleDelete}
         title="Delete Entity"
         message={<>Are you sure you want to delete the entity <strong>{data?.items.find((r) => r.id === deleteId)?.legalName ?? ""}</strong>?</>}
-        confirmLabel="Delete Permanently"
+        confirmLabel="Delete"
         variant="danger"
         loading={deleteLoading}
       />

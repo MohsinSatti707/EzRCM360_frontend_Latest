@@ -85,8 +85,8 @@ export function ConfirmDialog({
             disabled={loading}
             className={
               variant === "danger"
-                ? "h-10 rounded-[5px] px-[18px] py-3 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-                : "h-10 rounded-[5px] px-[18px] py-3 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+                ? "h-10 rounded-[5px] px-[18px] py-3 bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+                : "h-10 rounded-[5px] px-[18px] py-3 bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
             }
           >
             {loading ? "..." : (

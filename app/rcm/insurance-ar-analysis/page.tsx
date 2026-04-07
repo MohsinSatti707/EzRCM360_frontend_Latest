@@ -20,6 +20,7 @@ import {
   TableCell,
 } from "@/components/ui/Table";
 import { Loader } from "@/components/ui/Loader";
+import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { insuranceArAnalysisApi, type ArAnalysisSessionListItemDto, type ArAnalysisSessionStatus } from "@/lib/services/insuranceArAnalysis";
@@ -74,6 +75,7 @@ export default function InsuranceArAnalysisListPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
@@ -136,6 +138,7 @@ export default function InsuranceArAnalysisListPage() {
     if (!deleteId) return;
     const deletedName = displayedItems.find((r) => r.id === deleteId)?.sessionName ?? "";
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.deleteSession(deleteId);
       setDeleteId(null);
@@ -146,12 +149,14 @@ export default function InsuranceArAnalysisListPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.bulkDelete(Array.from(selectedIds));
       setBulkDeleteConfirm(false);
@@ -162,6 +167,7 @@ export default function InsuranceArAnalysisListPage() {
       toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -184,9 +190,8 @@ export default function InsuranceArAnalysisListPage() {
   if (permLoading) {
     return (
       <PageShell title="Insurance AR Analysis">
-        <div className="space-y-4">
-          <div className="h-12 w-full animate-shimmer-bg rounded-lg" />
-          <div className="h-72 animate-shimmer-bg rounded-xl" />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
         </div>
       </PageShell>
     );
@@ -465,10 +470,9 @@ export default function InsuranceArAnalysisListPage() {
         </div>
       )}
 
-      {!data && !error && loading && (
-        <div className="space-y-4">
-          <div className="h-12 w-full animate-shimmer-bg rounded-lg" />
-          <div className="h-72 animate-shimmer-bg rounded-xl" />
+      {loading && !data && !error && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          <Loader variant="inline" label="Loading" />
         </div>
       )}
       </div>
@@ -493,6 +497,7 @@ export default function InsuranceArAnalysisListPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      <OverlayLoader visible={overlayLoading} />
     </PageShell>
   );
 }
