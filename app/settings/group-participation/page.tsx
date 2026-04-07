@@ -33,7 +33,7 @@ import type {
   CreateGroupProviderPlanParticipationRequest,
   UpdateGroupProviderPlanParticipationRequest,
 } from "@/lib/services/groupParticipations";
-import type { PayerLookupDto, PlanLookupDto } from "@/lib/services/lookups";
+import type { PayerLookupDto, PlanLookupDto, EntityLookupDto, EntityProviderLookupDto } from "@/lib/services/lookups";
 import type { ValueLabelDto } from "@/lib/services/lookups";
 import type { PaginatedList } from "@/lib/types";
 import { useDebounce } from "@/lib/hooks";
@@ -58,6 +58,9 @@ const defaultForm: CreateGroupProviderPlanParticipationRequest = {
 
 export default function GroupParticipationPage() {
   const [data, setData] = useState<PaginatedList<GroupProviderPlanParticipationListItemDto> | null>(null);
+  const [entities, setEntities] = useState<EntityLookupDto[]>([]);
+  const [allEntityProviders, setAllEntityProviders] = useState<EntityProviderLookupDto[]>([]);
+  const [selectedEntityId, setSelectedEntityId] = useState("");
   const [payers, setPayers] = useState<PayerLookupDto[]>([]);
   const [allPlans, setAllPlans] = useState<PlanLookupDto[]>([]);
   const [selectedPayerId, setSelectedPayerId] = useState("");
@@ -98,11 +101,18 @@ export default function GroupParticipationPage() {
   }, [loadList]);
 
   useEffect(() => {
+    lookupsApi().getEntities().then(setEntities).catch(() => setEntities([]));
+    lookupsApi().getEntityProviders().then(setAllEntityProviders).catch(() => setAllEntityProviders([]));
     lookupsApi().getPayers().then(setPayers).catch(() => setPayers([]));
     lookupsApi().getPlans().then(setAllPlans).catch(() => setAllPlans([]));
     lookupsApi().getParticipationStatuses().then(setParticipationStatuses).catch(() => setParticipationStatuses([]));
     lookupsApi().getParticipationSources().then(setParticipationSources).catch(() => setParticipationSources([]));
   }, []);
+
+  const filteredProviders = useMemo(
+    () => selectedEntityId ? allEntityProviders.filter((p) => p.entityId === selectedEntityId) : allEntityProviders,
+    [allEntityProviders, selectedEntityId]
+  );
 
   const selectedPayer = payers.find((p) => p.id === selectedPayerId);
   const isSelectedPayerCommercialInsurance = selectedPayer != null
@@ -116,6 +126,7 @@ export default function GroupParticipationPage() {
 
   const openCreate = () => {
     setEditId(null);
+    setSelectedEntityId("");
     setSelectedPayerId("");
     setForm({
       ...defaultForm,
@@ -131,6 +142,9 @@ export default function GroupParticipationPage() {
     setFormError(null);
     try {
       const detail = await api.getById(row.id);
+      // Derive entity from provider
+      const provider = allEntityProviders.find((p) => p.id === detail.entityProviderId);
+      setSelectedEntityId(provider?.entityId ?? "");
       // Derive parent payer from detail or fallback to plan's payer
       const payerId = detail.payerId || allPlans.find((p) => p.id === detail.planId)?.payerId || "";
       setSelectedPayerId(payerId);
@@ -512,6 +526,24 @@ export default function GroupParticipationPage() {
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
           <div className="flex flex-col gap-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Entity</label>
+              <select value={selectedEntityId} onChange={(e) => { setSelectedEntityId(e.target.value); setForm((f) => ({ ...f, entityProviderId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                <option value="">Select entity</option>
+                {entities.map((e) => (
+                  <option key={e.id} value={e.id}>{e.displayName}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Provider</label>
+              <select value={form.entityProviderId} onChange={(e) => setForm((f) => ({ ...f, entityProviderId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" disabled={!selectedEntityId}>
+                <option value="">{selectedEntityId ? "Select provider" : "Select entity first"}</option>
+                {filteredProviders.map((p) => (
+                  <option key={p.id} value={p.id}>{p.displayName}</option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Payer <span className="text-red-500">*</span></label>
               <select value={selectedPayerId} onChange={(e) => { setSelectedPayerId(e.target.value); setForm((f) => ({ ...f, payerId: e.target.value, planId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
