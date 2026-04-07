@@ -184,11 +184,11 @@ export default function RenderingParticipationPage() {
       }
       setModalOpen(false);
       await loadList();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Participation Updated" : "Participation Added", editId ? "The participation has been updated successfully." : "A new participation has been added successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
       setOverlayLoading(false);
@@ -204,9 +204,9 @@ export default function RenderingParticipationPage() {
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       await loadList();
-      toast.success("Deleted successfully.");
+      toast.success("Participation Deleted", "The participation has been deleted successfully.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -249,9 +249,9 @@ export default function RenderingParticipationPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       await loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Participations Deleted", `${selectedIds.size} participation(s) have been deleted successfully.`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -274,9 +274,9 @@ export default function RenderingParticipationPage() {
         isActive: isActiveValue === 1,
       });
       await loadList();
-      toast.success("Status updated.");
+      toast.success("Status Updated", "The participation status has been updated successfully.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setStatusUpdatingId(null);
     }

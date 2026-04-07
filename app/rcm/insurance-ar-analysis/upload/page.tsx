@@ -92,11 +92,11 @@ export default function InsuranceArAnalysisUploadPage() {
 
   const handleCreateSession = useCallback(async () => {
     if (!practiceName.trim()) {
-      toast.error("Practice name is required.");
+      toast.error("Validation Error", "Practice name is required.");
       return;
     }
     if (!intakeFile) {
-      toast.error("Please upload an AR intake file.");
+      toast.error("Validation Error", "Please upload an AR intake file.");
       return;
     }
     setSubmitLoading(true);
@@ -114,7 +114,7 @@ export default function InsuranceArAnalysisUploadPage() {
             setRowsPassed(true);
           }
         }
-        toast.success(scope === "Rows" ? "Row validation complete." : scope === "Columns" ? "Column validation complete." : "Intake re-uploaded and validated.");
+        toast.success("Validation Complete", scope === "Rows" ? "Row validation complete." : scope === "Columns" ? "Column validation complete." : "Intake re-uploaded and validated.");
       } else {
         const result = await api.createSession({
           practiceName: practiceName.trim(),
@@ -131,10 +131,10 @@ export default function InsuranceArAnalysisUploadPage() {
             setRowsPassed(true);
           }
         }
-        toast.success(scope === "Rows" ? "Row validation complete." : scope === "Columns" ? "Column validation complete." : "Session created.");
+        toast.success("Validation Complete", scope === "Rows" ? "Row validation complete." : scope === "Columns" ? "Column validation complete." : "Session created.");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create session.");
+      toast.error("Session Error", err instanceof Error ? err.message : "Failed to create session.");
     } finally {
       setSubmitLoading(false);
       setValidationLoading(false);
@@ -154,13 +154,13 @@ export default function InsuranceArAnalysisUploadPage() {
 
   const handleUploadPmReports = useCallback(async () => {
     if (!sessionId || pmFiles.length === 0) {
-      toast.error("Please upload at least one PM report.");
+      toast.error("Validation Error", "Please upload at least one PM report.");
       return;
     }
     setSubmitLoading(true);
     try {
       await api.uploadPmReports(sessionId, pmFiles);
-      toast.success("PM reports uploaded.");
+      toast.success("Upload Successful", "PM reports uploaded.");
       setStep(3);
       const detail = await api.getSession(sessionId);
       setSessionDetail({
@@ -174,7 +174,7 @@ export default function InsuranceArAnalysisUploadPage() {
         totalRows: detail.totalRows ?? undefined,
       });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload.");
+      toast.error("Upload Failed", err instanceof Error ? err.message : "Failed to upload.");
     } finally {
       setSubmitLoading(false);
     }
@@ -185,10 +185,10 @@ export default function InsuranceArAnalysisUploadPage() {
     setSubmitLoading(true);
     try {
       await api.startAnalysis(sessionId);
-      toast.success("AR Analysis started.");
+      toast.success("Analysis Started", "AR Analysis started.");
       router.push(`/rcm/insurance-ar-analysis/${sessionId}/processing`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to start.");
+      toast.error("Start Failed", err instanceof Error ? err.message : "Failed to start.");
     } finally {
       setSubmitLoading(false);
     }
@@ -202,14 +202,14 @@ export default function InsuranceArAnalysisUploadPage() {
       const result = await api.dryRun(sessionId);
       setDryRunResult(result);
       if (result.totalIssuesFound === 0) {
-        toast.success("Dry run passed — no issues found. Ready to start analysis.");
+        toast.success("Dry Run Passed", "No issues found. Ready to start analysis.");
       } else if (result.hasBlockingIssues) {
-        toast.error(`Dry run found ${result.totalIssuesFound} issue(s) that must be resolved before analysis.`);
+        toast.error("Dry Run Failed", `Dry run found ${result.totalIssuesFound} issue(s) that must be resolved before analysis.`);
       } else {
         toast.warning(`Dry run found ${result.totalIssuesFound} warning(s). Analysis can proceed but some results may be affected.`);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Dry run failed.");
+      toast.error("Dry Run Failed", err instanceof Error ? err.message : "Dry run failed.");
     } finally {
       setDryRunLoading(false);
     }
@@ -385,9 +385,9 @@ export default function InsuranceArAnalysisUploadPage() {
                     a.download = "DataValidationErrors.xlsx";
                     a.click();
                     URL.revokeObjectURL(url);
-                    toast.success("Downloaded.");
+                    toast.success("File Downloaded", "The file has been downloaded successfully.");
                   } catch {
-                    toast.error("File not available.");
+                    toast.error("Download Failed", "File not available.");
                   }
                 } : undefined}
               />

@@ -83,13 +83,13 @@ export function AddPlanModal({ open, onClose, payerId, payerName, onSuccess }: A
     setLoading(true);
     try {
       await api.create(form);
-      toast.success("Plan created and linked successfully.");
+      toast.success("Plan Created", "A new plan has been created and linked successfully.");
       onSuccess();
       onClose();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to create plan.";
       setError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setLoading(false);
     }

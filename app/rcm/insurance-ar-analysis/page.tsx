@@ -120,9 +120,9 @@ export default function InsuranceArAnalysisListPage() {
       a.download = "AR_Intake_Template.xlsx";
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Template downloaded.");
+      toast.success("Template Downloaded", "The template has been downloaded successfully.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Download failed.");
+      toast.error("Download Failed", err instanceof Error ? err.message : "Download failed.");
     } finally {
       setDownloading(false);
     }
@@ -134,15 +134,16 @@ export default function InsuranceArAnalysisListPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    const deletedName = displayedItems.find((r) => r.id === deleteId)?.sessionName ?? "";
     setDeleteLoading(true);
     try {
       await api.deleteSession(deleteId);
       setDeleteId(null);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
-      toast.success("Session deleted.");
+      toast.success("Session Deleted", <>The session <strong>{deletedName}</strong> has been deleted successfully. All related claim data has been permanently removed.</>);
       await reload();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -155,10 +156,10 @@ export default function InsuranceArAnalysisListPage() {
       await api.bulkDelete(Array.from(selectedIds));
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
-      toast.success(`${selectedIds.size} session(s) deleted.`);
+      toast.success("Sessions Deleted", `${selectedIds.size} session(s) have been deleted successfully.`);
       await reload();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
     }

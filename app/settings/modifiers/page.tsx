@@ -128,11 +128,11 @@ export default function ModifiersPage() {
       }
       setModalOpen(false);
       reload();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Modifier Updated" : "Modifier Added", <>{editId ? "The" : "A new"} modifier, <strong>{form.modifierCode}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -151,10 +151,10 @@ export default function ModifiersPage() {
         };
         await api.update(row.id, payload);
         await reload();
-        toast.success("Status updated.");
+        toast.success("Status Updated", <>The status for <strong>{row.modifierCode}</strong> has been updated successfully.</>);
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Status update failed."
+          "Update Failed", err instanceof Error ? err.message : "Status update failed."
         );
       } finally {
         setStatusUpdatingId(null);
@@ -166,14 +166,15 @@ export default function ModifiersPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    const deletedName = data?.items.find((r) => r.id === deleteId)?.modifierCode ?? "";
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       reload();
-      toast.success("Deleted successfully.");
+      toast.success("Modifier Deleted", <>The modifier, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -215,9 +216,9 @@ export default function ModifiersPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       await reload();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Modifiers Deleted", <>{selectedIds.size} modifier(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);

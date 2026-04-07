@@ -49,7 +49,7 @@ export default function MfaSetupPage() {
       setQrDataUrl(dataUrl);
     } catch (err) {
       console.error("Failed to generate QR:", err);
-      toast.error("Failed to generate setup code.");
+      toast.error("Setup Error", "Failed to generate setup code.");
     }
   };
 
@@ -67,7 +67,7 @@ export default function MfaSetupPage() {
     const userId = typeof window !== "undefined" ? sessionStorage.getItem(MFA_SETUP_USER_ID_KEY) : null;
     const token = typeof window !== "undefined" ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
     if (!userId || !token) {
-      toast.error("Session expired. Please log in again.");
+      toast.error("Session Expired", "Session expired. Please log in again.");
       return;
     }
     setLoading(true);
@@ -86,9 +86,9 @@ export default function MfaSetupPage() {
       }
       setEmailCodeSent(true);
       setMethod("email");
-      toast.success("Verification code sent to your email.");
+      toast.success("Code Sent", "Verification code has been sent to your email.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send code");
+      toast.error("Send Failed", err instanceof Error ? err.message : "Failed to send code");
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ export default function MfaSetupPage() {
     e.preventDefault();
     const userId = typeof window !== "undefined" ? sessionStorage.getItem(MFA_SETUP_USER_ID_KEY) : null;
     if (!userId || !code || code.length !== 6) {
-      toast.error("Please enter a valid 6-digit code.");
+      toast.error("Invalid Code", "Please enter a valid 6-digit code.");
       return;
     }
 
@@ -124,13 +124,13 @@ export default function MfaSetupPage() {
         }
         sessionStorage.removeItem(MFA_SETUP_USER_ID_KEY);
         sessionStorage.setItem(MFA_VERIFIED_KEY, "true");
-        toast.success("MFA set up successfully with email verification.");
+        toast.success("MFA Setup Complete", "MFA set up successfully with email verification.");
         const redirect = typeof window !== "undefined" ? sessionStorage.getItem("mfa_redirect") : null;
         if (typeof window !== "undefined") sessionStorage.removeItem("mfa_redirect");
         router.push(redirect?.startsWith("/") ? redirect : "/settings");
         router.refresh();
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Verification failed");
+        toast.error("Verification Failed", err instanceof Error ? err.message : "Verification failed");
       } finally {
         setLoading(false);
       }
@@ -138,17 +138,17 @@ export default function MfaSetupPage() {
     }
 
     if (!secret) {
-      toast.error("Please enter a valid 6-digit code.");
+      toast.error("Invalid Code", "Please enter a valid 6-digit code.");
       return;
     }
     try {
       const isValid = authenticator.check(code, secret);
       if (!isValid) {
-        toast.error("Invalid code. The code may have expired. Please try again.");
+        toast.error("Invalid Code", "The code may have expired. Please try again.");
         return;
       }
     } catch {
-      toast.error("Invalid code.");
+      toast.error("Invalid Code", "The code entered is invalid.");
       return;
     }
 
@@ -173,14 +173,14 @@ export default function MfaSetupPage() {
       sessionStorage.removeItem(MFA_SETUP_USER_ID_KEY);
       sessionStorage.setItem(MFA_VERIFIED_KEY, "true");
       await permissions?.reload();
-      toast.success("MFA set up successfully. You will be asked to verify on your next login.");
+      toast.success("MFA Setup Complete", "MFA set up successfully. You will be asked to verify on your next login.");
       const redirect = typeof window !== "undefined" ? sessionStorage.getItem("mfa_redirect") : null;
       if (typeof window !== "undefined") sessionStorage.removeItem("mfa_redirect");
       router.push(redirect?.startsWith("/") ? redirect : "/settings");
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Setup failed";
-      toast.error(msg);
+      toast.error("Setup Failed", msg);
     } finally {
       setLoading(false);
     }

@@ -107,11 +107,11 @@ export default function EditProfilePage() {
       });
       setPictureFile(null);
       loadProfile();
-      toast.success("Profile updated successfully.");
+      toast.success("Profile Updated", "Your profile has been updated successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to update profile.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }

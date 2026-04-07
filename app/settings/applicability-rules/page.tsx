@@ -304,11 +304,11 @@ export default function ApplicabilityRulesPage() {
       }
       setModalOpen(false);
       loadList();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Applicability Rule Updated" : "Applicability Rule Added", <>{editId ? "The" : "A new"} applicability rule, <strong>{form.displayName}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -316,15 +316,16 @@ export default function ApplicabilityRulesPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    const deletedName = data?.items.find((r) => r.id === deleteId)?.displayName;
     setDeleteLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       loadList();
-      toast.success("Deleted successfully.");
+      toast.success("Applicability Rule Deleted", <>The applicability rule, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -366,9 +367,9 @@ export default function ApplicabilityRulesPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Applicability Rules Deleted", <>{selectedIds.size} applicability rule(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -399,9 +400,9 @@ export default function ApplicabilityRulesPage() {
         multiplierPct: row.multiplierPct ?? null,
       });
       await loadList();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status of applicability rule, <strong>{row.displayName}</strong>, has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setStatusUpdatingId(null);
     }

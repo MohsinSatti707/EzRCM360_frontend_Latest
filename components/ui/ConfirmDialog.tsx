@@ -61,8 +61,8 @@ export function ConfirmDialog({
         {/* Icon */}
         <div className="flex justify-center py-4">
           <Image
-            src="/icons/svg/delete.svg"
-            alt="Delete"
+            src={icon?.src ?? "/icons/svg/delete.svg"}
+            alt={icon?.alt ?? "Delete"}
             width={80}
             height={80}
           />
@@ -100,7 +100,7 @@ export function ConfirmDialog({
             disabled={loading}
             className="h-10 px-[18px] py-3 rounded-[5px] border-[#E2E8F0] font-aileron text-[14px] text-[#2A2C33] mt-0"
           >
-            Cancel
+            {cancelLabel}
           </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>

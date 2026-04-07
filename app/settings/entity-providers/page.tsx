@@ -148,11 +148,11 @@ export default function EntityProvidersPage() {
       }
       setModalOpen(false);
       await loadList();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Provider Updated" : "Provider Added", <>{editId ? "The" : "A new"} provider, <strong>{form.providerName}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
       setOverlayLoading(false);
@@ -164,13 +164,14 @@ export default function EntityProvidersPage() {
     setDeleteLoading(true);
     setOverlayLoading(true);
     try {
+      const deletedName = data?.items.find((r) => r.id === deleteId)?.providerName ?? "";
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       await loadList();
-      toast.success("Deleted successfully.");
+      toast.success("Provider Deleted", <>The provider, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -213,9 +214,9 @@ export default function EntityProvidersPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       await loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Providers Deleted", <>{selectedIds.size} provider(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -239,9 +240,9 @@ export default function EntityProvidersPage() {
         isActive,
       });
       await loadList();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status for <strong>{row.providerName}</strong> has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setStatusUpdatingId(null);
     }

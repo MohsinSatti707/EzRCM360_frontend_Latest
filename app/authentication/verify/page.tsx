@@ -41,7 +41,7 @@ export default function MfaVerifyPage() {
   const handleSendEmailOtp = async () => {
     const userId = typeof window !== "undefined" ? sessionStorage.getItem(MFA_USER_ID_KEY) : null;
     if (!userId) {
-      toast.error("Session expired. Please log in again.");
+      toast.error("Session Expired", "Session expired. Please log in again.");
       return;
     }
     setSendingOtp(true);
@@ -55,9 +55,9 @@ export default function MfaVerifyPage() {
         const errData = (await res.json().catch(() => ({}))) as { message?: string; title?: string; detail?: string };
         throw new Error(errData.message || errData.title || errData.detail || "Failed to send code");
       }
-      toast.success("Verification code sent to your email.");
+      toast.success("Code Sent", "Verification code has been sent to your email.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send code");
+      toast.error("Send Failed", err instanceof Error ? err.message : "Failed to send code");
     } finally {
       setSendingOtp(false);
     }
@@ -67,7 +67,7 @@ export default function MfaVerifyPage() {
     e.preventDefault();
     const userId = typeof window !== "undefined" ? sessionStorage.getItem(MFA_USER_ID_KEY) : null;
     if (!userId || !code || code.length !== 6) {
-      toast.error("Please enter a valid 6-digit code.");
+      toast.error("Invalid Code", "Please enter a valid 6-digit code.");
       return;
     }
     setLoading(true);
@@ -93,14 +93,14 @@ export default function MfaVerifyPage() {
         await permissions?.reload();
       }
 
-      toast.success("Verification successful.");
+      toast.success("Verified", "Verification successful.");
       const redirect = typeof window !== "undefined" ? sessionStorage.getItem("mfa_redirect") : null;
       if (typeof window !== "undefined") sessionStorage.removeItem("mfa_redirect");
       router.push(redirect?.startsWith("/") ? redirect : "/settings");
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Verification failed";
-      toast.error(msg);
+      toast.error("Verification Failed", msg);
     } finally {
       setLoading(false);
     }

@@ -27,9 +27,9 @@ export function BulkImportActions({ apiBase, templateFileName, onImportSuccess, 
     setDownloading(true);
     try {
       await downloadImportTemplate(apiBase, templateFileName);
-      toast.success("Template downloaded.");
+      toast.success("Template Downloaded", "The template has been downloaded successfully.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Download failed.");
+      toast.error("Download Failed", err instanceof Error ? err.message : "Download failed.");
     } finally {
       setDownloading(false);
     }
@@ -44,10 +44,10 @@ export function BulkImportActions({ apiBase, templateFileName, onImportSuccess, 
     onLoadingChange?.(true);
     try {
       const result = await uploadBulkImport(apiBase, file);
-      toast.success(`${result.rowsImported} records imported successfully.`);
+      toast.success("Import Successful", `${result.rowsImported} records have been imported successfully.`);
       await onImportSuccess();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Import failed.");
+      toast.error("Import Failed", err instanceof Error ? err.message : "Import failed.");
     } finally {
       setUploading(false);
       onLoadingChange?.(false);

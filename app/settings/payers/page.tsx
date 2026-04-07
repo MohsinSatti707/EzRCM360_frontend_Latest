@@ -190,11 +190,11 @@ export default function PayersPage() {
       }
       setModalOpen(false);
       await reload();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Payer Updated" : "Payer Added", <>{editId ? "The" : "A new"} payer, <strong>{form.payerName}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
       setOverlayLoading(false);
@@ -222,7 +222,7 @@ export default function PayersPage() {
     try {
       const newId = await api.create(payload);
       await reload();
-      toast.success("Payer created. Now add a plan.");
+      toast.success("Payer Created", <>A new payer, <strong>{form.payerName}</strong>, has been created. Now add a plan.</>);
       // Close the payer modal first, then open the Add Plan modal
       setModalOpen(false);
       setEditId(newId);
@@ -230,7 +230,7 @@ export default function PayersPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
       setOverlayLoading(false);
@@ -242,13 +242,14 @@ export default function PayersPage() {
     setDeleteLoading(true);
     setOverlayLoading(true);
     try {
+      const deletedName = data?.items.find((r) => r.id === deleteId)?.payerName ?? "";
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       await reload();
-      toast.success("Deleted successfully.");
+      toast.success("Payer Deleted", <>The payer, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -291,9 +292,9 @@ export default function PayersPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       await reload();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Payers Deleted", <>{selectedIds.size} payer(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -329,9 +330,9 @@ export default function PayersPage() {
         })),
       });
       await reload();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status for <strong>{row.payerName}</strong> has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setStatusUpdatingId(null);
     }

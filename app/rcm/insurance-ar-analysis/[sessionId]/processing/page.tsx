@@ -462,9 +462,9 @@ export default function InsuranceArAnalysisProcessingPage() {
       a.download = "ConflictClaims.xlsx";
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Conflict file downloaded.");
+      toast.success("File Downloaded", "Conflict file downloaded.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Download failed.");
+      toast.error("Download Failed", err instanceof Error ? err.message : "Download failed.");
     } finally {
       setDownloading(false);
     }
@@ -472,18 +472,18 @@ export default function InsuranceArAnalysisProcessingPage() {
 
   const handleUploadConflicts = async () => {
     if (!conflictFile) {
-      toast.error("Please select a file.");
+      toast.error("Validation Error", "Please select a file.");
       return;
     }
     setUploading(true);
     try {
       await apiRef.current.uploadClaimIntegrityConflicts(sessionId, conflictFile);
       setConflictFile(null);
-      toast.success("File uploaded. Resuming analysis…");
+      toast.success("Upload Successful", "File uploaded. Resuming analysis…");
       await refreshStatus();
       pollUntilSettled(); // poll until Completed/Failed so UI updates
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed.");
+      toast.error("Upload Failed", err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setUploading(false);
     }
@@ -504,11 +504,11 @@ export default function InsuranceArAnalysisProcessingPage() {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(`${name} file downloaded.`);
+      toast.success("File Downloaded", `${name} file downloaded.`);
       callbacks?.onSuccess?.();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Download failed.";
-      toast.error(message);
+      toast.error("Download Failed", message);
       callbacks?.onError?.(message);
     } finally {
       setDownloading(false);
@@ -517,18 +517,18 @@ export default function InsuranceArAnalysisProcessingPage() {
 
   const createUploadHandler = (name: string, file: File | null, uploadFn: (f: File) => Promise<void>, setFile: (f: File | null) => void) => async () => {
     if (!file) {
-      toast.error("Please select a file.");
+      toast.error("Validation Error", "Please select a file.");
       return;
     }
     setUploading(true);
     try {
       await uploadFn(file);
       setFile(null);
-      toast.success("File uploaded. Resuming analysis…");
+      toast.success("Upload Successful", "File uploaded. Resuming analysis…");
       await refreshStatus();
       pollUntilSettled(); // poll until Completed/Failed so UI updates
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed.");
+      toast.error("Upload Failed", err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setUploading(false);
     }
@@ -538,11 +538,11 @@ export default function InsuranceArAnalysisProcessingPage() {
     setRetrying(true);
     try {
       await apiRef.current.startAnalysis(sessionId);
-      toast.success("Analysis restarted.");
+      toast.success("Analysis Restarted", "Analysis restarted.");
       await refreshStatus();
       pollUntilSettled();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Retry failed.");
+      toast.error("Retry Failed", err instanceof Error ? err.message : "Retry failed.");
     } finally {
       setRetrying(false);
     }
@@ -553,14 +553,14 @@ export default function InsuranceArAnalysisProcessingPage() {
     try {
       const s = await refreshStatus();
       if (s?.sessionStatus === "Completed") {
-        toast.success("Analysis completed.");
+        toast.success("Analysis Complete", "Analysis completed.");
       } else if (s?.sessionStatus === "Failed") {
-        toast.error("Analysis failed. Check the pipeline steps for details.");
+        toast.error("Analysis Failed", "Analysis failed. Check the pipeline steps for details.");
       } else {
-        toast.success("Status updated.");
+        toast.success("Status Updated", "Status updated.");
       }
     } catch {
-      toast.error("Could not refresh status.");
+      toast.error("Refresh Failed", "Could not refresh status.");
     } finally {
       setRefreshingStatus(false);
     }
@@ -604,11 +604,11 @@ export default function InsuranceArAnalysisProcessingPage() {
     setSkipping(true);
     try {
       await skipFn();
-      toast.success(`${name} skipped. Resuming analysis…`);
+      toast.success("Step Skipped", `${name} skipped. Resuming analysis…`);
       await refreshStatus();
       pollUntilSettled(); // poll until Completed/Failed so UI updates
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Skip failed.");
+      toast.error("Skip Failed", err instanceof Error ? err.message : "Skip failed.");
     } finally {
       setSkipping(false);
     }

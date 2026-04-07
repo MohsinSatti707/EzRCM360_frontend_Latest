@@ -133,11 +133,11 @@ export default function FacilitiesPage() {
       }
       setModalOpen(false);
       await reload();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Facility Updated" : "Facility Added", <>{editId ? "The" : "A new"} facility, <strong>{form.name}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
       setOverlayLoading(false);
@@ -148,14 +148,15 @@ export default function FacilitiesPage() {
     if (!deleteId) return;
     setDeleteLoading(true);
     setOverlayLoading(true);
+    const deletedName = data?.items.find((r) => r.id === deleteId)?.name ?? "";
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       await reload();
-      toast.success("Deleted successfully.");
+      toast.success("Facility Deleted", <>The facility, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -198,9 +199,9 @@ export default function FacilitiesPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       await reload();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Facilities Deleted", <>{selectedIds.size} facility(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -223,9 +224,9 @@ export default function FacilitiesPage() {
         isActive: isActiveValue === 1,
       });
       await reload();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status for <strong>{row.name}</strong> has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setStatusUpdatingId(null);
     }

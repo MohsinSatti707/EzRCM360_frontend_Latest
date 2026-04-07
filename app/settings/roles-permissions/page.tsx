@@ -300,11 +300,11 @@ export default function RolesPermissionsPage() {
       }
       setModalOpen(false);
       loadRoles();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Role Updated" : "Role Added", <>The role <strong>{form.name}</strong> has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -312,6 +312,7 @@ export default function RolesPermissionsPage() {
 
   const handleDeleteRole = async () => {
     if (!deleteId) return;
+    const deletedName = roles.find((r) => r.id === deleteId)?.name ?? "";
     setDeleteLoading(true);
     try {
       await rolesClient.delete(deleteId);
@@ -321,9 +322,9 @@ export default function RolesPermissionsPage() {
       }
       setDeleteId(null);
       loadRoles();
-      toast.success("Deleted successfully.");
+      toast.success("Role Deleted", <>The role <strong>{deletedName}</strong> has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -405,11 +406,11 @@ export default function RolesPermissionsPage() {
       }));
       await permissionsClient.updateByRoleId(selectedRole.id, { permissions: payload });
       setPermissionDirty(false);
-      toast.success("Permissions saved successfully.");
+      toast.success("Permissions Saved", "Role permissions have been saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to save permissions";
       setError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSavePermissionsLoading(false);
     }

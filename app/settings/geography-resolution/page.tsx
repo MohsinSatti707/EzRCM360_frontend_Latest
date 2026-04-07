@@ -169,11 +169,11 @@ export default function GeographyResolutionPage() {
       }
       setModalOpen(false);
       loadList();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Geo Mapping Updated" : "Geo Mapping Added", <>{editId ? "The" : "A new"} geo mapping, <strong>{form.mappingName}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -181,15 +181,16 @@ export default function GeographyResolutionPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    const deletedName = data?.items.find((r) => r.id === deleteId)?.mappingName;
     setDeleteLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       loadList();
-      toast.success("Deleted successfully.");
+      toast.success("Geo Mapping Deleted", <>The geo mapping, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -231,9 +232,9 @@ export default function GeographyResolutionPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Geo Mappings Deleted", <>{selectedIds.size} geo mapping(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -258,9 +259,9 @@ export default function GeographyResolutionPage() {
         active: activeValue === 1,
       });
       await loadList();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status of geo mapping, <strong>{row.mappingName}</strong>, has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setStatusUpdatingId(null);
     }
@@ -271,13 +272,13 @@ export default function GeographyResolutionPage() {
     try {
       const result = await api.importMappings(importCategory, file);
       if (result.success) {
-        toast.success(`Imported ${result.rowsImported} mappings.`);
+        toast.success("Mappings Imported", <>{result.rowsImported} mapping(s) have been imported successfully.</>);
         loadList();
       } else {
-        toast.error(result.errors?.join("; ") || "Import failed.");
+        toast.error("Import Failed", result.errors?.join("; ") || "Import failed.");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Import failed.");
+      toast.error("Import Failed", err instanceof Error ? err.message : "Import failed.");
     } finally {
       setImportLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -288,7 +289,7 @@ export default function GeographyResolutionPage() {
     try {
       await api.downloadTemplate(importCategory);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Download failed.");
+      toast.error("Download Failed", err instanceof Error ? err.message : "Download failed.");
     }
   };
 

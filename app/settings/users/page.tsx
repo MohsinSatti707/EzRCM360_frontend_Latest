@@ -358,11 +358,14 @@ export default function UsersPage() {
       }
       setModalOpen(false);
       loadList();
-      toast.success("Saved successfully.");
+      toast.success(
+        editId ? "User Updated" : "User Added",
+        <>{editId ? "The" : "A new"} user, <strong>{form.userName}</strong>, has been {editId ? "updated" : "added"} successfully.</>
+      );
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -372,13 +375,14 @@ export default function UsersPage() {
     if (!deleteId) return;
     setDeleteLoading(true);
     try {
+      const deletedName = data?.items.find((r) => r.id === deleteId)?.userName ?? "";
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       loadList();
-      toast.success("Deleted successfully.");
+      toast.success("User Deleted", <>The user, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -420,9 +424,9 @@ export default function UsersPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Users Deleted", <>{selectedIds.size} user(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -442,9 +446,9 @@ export default function UsersPage() {
         status: USER_STATUS_NAMES[newStatus] ?? "Pending",
       });
       loadList();
-      toast.success("Status updated successfully.");
+      toast.success("Status Updated", <>The status for <strong>{row.userName}</strong> has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Update failed.");
     } finally {
       setStatusUpdatingId(null);
     }

@@ -137,11 +137,11 @@ export default function NdcCodesPage() {
       }
       setModalOpen(false);
       loadList();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "NDC Code Updated" : "NDC Code Added", <>{editId ? "The" : "A new"} NDC code, <strong>{form.ndcCodeValue}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -162,9 +162,9 @@ export default function NdcCodesPage() {
       };
       await api.update(row.id, payload);
       loadList();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status for <strong>{row.ndcCodeValue}</strong> has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Status update failed.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Status update failed.");
     } finally {
       setStatusUpdatingId(null);
     }
@@ -173,14 +173,15 @@ export default function NdcCodesPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    const deletedName = data?.items.find((r) => r.id === deleteId)?.ndcCodeValue ?? "";
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       loadList();
-      toast.success("Deleted successfully.");
+      toast.success("NDC Code Deleted", <>The NDC code, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -222,9 +223,9 @@ export default function NdcCodesPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("NDC Codes Deleted", <>{selectedIds.size} NDC code(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);

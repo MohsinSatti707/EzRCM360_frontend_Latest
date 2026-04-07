@@ -231,11 +231,11 @@ export default function PlansPage() {
       }
       setModalOpen(false);
       await reload();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Plan Updated" : "Plan Added", <>{editId ? "The" : "A new"} plan, <strong>{form.planName}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
       setOverlayLoading(false);
@@ -248,11 +248,12 @@ export default function PlansPage() {
     setDeleteError(null);
     setOverlayLoading(true);
     try {
+      const deletedName = data?.items.find((r) => r.id === deleteId)?.planName ?? "";
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       await reload();
-      toast.success("Deleted successfully.");
+      toast.success("Plan Deleted", <>The plan, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : "Delete failed.");
     } finally {
@@ -297,9 +298,9 @@ export default function PlansPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       await reload();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Plans Deleted", <>{selectedIds.size} plan(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -333,9 +334,9 @@ export default function PlansPage() {
         status: statusValue,
       } as UpdatePlanRequest);
       await reload();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status for <strong>{row.planName}</strong> has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setStatusUpdatingId(null);
     }
@@ -367,11 +368,11 @@ export default function PlansPage() {
       await payersApi().create(createPayerForm);
       setCreatePayerOpen(false);
       reloadLookups();
-      toast.success("Payer created.");
+      toast.success("Payer Created", "A new payer has been created successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to create payer.";
       setCreatePayerError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setCreatePayerLoading(false);
     }

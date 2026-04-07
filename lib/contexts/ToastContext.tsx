@@ -6,15 +6,16 @@ export type ToastVariant = "success" | "error" | "warning";
 
 export interface ToastItem {
   id: string;
-  message: string;
+  title: string;
+  description?: React.ReactNode;
   variant: ToastVariant;
 }
 
 interface ToastContextValue {
   toasts: ToastItem[];
-  success: (message: string) => void;
-  error: (message: string) => void;
-  warning: (message: string) => void;
+  success: (title: string, description?: React.ReactNode) => void;
+  error: (title: string, description?: React.ReactNode) => void;
+  warning: (title: string, description?: React.ReactNode) => void;
   dismiss: (id: string) => void;
 }
 
@@ -43,24 +44,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addToast = useCallback(
-    (message: string, variant: ToastVariant) => {
-      // Deduplicate: skip if an identical message + variant toast already exists
+    (title: string, variant: ToastVariant, description?: React.ReactNode) => {
+      // Deduplicate: skip if an identical title + variant toast already exists
       setToasts((prev) => {
-        if (prev.some((t) => t.message === message && t.variant === variant)) return prev;
+        if (prev.some((t) => t.title === title && t.variant === variant)) return prev;
         const id = nextId();
-        const isLong = variant === "error" && message.length > LONG_MESSAGE_THRESHOLD;
+        const isLong = variant === "error" && title.length > LONG_MESSAGE_THRESHOLD;
         const delay = isLong ? LONG_AUTO_DISMISS_MS : AUTO_DISMISS_MS;
         const t = setTimeout(() => dismiss(id), delay);
         timeoutsRef.current.set(id, t);
-        return [...prev, { id, message, variant }];
+        return [...prev, { id, title, description, variant }];
       });
     },
     [dismiss]
   );
 
-  const success = useCallback((message: string) => addToast(message, "success"), [addToast]);
-  const error = useCallback((message: string) => addToast(message, "error"), [addToast]);
-  const warning = useCallback((message: string) => addToast(message, "warning"), [addToast]);
+  const success = useCallback((title: string, description?: React.ReactNode) => addToast(title, "success", description), [addToast]);
+  const error = useCallback((title: string, description?: React.ReactNode) => addToast(title, "error", description), [addToast]);
+  const warning = useCallback((title: string, description?: React.ReactNode) => addToast(title, "warning", description), [addToast]);
 
   const value: ToastContextValue = { toasts, success, error, warning, dismiss };
   return (

@@ -128,11 +128,11 @@ export default function EntityLocationsPage() {
       }
       setModalOpen(false);
       await reload();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Location Updated" : "Location Added", <>{editId ? "The" : "A new"} location, <strong>{form.locationName}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
       setOverlayLoading(false);
@@ -144,13 +144,14 @@ export default function EntityLocationsPage() {
     setDeleteLoading(true);
     setOverlayLoading(true);
     try {
+      const deletedName = data?.items.find((r) => r.id === deleteId)?.locationName ?? "";
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       await reload();
-      toast.success("Deleted successfully.");
+      toast.success("Location Deleted", <>The location, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -193,9 +194,9 @@ export default function EntityLocationsPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       await reload();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Locations Deleted", <>{selectedIds.size} location(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -215,9 +216,9 @@ export default function EntityLocationsPage() {
         isActive,
       });
       await reload();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status for <strong>{row.locationName}</strong> has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setStatusUpdatingId(null);
     }

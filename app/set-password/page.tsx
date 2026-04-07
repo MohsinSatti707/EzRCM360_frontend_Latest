@@ -58,16 +58,16 @@ function SetPasswordForm() {
       if (!res.ok) {
         const msg = message || "Failed to set password. The link may have expired.";
         setError(msg);
-        toast.error(msg);
+        toast.error("Validation Error", msg);
         return;
       }
-      toast.success(message || "Password set successfully. You can now sign in.");
+      toast.success("Password Set", message || "Password set successfully. You can now sign in.");
       router.push("/login?activated=1");
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
       setError(msg);
-      toast.error(msg);
+      toast.error("Error", msg);
     } finally {
       setLoading(false);
     }

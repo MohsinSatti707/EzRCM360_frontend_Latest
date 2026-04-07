@@ -185,11 +185,11 @@ export default function OrganizationPage() {
       const updated = await api.getCurrent();
       setProfile(updated);
       setEditOpen(false);
-      toast.success("Saved successfully.");
+      toast.success("Organization Updated", "Organization settings have been saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Update failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }

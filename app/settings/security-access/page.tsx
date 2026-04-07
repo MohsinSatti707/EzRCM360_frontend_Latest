@@ -172,11 +172,11 @@ export default function SecurityAccessPage() {
         dailySessionResetEnabled: form.dailySessionResetEnabled ?? false,
       });
       loadSettings();
-      toast.success("Security settings saved.");
+      toast.success("Settings Saved", "Security settings have been saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSaving(false);
     }
@@ -187,9 +187,9 @@ export default function SecurityAccessPage() {
     try {
       await api.disableUserMfa(userId);
       loadUsers();
-      toast.success("MFA disabled for user.");
+      toast.success("MFA Disabled", "MFA has been disabled for the user.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to disable MFA.");
+      toast.error("MFA Error", err instanceof Error ? err.message : "Failed to disable MFA.");
     } finally {
       setMfaDisablingId(null);
     }

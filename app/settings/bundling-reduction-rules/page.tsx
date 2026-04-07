@@ -146,11 +146,11 @@ export default function BundlingReductionRulesPage() {
       }
       setModalOpen(false);
       loadList();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Rule Updated" : "Rule Added", <>{editId ? "The" : "A new"} bundling reduction rule, <strong>{form.primaryCptCode}</strong>, has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -173,9 +173,9 @@ export default function BundlingReductionRulesPage() {
       };
       await api.update(row.id, payload);
       loadList();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status of bundling reduction rule, <strong>{row.primaryCptCode}</strong>, has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Status update failed.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Status update failed.");
     } finally {
       setStatusUpdatingId(null);
     }
@@ -183,15 +183,16 @@ export default function BundlingReductionRulesPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    const deletedName = data?.items.find((r) => r.id === deleteId)?.primaryCptCode;
     setDeleteLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       loadList();
-      toast.success("Deleted successfully.");
+      toast.success("Rule Deleted", <>The bundling reduction rule, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -233,9 +234,9 @@ export default function BundlingReductionRulesPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Rules Deleted", <>{selectedIds.size} bundling reduction rule(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);

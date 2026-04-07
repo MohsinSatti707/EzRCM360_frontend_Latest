@@ -99,13 +99,13 @@ export default function InsuranceArAnalysisReportPage() {
     apiRef.current
       .getReport(sessionId)
       .then(setReport)
-      .catch(() => toast.error("Failed to load report."))
+      .catch(() => toast.error("Load Failed", "Failed to load report."))
       .finally(() => setLoading(false));
   }, [sessionId, isDummy]);
 
   const handleExport = async () => {
     if (isDummy) {
-      toast.success("Export is not available for the dummy report.");
+      toast.success("Export Unavailable", "Export is not available for the dummy report.");
       return;
     }
     setExporting(true);
@@ -117,9 +117,9 @@ export default function InsuranceArAnalysisReportPage() {
       a.download = "AR_Analysis_Report.xlsx";
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Report exported.");
+      toast.success("Report Exported", "Report exported.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Export failed.");
+      toast.error("Export Failed", err instanceof Error ? err.message : "Export failed.");
     } finally {
       setExporting(false);
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AUTH_TOKEN_KEY,
@@ -11,6 +11,7 @@ import {
   AUTH_COOKIE,
 } from "@/lib/env";
 import { getApiUrl } from "@/lib/api";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 /**
  * Logout button that clears auth state and redirects to login.
@@ -18,9 +19,11 @@ import { getApiUrl } from "@/lib/api";
  */
 export function LogoutButton({ className }: { className?: string }) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogout = async (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleLogout = async () => {
+    setLoading(true);
     const token = typeof window !== "undefined" ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
     if (token) {
       try {
@@ -43,17 +46,33 @@ export function LogoutButton({ className }: { className?: string }) {
       sessionStorage.removeItem(MFA_VERIFIED_KEY);
       document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0`;
     }
+    setLoading(false);
     router.replace("/login");
     router.refresh();
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleLogout}
-      className={className}
-    >
-      Logout
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={className}
+      >
+        Logout
+      </button>
+
+      <ConfirmDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onConfirm={handleLogout}
+        title="Logout"
+        message="Are you sure you want to logout of this device?"
+        confirmLabel="Yes, Logout"
+        cancelLabel="No, Stay Here"
+        variant="primary"
+        loading={loading}
+        icon={{ src: "/icons/svg/logout.svg", alt: "Logout" }}
+      />
+    </>
   );
 }

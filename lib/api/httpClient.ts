@@ -39,8 +39,11 @@ export class HttpClient implements IHttpClient {
         // Handle array-format validation errors: [{"errorMessage":"..."}]
         if (Array.isArray(parsed) && parsed.length > 0) {
           const msgs = parsed
-            .map((e: { errorMessage?: string; ErrorMessage?: string }) =>
-              e.errorMessage ?? e.ErrorMessage
+            .map((e: unknown) =>
+              typeof e === "string"
+                ? e
+                : (e as { errorMessage?: string; ErrorMessage?: string })?.errorMessage ??
+                  (e as { errorMessage?: string; ErrorMessage?: string })?.ErrorMessage
             )
             .filter(Boolean);
           message = msgs.length > 0 ? msgs.join(" ") : text;

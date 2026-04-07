@@ -170,9 +170,9 @@ export default function FeeSchedulesPage() {
       };
       await api.update(row.id, payload);
       loadList();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status of fee schedule, <strong>{row.scheduleCode}</strong>, has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Status update failed.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Status update failed.");
     } finally {
       setStatusUpdatingId(null);
     }
@@ -245,19 +245,19 @@ export default function FeeSchedulesPage() {
         await api.update(editId, form);
         setModalOpen(false);
         loadList();
-        toast.success("Updated successfully.");
+        toast.success("Fee Schedule Updated", <>The fee schedule, <strong>{form.scheduleCode}</strong>, has been updated successfully.</>);
       } else {
         const newId = await api.create(form);
         setCreatedScheduleIds([newId]);
         setCreatedScheduleId(newId);
         loadList();
-        toast.success("Fee schedule created. You can now import lines.");
+        toast.success("Fee Schedule Added", <>A new fee schedule, <strong>{form.scheduleCode}</strong>, has been added successfully. You can now import lines.</>);
         setWizardStep(3);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -265,15 +265,16 @@ export default function FeeSchedulesPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    const deletedName = data?.items.find((r) => r.id === deleteId)?.scheduleCode;
     setDeleteLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       loadList();
-      toast.success("Deleted successfully.");
+      toast.success("Fee Schedule Deleted", <>The fee schedule, <strong>{deletedName}</strong>, has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -315,9 +316,9 @@ export default function FeeSchedulesPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Fee Schedules Deleted", <>{selectedIds.size} fee schedule(s) have been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);
@@ -337,7 +338,7 @@ export default function FeeSchedulesPage() {
     setLinesLoading(true);
     api.getLines(id, { pageNumber: pg, pageSize: 20, search: search || undefined })
       .then(setLinesData)
-      .catch(() => toast.error("Failed to load lines."))
+      .catch(() => toast.error("Load Failed", "Failed to load lines."))
       .finally(() => setLinesLoading(false));
   };
 
@@ -347,7 +348,7 @@ export default function FeeSchedulesPage() {
     try {
       const result = await api.importLines(scheduleId, file);
       if (result.success) {
-        toast.success(`Imported ${result.rowsImported} lines.`);
+        toast.success("Lines Imported", <>{result.rowsImported} line(s) have been imported successfully.</>);
         if (isWizard) {
           loadWizardLines(scheduleId);
         } else {
@@ -356,10 +357,10 @@ export default function FeeSchedulesPage() {
           setLinesPage(1);
         }
       } else {
-        toast.error(result.errors?.join("; ") || "Import failed.");
+        toast.error("Import Failed", result.errors?.join("; ") || "Import failed.");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Import failed.");
+      toast.error("Import Failed", err instanceof Error ? err.message : "Import failed.");
     } finally {
       setLoading(false);
       if (isWizard && wizardFileRef.current) wizardFileRef.current.value = "";
@@ -393,21 +394,21 @@ export default function FeeSchedulesPage() {
   };
   const handleLineSave = async () => {
     if (!linesSchedule) return;
-    if (!lineForm.cptHcpcs.trim()) { toast.error("CPT/HCPCS is required."); return; }
+    if (!lineForm.cptHcpcs.trim()) { toast.error("Validation Error", "CPT/HCPCS is required."); return; }
     setLineSubmitLoading(true);
     try {
       const payload = { ...lineForm, zip: lineForm.zip || null, modifier: lineForm.modifier || null };
       if (lineEditId) {
         await api.updateLine(lineEditId, payload);
-        toast.success("Line updated.");
+        toast.success("Fee Schedule Line Updated", <>The fee schedule line, <strong>{lineForm.cptHcpcs}</strong>, has been updated successfully.</>);
       } else {
         await api.createLine(linesSchedule.id, payload);
-        toast.success("Line created.");
+        toast.success("Fee Schedule Line Added", <>A new fee schedule line, <strong>{lineForm.cptHcpcs}</strong>, has been added successfully.</>);
       }
       setLineModalOpen(false);
       loadLines(linesSchedule.id, linesPage, linesSearch);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Save failed.");
+      toast.error("Save Failed", err instanceof Error ? err.message : "Save failed.");
     } finally {
       setLineSubmitLoading(false);
     }
@@ -417,11 +418,11 @@ export default function FeeSchedulesPage() {
     setLineDeleteLoading(true);
     try {
       await api.deleteLine(lineDeleteId);
-      toast.success("Line deleted.");
+      toast.success("Fee Schedule Line Deleted", <>The fee schedule line has been deleted successfully.</>);
       setLineDeleteId(null);
       loadLines(linesSchedule.id, linesPage, linesSearch);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setLineDeleteLoading(false);
     }
@@ -432,12 +433,12 @@ export default function FeeSchedulesPage() {
     setLineBulkDeleteLoading(true);
     try {
       await Promise.all(Array.from(lineSelectedIds).map((id) => api.deleteLine(id)));
-      toast.success(`Deleted ${lineSelectedIds.size} line(s).`);
+      toast.success("Fee Schedule Lines Deleted", <>{lineSelectedIds.size} fee schedule line(s) have been deleted successfully.</>);
       setLineSelectedIds(new Set());
       setLineBulkDeleteConfirm(false);
       loadLines(linesSchedule.id, linesPage, linesSearch);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setLineBulkDeleteLoading(false);
     }
@@ -464,7 +465,7 @@ export default function FeeSchedulesPage() {
     try {
       await api.downloadLinesTemplate(resolveCategoryStr(category));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Download failed.");
+      toast.error("Download Failed", err instanceof Error ? err.message : "Download failed.");
     }
   };
 

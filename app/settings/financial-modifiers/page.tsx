@@ -133,11 +133,11 @@ export default function FinancialModifiersPage() {
       }
       setModalOpen(false);
       loadList();
-      toast.success("Saved successfully.");
+      toast.success(editId ? "Financial Modifier Updated" : "Financial Modifier Added", <>The financial modifier <strong>{form.modifierCode}</strong> has been {editId ? "updated" : "added"} successfully.</>);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
-      toast.error(msg);
+      toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
     }
@@ -157,9 +157,9 @@ export default function FinancialModifiersPage() {
       };
       await api.update(row.id, payload);
       loadList();
-      toast.success("Status updated.");
+      toast.success("Status Updated", <>The status for <strong>{row.modifierCode}</strong> has been updated successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Status update failed.");
+      toast.error("Update Failed", err instanceof Error ? err.message : "Status update failed.");
     } finally {
       setStatusUpdatingId(null);
     }
@@ -167,15 +167,16 @@ export default function FinancialModifiersPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    const deletedName = data?.items.find((r) => r.id === deleteId)?.modifierCode ?? "";
     setDeleteLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
       setDeleteId(null);
       loadList();
-      toast.success("Deleted successfully.");
+      toast.success("Financial Modifier Deleted", <>The financial modifier <strong>{deletedName}</strong> has been deleted successfully.</>);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed.");
+      toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
     }
@@ -217,9 +218,9 @@ export default function FinancialModifiersPage() {
       setBulkDeleteConfirm(false);
       setSelectedIds(new Set());
       loadList();
-      toast.success(`${selectedIds.size} record(s) deleted successfully.`);
+      toast.success("Financial Modifiers Deleted", `${selectedIds.size} financial modifier(s) have been deleted successfully.`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk delete failed.");
+      toast.error("Bulk Delete Failed", err instanceof Error ? err.message : "Bulk delete failed.");
     } finally {
       setDeleteLoading(false);
       setOverlayLoading(false);

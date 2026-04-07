@@ -27,7 +27,7 @@ function LoginForm() {
   useEffect(() => {
     if (searchParams.get("activated") === "1" && !hasShownActivatedToast.current) {
       hasShownActivatedToast.current = true;
-      toast.success("Password Set Successfully. Your account has been activated successfully!");
+      toast.success("Password Set", "Your account has been activated successfully!");
       router.replace("/login");
     }
   }, [searchParams, toast, router]);
@@ -68,7 +68,7 @@ function LoginForm() {
         sessionStorage.setItem(MFA_SETUP_USER_ID_KEY, userId);
         sessionStorage.setItem("mfa_redirect", redirectTo);
         await permissions?.reload();
-        toast.success("Please set up Multi-Factor Authentication.");
+        toast.success("MFA Required", "Please set up Multi-Factor Authentication.");
         router.push("/authentication/setup");
         router.refresh();
         return;
@@ -80,13 +80,13 @@ function LoginForm() {
         document.cookie = `${AUTH_COOKIE}=1; path=/; max-age=86400; SameSite=Lax`;
         await permissions?.reload();
       }
-      toast.success("Signed in successfully.");
+      toast.success("Signed In", "You have signed in successfully.");
       router.push(redirectTo.startsWith("/") ? redirectTo : "/settings");
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Login failed";
       setError(msg);
-      toast.error(msg);
+      toast.error("Sign In Failed", msg);
     } finally {
       setLoading(false);
     }
