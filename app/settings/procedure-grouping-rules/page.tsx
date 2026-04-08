@@ -133,6 +133,7 @@ export default function ProcedureGroupingRulesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form);
@@ -148,6 +149,7 @@ export default function ProcedureGroupingRulesPage() {
       toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -178,6 +180,7 @@ export default function ProcedureGroupingRulesPage() {
     if (!deleteId) return;
     const deletedName = data?.items.find((r) => r.id === deleteId)?.groupName;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
@@ -188,6 +191,7 @@ export default function ProcedureGroupingRulesPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 

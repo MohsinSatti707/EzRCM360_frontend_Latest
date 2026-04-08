@@ -129,6 +129,7 @@ export default function NdcCodesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form);
@@ -144,6 +145,7 @@ export default function NdcCodesPage() {
       toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -173,6 +175,7 @@ export default function NdcCodesPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     const deletedName = data?.items.find((r) => r.id === deleteId)?.ndcCodeValue ?? "";
     try {
       await api.delete(deleteId);
@@ -184,6 +187,7 @@ export default function NdcCodesPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 

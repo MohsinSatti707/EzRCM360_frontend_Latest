@@ -125,6 +125,7 @@ export default function FinancialModifiersPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form);
@@ -140,6 +141,7 @@ export default function FinancialModifiersPage() {
       toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -169,6 +171,7 @@ export default function FinancialModifiersPage() {
     if (!deleteId) return;
     const deletedName = data?.items.find((r) => r.id === deleteId)?.modifierCode ?? "";
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
@@ -179,6 +182,7 @@ export default function FinancialModifiersPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 

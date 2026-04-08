@@ -135,6 +135,7 @@ export default function CptHcpcsCodesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form);
@@ -150,6 +151,7 @@ export default function CptHcpcsCodesPage() {
       toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -180,6 +182,7 @@ export default function CptHcpcsCodesPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     const deletedName = data?.items.find((r) => r.id === deleteId)?.code ?? "";
     try {
       await api.delete(deleteId);
@@ -191,6 +194,7 @@ export default function CptHcpcsCodesPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 

@@ -143,6 +143,7 @@ export default function IcdCodesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form);
@@ -158,6 +159,7 @@ export default function IcdCodesPage() {
       toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -187,6 +189,7 @@ export default function IcdCodesPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     const deletedName = data?.items.find((r) => r.id === deleteId)?.code ?? "";
     try {
       await api.delete(deleteId);
@@ -198,6 +201,7 @@ export default function IcdCodesPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 

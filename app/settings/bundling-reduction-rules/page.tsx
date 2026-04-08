@@ -138,6 +138,7 @@ export default function BundlingReductionRulesPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form);
@@ -153,6 +154,7 @@ export default function BundlingReductionRulesPage() {
       toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -185,6 +187,7 @@ export default function BundlingReductionRulesPage() {
     if (!deleteId) return;
     const deletedName = data?.items.find((r) => r.id === deleteId)?.primaryCptCode;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
@@ -195,6 +198,7 @@ export default function BundlingReductionRulesPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 

@@ -240,6 +240,7 @@ export default function FeeSchedulesPage() {
   const handleSubmit = async () => {
     setFormError(null);
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form);
@@ -260,6 +261,7 @@ export default function FeeSchedulesPage() {
       toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   };
 
@@ -267,6 +269,7 @@ export default function FeeSchedulesPage() {
     if (!deleteId) return;
     const deletedName = data?.items.find((r) => r.id === deleteId)?.scheduleCode;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     try {
       await api.delete(deleteId);
       setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleteId); return next; });
@@ -277,6 +280,7 @@ export default function FeeSchedulesPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 

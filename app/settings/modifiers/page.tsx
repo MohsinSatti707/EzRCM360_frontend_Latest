@@ -120,6 +120,7 @@ export default function ModifiersPage() {
       return;
     }
     setSubmitLoading(true);
+    setOverlayLoading(true);
     try {
       if (editId) {
         await api.update(editId, form);
@@ -135,6 +136,7 @@ export default function ModifiersPage() {
       toast.error("Save Failed", msg);
     } finally {
       setSubmitLoading(false);
+      setOverlayLoading(false);
     }
   }, [editId, form, api, reload]);
 
@@ -166,6 +168,7 @@ export default function ModifiersPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
+    setOverlayLoading(true);
     const deletedName = data?.items.find((r) => r.id === deleteId)?.modifierCode ?? "";
     try {
       await api.delete(deleteId);
@@ -177,6 +180,7 @@ export default function ModifiersPage() {
       toast.error("Delete Failed", err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setDeleteLoading(false);
+      setOverlayLoading(false);
     }
   };
 
