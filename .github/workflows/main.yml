@@ -1,0 +1,164 @@
+# This workflow is designed to be reusable across multiple repositories
+# (DotNet APIs and Vue/Node Frontends) by relying on repository variables
+# for project-specific configurations.
+#
+# Required Repository Variables:
+#   API_PROJECT_FILE          - Path to the .csproj file (e.g., "src/Api/Api.csproj")
+#   DOTNET_VERSION            - .NET SDK version (e.g., "10.0.x" or "8.0.x")
+#   DEPLOY_TARGET_PATH_STAGING  - Server path for staging deployment
+#   DEPLOY_TARGET_PATH_PROD     - Server path for production deployment
+#   STAGING_APPSETTINGS_PATH    - Path to staging appsettings.json on server
+#   PROD_APPSETTINGS_PATH       - Path to production appsettings.json on server
+#   API_SUPERVISOR_BASE         - Supervisor service name for API restart
+#   FRONTEND_BUILD_COMMAND      - (Frontend only) Build command (e.g., "npm ci && npm run build")
+#   FRONTEND_BUILD_DIR          - (Frontend only) Build output directory (e.g., ".output/")
+#   IsManualTriggerDisabled     - Set to "true" to disable auto-deploy on push
+#
+# Required Repository Secrets:
+#   DEPLOY_HOST               - Deployment server hostname
+#   DEPLOY_USER               - Deployment server SSH user
+
+name: 🔄 Generic Deployment (Auto & Manual)
+
+on:
+  # 1. Automatic trigger on push to master/main
+  push:
+    branches:
+      - master
+      - main
+
+  # 2. Manual trigger with inputs
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select the deployment target environment'
+        required: true
+        type: choice
+        default: 'staging'
+        options:
+        - staging
+        - production
+      app_type:
+        description: 'Select the application type to deploy'
+        required: true
+        type: choice
+        default: 'api'
+        options:
+        - api
+        - frontend
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  # ==================================
+  # JOB 1: APPROVAL (Production only)
+  # ==================================
+  approve_prod:
+    if: github.event.inputs.environment == 'production'
+    runs-on: [self-hosted, "${{ github.event.inputs.environment }}"]
+    steps:
+      - name: Wait for Production Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: aahmadSignup, Muneeb-juttt, Mohsin-246
+          minimum-approvals: 1
+          issue-title: "🚀 Approve Production Deployment: ${{ github.event.inputs.app_type || 'api' }}"
+          issue-body: "A deployment to **production** has been requested. Please comment 'approve' or 'deny' to proceed."
+
+  # ==================================
+  # JOB 2: DEPLOYMENT
+  # ==================================
+  deploy:
+    needs: [approve_prod]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' || vars.IsManualTriggerDisabled != 'true') &&
+      (needs.approve_prod.result == 'success' || github.event.inputs.environment == 'staging' || github.event_name == 'push')
+
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    runs-on: [self-hosted, "${{ github.event.inputs.environment || 'staging' }}"]
+
+    env:
+      HOST: ${{ secrets.DEPLOY_HOST }}
+      USER: ${{ secrets.DEPLOY_USER }}
+      CURRENT_ENV: ${{ github.event.inputs.environment || 'staging' }}
+      APP_TYPE: ${{ github.event.inputs.app_type || 'api' }}
+      SERVER_PATH: ${{ (github.event.inputs.environment || 'staging') == 'production' && vars.DEPLOY_TARGET_PATH_PROD || vars.DEPLOY_TARGET_PATH_STAGING }}
+      APPSETTINGS_SOURCE: ${{ (github.event.inputs.environment || 'staging') == 'production' && vars.PROD_APPSETTINGS_PATH || vars.STAGING_APPSETTINGS_PATH }}
+
+    steps:
+    - name: ⬇️ Checkout Code
+      uses: actions/checkout@v4
+
+    # ==================================
+    # 1. CI: CONDITIONAL BUILD STEPS
+    # ==================================
+
+    # --- .NET API BUILD ---
+    - name: 🛠️ Setup .NET SDK
+      if: env.APP_TYPE == 'api'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ vars.DOTNET_VERSION || '8.0.x' }}
+
+    - name: 🏗️ Restore and Publish .NET Artifacts
+      if: env.APP_TYPE == 'api'
+      run: |
+        dotnet restore ${{ vars.API_PROJECT_FILE }}
+        dotnet publish ${{ vars.API_PROJECT_FILE }} -c Release -o ./publish --no-restore
+
+    # --- VUE/NODE FRONTEND BUILD ---
+    - name: 🛠️ Setup Node.js
+      if: env.APP_TYPE == 'frontend'
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ vars.NODE_VERSION || '20' }}
+
+    - name: 🏗️ Build Frontend Assets
+      if: env.APP_TYPE == 'frontend'
+      run: ${{ vars.FRONTEND_BUILD_COMMAND }}
+
+    # ==================================
+    # 2. CD: DEPLOYMENT STEPS
+    # ==================================
+
+    - name: 💾 Backup Current Deployment
+      run: |
+        DEPLOY_FOLDER=$(basename ${{ env.SERVER_PATH }})
+        BACKUP_DIR="/home/${{ env.USER }}/deployment_backups"
+        BACKUP_PREFIX="${DEPLOY_FOLDER}-"
+
+        mkdir -p ${BACKUP_DIR}
+        echo 'Creating new local backup...'
+        /usr/bin/zip -r ${BACKUP_DIR}/${BACKUP_PREFIX}$(date +%Y%m%d%H%M%S).zip ${{ env.SERVER_PATH }} > /dev/null
+
+        echo 'Cleaning up old backups...'
+        find ${BACKUP_DIR} -maxdepth 1 -name "${BACKUP_PREFIX}*.zip" -type f | \
+          sort -r | tail -n +2 | xargs -r rm
+
+    - name: 📁 Transfer Files
+      run: |
+        BUILD_SOURCE=${{ env.APP_TYPE == 'api' && './publish/' || vars.FRONTEND_BUILD_DIR }}
+        rsync -avz --no-perms --no-times --delete $BUILD_SOURCE ${{ env.SERVER_PATH }}
+        echo 'File transfer complete.'
+
+    # --- API-ONLY POST-DEPLOY ---
+    - name: ⚙️ Apply Environment appsettings.json
+      if: env.APP_TYPE == 'api'
+      run: |
+        if [ -f "${{ env.APPSETTINGS_SOURCE }}" ]; then
+          cp "${{ env.APPSETTINGS_SOURCE }}" "${{ env.SERVER_PATH }}/appsettings.json"
+          echo "Configuration successfully applied."
+        else
+          echo "Error: Source appsettings file not found at ${{ env.APPSETTINGS_SOURCE }}"
+          exit 1
+        fi
+
+    - name: ♻️ Restart Service
+      if: env.APP_TYPE == 'api'
+      run: |
+        echo "Restarting service: ${{ vars.API_SUPERVISOR_BASE }}"
+        sudo /usr/bin/supervisorctl restart ${{ vars.API_SUPERVISOR_BASE }}
