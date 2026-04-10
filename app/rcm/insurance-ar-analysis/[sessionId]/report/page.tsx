@@ -252,47 +252,48 @@ const formattedSession = formatSessionDetails(
         </Card>
 
         <section>
-          <h2 className="mb-3 text-[17px] font-['Aileron'] font-bold text-foreground">Analysis Report</h2>
-          <div className="grid gap-5 sm:grid-cols-3">
-            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
-              <div className="text-[32px] font-bold font-['Aileron'] text-foreground mb-1">
+          <h2 className="mb-3 text-[17px] font-['Aileron'] font-bold text-foreground">Analysis Summary</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="bg-[#F8FAFC] rounded-lg p-5 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
                 {totalClaimsAnalyzed.toLocaleString()}
               </div>
-              <div className="text-[15px] font-['Aileron'] text-muted-foreground">Total Claims Analyzed</div>
+              <div className="text-[13px] font-['Aileron'] text-muted-foreground">Total Claims Analyzed</div>
             </div>
-            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
-              <div className="text-[32px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
+            <div className="bg-[#F8FAFC] rounded-lg p-5 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
                 {formatCurrency(totalUnderpayment)}
               </div>
-              <div className="text-[15px] font-['Aileron'] text-muted-foreground">Total Underpayment</div>
+              <div className="text-[13px] font-['Aileron'] text-muted-foreground">Total Underpayment</div>
+            </div>
+            <div className="bg-[#F8FAFC] rounded-lg p-5 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-[#16A34A] mb-1">
+                {formatCurrency(riskAdjustedRecovery)}
+              </div>
+              <div className="text-[13px] font-['Aileron'] text-muted-foreground">Risk-Adjusted Recovery</div>
             </div>
           </div>
 
           {/* Claim-Level Underpayment Aggregation (Section 7.1.3) */}
-          <div className="grid gap-5 sm:grid-cols-3 mt-5">
-            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
-              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+          <h2 className="mt-6 mb-3 text-[17px] font-['Aileron'] font-bold text-foreground">Underpayment Breakdown</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="bg-[#F8FAFC] rounded-lg p-5 text-center border border-border">
+              <div className="text-[24px] font-bold font-['Aileron'] text-foreground mb-1">
                 {formatCurrency(report.totalUnderpaymentFs ?? 0)}
               </div>
-              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (FS)</div>
+              <div className="text-[13px] font-['Aileron'] text-muted-foreground">Underpayment (Fee Schedule)</div>
             </div>
-            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
-              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+            <div className="bg-[#F8FAFC] rounded-lg p-5 text-center border border-border">
+              <div className="text-[24px] font-bold font-['Aileron'] text-foreground mb-1">
                 {formatCurrency(report.totalUnderpaymentAllowed ?? 0)}
               </div>
-              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (Allowed)</div>
+              <div className="text-[13px] font-['Aileron'] text-muted-foreground">Underpayment (Allowed)</div>
             </div>
-            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
-              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+            <div className="bg-[#F8FAFC] rounded-lg p-5 text-center border border-border">
+              <div className="text-[24px] font-bold font-['Aileron'] text-foreground mb-1">
                 {formatCurrency(report.totalUnderpaymentOon ?? 0)}
               </div>
-              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (OON)</div>
-            </div>
-            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
-              <div className="text-[32px] font-bold font-['Aileron'] text-[#16A34A] mb-1">
-                {formatCurrency(riskAdjustedRecovery)}
-              </div>
-              <div className="text-[15px] font-['Aileron'] text-muted-foreground">Risk-Adjusted Recovery</div>
+              <div className="text-[13px] font-['Aileron'] text-muted-foreground">Underpayment (OON)</div>
             </div>
           </div>
           {(report.underbilledClaimCount > 0 || report.totalUnderbilledAmount > 0) && (
