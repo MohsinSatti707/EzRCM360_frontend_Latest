@@ -135,6 +135,7 @@ export default function CategoryFeeSchedulesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [zipRangeMode, setZipRangeMode] = useState<"single" | "dual">("single");
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreateFeeScheduleCommand>(defaultForm);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -281,10 +282,12 @@ export default function CategoryFeeSchedulesPage() {
 
   const openEdit = (row: FeeScheduleDto) => {
     setEditId(row.id);
-    setWizardStep(1); // Edit goes directly to fields step (step 1 in 2-step wizard)
+    setWizardStep(1);
     setFormError(null);
     setModalOpen(true);
     api.getById(row.id).then((detail: FeeScheduleDetailDto) => {
+      // Set zip range mode for UCR based on existing geoCode
+      if (isUCR) setZipRangeMode((detail.geoCode ?? "").includes("-") ? "dual" : "single");
       setForm({
         scheduleCode: detail.scheduleCode ?? "",
         category: categoryValue, // always locked
@@ -915,15 +918,15 @@ export default function CategoryFeeSchedulesPage() {
                   <div>
                     <label className="mb-1 block text-sm font-medium text-foreground">Geography Code</label>
                     <select
-                      value={(form.geoCode ?? "").includes("-") ? "DualZipRange" : "SingleZipRange"}
-                      onChange={(e) => setForm((f) => ({ ...f, geoCode: "" }))}
+                      value={zipRangeMode}
+                      onChange={(e) => { setZipRangeMode(e.target.value as "single" | "dual"); setForm((f) => ({ ...f, geoCode: "" })); }}
                       className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                     >
-                      <option value="SingleZipRange">Single ZIP Range</option>
-                      <option value="DualZipRange">Dual ZIP Range</option>
+                      <option value="single">Single ZIP Range</option>
+                      <option value="dual">Dual ZIP Range</option>
                     </select>
                   </div>
-                  {!(form.geoCode ?? "").includes("-") ? (
+                  {zipRangeMode === "single" ? (
                     <div>
                       <label className="mb-1 block text-sm font-medium text-foreground">ZIP Code</label>
                       <input type="text" placeholder="e.g., 10001" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
