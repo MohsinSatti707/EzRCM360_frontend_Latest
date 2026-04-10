@@ -551,15 +551,17 @@ export default function InsuranceArAnalysisUploadPage() {
               </div>
             </div>
           </div>
-            {/* Dry Run Results */}
+            {/* Dry Run — hidden for now
             {dryRunResult && (
               <DryRunResults
                 result={dryRunResult}
                 onDismiss={() => setDryRunResult(null)}
               />
             )}
+            */}
 
             <div className="flex flex-wrap gap-3 pt-4">
+              {/* Dry Run button — hidden for now
               <Button
                 onClick={handleDryRun}
                 disabled={dryRunLoading || submitLoading}
@@ -569,6 +571,7 @@ export default function InsuranceArAnalysisUploadPage() {
                 {dryRunLoading ? "Checking…" : "Start Dry Run"}
                 <Search className="h-4 w-4" />
               </Button>
+              */}
               <Button
                 onClick={handleStartAnalysis}
                 disabled={submitLoading || dryRunLoading}
