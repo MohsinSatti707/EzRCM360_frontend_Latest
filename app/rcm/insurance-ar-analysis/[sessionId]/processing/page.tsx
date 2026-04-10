@@ -898,6 +898,8 @@ export default function InsuranceArAnalysisProcessingPage() {
                   uploading={uploading}
                   downloadError={payerDownloadError}
                   showRequiredColumns
+                  onSkip={isPayerStepCurrent ? handleSkipPayer : undefined}
+                  skipping={skippingPayer}
                 />
               </div>
             )}
@@ -919,6 +921,8 @@ export default function InsuranceArAnalysisProcessingPage() {
                   uploading={uploading}
                   downloadError={planDownloadError}
                   showRequiredColumns
+                  onSkip={isPlanStepCurrent ? handleSkipPlan : undefined}
+                  skipping={skippingPlan}
                 />
               </div>
             )}
@@ -939,6 +943,8 @@ export default function InsuranceArAnalysisProcessingPage() {
                   disabled={downloading}
                   uploading={uploading}
                   downloadError={providerDownloadError}
+                  onSkip={isProviderStepCurrent ? handleSkipProvider : undefined}
+                  skipping={skippingProvider}
                 />
               </div>
             )}
