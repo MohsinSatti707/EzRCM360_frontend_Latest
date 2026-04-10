@@ -48,10 +48,10 @@ const CATEGORY_CONFIG: Record<string, {
   showAdoptFs?: boolean;
   showFallbackCategory?: boolean;
 }> = {
-  medicare: { value: 0, label: "Medicare", templateType: "Medicare", showAdoptFs: false, showFallbackCategory: false },
+  medicare: { value: 0, label: "Medicare", templateType: "Medicare", lockedGeoType: 1, showAdoptFs: false, showFallbackCategory: false },
   ucr: { value: 1, label: "UCR", templateType: "UCR", lockedGeoType: 2, lockedBillingType: 0, showAdoptFs: false, showFallbackCategory: false },
-  mva: { value: 2, label: "MVA", templateType: "MVA", showAdoptFs: true, showFallbackCategory: true },
-  wc: { value: 3, label: "WC", templateType: "WC", showAdoptFs: true, showFallbackCategory: true },
+  mva: { value: 2, label: "MVA", templateType: "MVA", lockedGeoType: 1, showAdoptFs: true, showFallbackCategory: true },
+  wc: { value: 3, label: "WC", templateType: "WC", lockedGeoType: 1, showAdoptFs: true, showFallbackCategory: true },
 };
 
 const STATUS_OPTIONS = [{ value: 0, name: "Active" }, { value: 1, name: "Inactive" }];
@@ -701,6 +701,7 @@ export default function CategoryFeeSchedulesPage() {
               <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
             </Button>
           )}
+          {/* Bulk import commented out — category-specific import TBD
           {canCreate && (
             <BulkImportActions
               apiBase="/api/FeeSchedules"
@@ -708,6 +709,7 @@ export default function CategoryFeeSchedulesPage() {
               onImportSuccess={loadList}
             />
           )}
+          */}
           {canCreate && (
             <Button
               onClick={openCreate}
@@ -747,14 +749,12 @@ export default function CategoryFeeSchedulesPage() {
                     </TableHeaderCell>
                   )}
                   <TableHeaderCell className="w-[150px] min-w-[150px]">Fee Schedule ID</TableHeaderCell>
-                  <TableHeaderCell className="w-[90px] min-w-[90px]">State</TableHeaderCell>
+                  <TableHeaderCell className="w-[120px] min-w-[120px]">State</TableHeaderCell>
                   <TableHeaderCell className="w-[130px] min-w-[130px]">Geography Type</TableHeaderCell>
-                  <TableHeaderCell className="w-[130px] min-w-[130px]">{isUCR ? "Zip Range Code" : "Geography Code"}</TableHeaderCell>
+                  <TableHeaderCell className="w-[120px] min-w-[120px]">{isUCR ? "Zip Range Code" : "Geography Code"}</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Geography Name</TableHeaderCell>
                   <TableHeaderCell className="w-[120px] min-w-[120px]">Billing Type</TableHeaderCell>
                   <TableHeaderCell className="w-[110px] min-w-[110px]">Effective Year</TableHeaderCell>
-                  <TableHeaderCell className="w-[140px] min-w-[140px]">Calculation Model</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">Status</TableHeaderCell>
-                  <TableHeaderCell className="w-[100px] min-w-[100px]">CPT Fees</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
                   )}
@@ -776,8 +776,8 @@ export default function CategoryFeeSchedulesPage() {
                         <CellTooltip text={row.scheduleCode ?? "\u2014"} />
                       </div>
                     </TableCell>
-                    <TableCell className="w-[90px] min-w-[90px]">
-                      <div className="max-w-[70px] truncate">
+                    <TableCell className="w-[120px] min-w-[120px]">
+                      <div className="max-w-[100px] truncate">
                         <CellTooltip text={row.state ?? "\u2014"} />
                       </div>
                     </TableCell>
@@ -786,9 +786,14 @@ export default function CategoryFeeSchedulesPage() {
                         <CellTooltip text={geoTypeLabelFn(row.geoType)} />
                       </div>
                     </TableCell>
-                    <TableCell className="w-[130px] min-w-[130px]">
-                      <div className="max-w-[110px] truncate">
+                    <TableCell className="w-[120px] min-w-[120px]">
+                      <div className="max-w-[100px] truncate">
                         <CellTooltip text={row.geoCode ?? "\u2014"} />
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[140px] min-w-[140px]">
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={row.geoName ?? "\u2014"} />
                       </div>
                     </TableCell>
                     <TableCell className="w-[120px] min-w-[120px]">
@@ -797,40 +802,9 @@ export default function CategoryFeeSchedulesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="w-[110px] min-w-[110px]">
-                      {(() => {
-                        const text = `${row.years?.join(", ") ?? ""}${row.quarters?.length ? ` / Q${row.quarters.join(",")}` : ""}`;
-                        return (
-                          <CellTooltip text={text}>
-                            <span className="block max-w-[90px] truncate">
-                              {text}
-                            </span>
-                          </CellTooltip>
-                        );
-                      })()}
-                    </TableCell>
-                    <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">
-                        <CellTooltip text={calcModelLabelFn(row.calculationModel)} />
+                      <div className="max-w-[90px] truncate">
+                        <CellTooltip text={row.years?.join(", ") ?? "\u2014"} />
                       </div>
-                    </TableCell>
-                    <TableCell className="w-[120px] min-w-[120px]">
-                      <select
-                        value={resolveFromLookup(row.status, STATUS_OPTIONS.map((o) => ({ value: o.value, name: o.name })))}
-                        onChange={(e) => handleStatusChange(row, Number(e.target.value))}
-                        disabled={!canUpdate || statusUpdatingId === row.id}
-                        className="input-enterprise w-[100px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                      >
-                        {STATUS_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.name}
-                          </option>
-                        ))}
-                      </select>
-                    </TableCell>
-                    <TableCell className="w-[100px] min-w-[100px]">
-                      <button onClick={() => openLines(row)} className="text-xs text-blue-600 hover:underline" title="Manage CPT Fees">
-                        <FileSpreadsheet className="inline h-4 w-4 mr-0.5" />CPT Fees
-                      </button>
                     </TableCell>
                     {(canUpdate || canDelete) && (
                       <TableCell className="!w-[120px] min-w-[120px]">
@@ -897,13 +871,13 @@ export default function CategoryFeeSchedulesPage() {
                 </select>
               </div>
 
-              {/* Geo Type — locked for UCR (Zip), editable for others */}
+              {/* Geo Type — locked per category config */}
               {categoryConfig.lockedGeoType != null ? (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Geo type</label>
-                  <div className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
-                    {lookups?.geoTypes?.find((g) => g.value === categoryConfig.lockedGeoType)?.name ?? "Zip"}
-                  </div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Geography Type</label>
+                  <select disabled className="w-full rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
+                    <option>{categoryConfig.lockedGeoType === 1 ? "Area - Region" : categoryConfig.lockedGeoType === 2 ? "Zip" : lookups?.geoTypes?.find((g) => g.value === categoryConfig.lockedGeoType)?.name ?? "—"}</option>
+                  </select>
                 </div>
               ) : (
                 <div>
@@ -916,51 +890,25 @@ export default function CategoryFeeSchedulesPage() {
                 </div>
               )}
 
-              {/* Geo Type = Area (1): show Region input */}
-              {form.geoType === 1 && (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Region</label>
-                  <input type="text" placeholder="e.g. Northern New Jersey" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-                </div>
-              )}
+              {/* Geography Code */}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Geography Code</label>
+                <input type="text" placeholder="e.g., 01, 99" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+              </div>
 
-              {/* Geo Type = Zip (2): show mapping type + zip inputs */}
-              {form.geoType === 2 && (
-                <>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Mapping type</label>
-                    <select value={form.geoName === "ZipRange" ? "ZipRange" : "ZipExact"} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value, geoCode: "" }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                      <option value="ZipExact">ZipExact</option>
-                      <option value="ZipRange">ZipRange</option>
-                    </select>
-                  </div>
-                  {form.geoName !== "ZipRange" ? (
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-foreground">ZIP code</label>
-                      <input type="text" placeholder="e.g. 07040" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-                    </div>
-                  ) : (
-                    <>
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-foreground">ZIP from</label>
-                        <input type="text" placeholder="e.g. 07000" value={(form.geoCode ?? "").split("-")[0] ?? ""} onChange={(e) => { const to = (form.geoCode ?? "").split("-")[1] ?? ""; setForm((f) => ({ ...f, geoCode: `${e.target.value}-${to}` })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-foreground">ZIP to</label>
-                        <input type="text" placeholder="e.g. 07999" value={(form.geoCode ?? "").split("-")[1] ?? ""} onChange={(e) => { const from = (form.geoCode ?? "").split("-")[0] ?? ""; setForm((f) => ({ ...f, geoCode: `${from}-${e.target.value}` })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
+              {/* Geography Name */}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Geography Name</label>
+                <input type="text" placeholder="e.g., Northern Jersey" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+              </div>
 
               {/* Billing type — locked for UCR (Professional), editable for others */}
               {categoryConfig.lockedBillingType != null ? (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Billing type</label>
-                  <div className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
-                    {lookups?.billingTypes?.find((b) => b.value === categoryConfig.lockedBillingType)?.name ?? "Professional"}
-                  </div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Billing Type</label>
+                  <select disabled className="w-full rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
+                    <option>{lookups?.billingTypes?.find((b) => b.value === categoryConfig.lockedBillingType)?.name ?? "Professional"}</option>
+                  </select>
                 </div>
               ) : (
                 <div>
@@ -1008,30 +956,18 @@ export default function CategoryFeeSchedulesPage() {
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Quarter(s)</label>
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input type="checkbox" checked={form.quarters.length === 0} onChange={() => setForm((f) => ({ ...f, quarters: [] }))} className="rounded border-input" />
-                    <span className="text-sm font-medium">Whole Year</span>
-                  </label>
-                  {[1, 2, 3, 4].map((q) => (
-                    <label key={q} className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={form.quarters.includes(q)}
-                        onChange={() => setForm((f) => ({
-                          ...f,
-                          quarters: f.quarters.includes(q) ? f.quarters.filter((v) => v !== q) : [...f.quarters, q].sort()
-                        }))}
-                        className="rounded border-input"
-                      />
-                      <span className="text-sm">Q{q}</span>
-                    </label>
-                  ))}
-                </div>
-                {form.quarters.length === 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">Applies to the entire year.</p>
-                )}
+                <label className="mb-1 block text-sm font-medium text-foreground">Quarter (Optional)</label>
+                <MultiSelectDropdown
+                  options={[
+                    { value: 1, label: "Q1" },
+                    { value: 2, label: "Q2" },
+                    { value: 3, label: "Q3" },
+                    { value: 4, label: "Q4" },
+                  ]}
+                  selected={form.quarters}
+                  onChange={(vals) => setForm((f) => ({ ...f, quarters: vals.sort() }))}
+                  placeholder="Select"
+                />
               </div>
 
               <div>
