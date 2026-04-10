@@ -848,14 +848,20 @@ export default function InsuranceArAnalysisProcessingPage() {
               </div>
             ) : status?.steps && status.steps.length > 0 ? (
               <div className="space-y-3">
-                {status.steps.map((s, i) => (
+                {status.steps.map((s, i) => {
+                  // When session is Completed, override all steps to show as Completed
+                  const step = status.sessionStatus === "Completed"
+                    ? { ...s, status: "Completed", message: null }
+                    : s;
+                  return (
                   <PipelineStep
                     key={s.name}
-                    step={s}
+                    step={step}
                     index={i}
                     isLast={i === status.steps.length - 1}
                   />
-                ))}
+                  );
+                })}
               </div>
             ) : null}
 
@@ -993,7 +999,7 @@ export default function InsuranceArAnalysisProcessingPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="rounded-lg bg-white p-3 text-center border border-emerald-200">
                         <div className="text-2xl font-bold text-foreground">{providerUploadPreview.totalCombos}</div>
-                        <div className="text-xs text-muted-foreground mt-1">Total Combos</div>
+                        <div className="text-xs text-muted-foreground mt-1">Total Entries</div>
                       </div>
                       <div className="rounded-lg bg-white p-3 text-center border border-emerald-200">
                         <div className="text-2xl font-bold text-emerald-700">{providerUploadPreview.inNetworkCount}</div>
