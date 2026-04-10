@@ -263,6 +263,28 @@ const formattedSession = formatSessionDetails(
               </div>
               <div className="text-[15px] font-['Aileron'] text-muted-foreground">Total Underpayment</div>
             </div>
+          </div>
+
+          {/* Claim-Level Underpayment Aggregation (Section 7.1.3) */}
+          <div className="grid gap-5 sm:grid-cols-3 mt-5">
+            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+                {formatCurrency(Math.max(0, report.totalMerFs - report.totalPaidAmount))}
+              </div>
+              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (FS)</div>
+            </div>
+            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+                {formatCurrency(Math.max(0, report.totalMerAllowed - report.totalPaidAmount))}
+              </div>
+              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (Allowed)</div>
+            </div>
+            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+                {formatCurrency(Math.max(0, report.totalMerOonAdjusted - report.totalPaidAmount))}
+              </div>
+              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (OON)</div>
+            </div>
             <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
               <div className="text-[32px] font-bold font-['Aileron'] text-[#16A34A] mb-1">
                 {formatCurrency(riskAdjustedRecovery)}
