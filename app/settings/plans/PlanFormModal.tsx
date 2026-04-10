@@ -18,16 +18,17 @@ const CATEGORY = ENUMS.PlanCategory;
 const TYPE = ENUMS.PlanType;
 
 const CATEGORY_TO_TYPES: Record<number, number[]> = {
-  [CATEGORY.Commercial]: [TYPE.Hmo, TYPE.Ppo, TYPE.Epo, TYPE.Pos, TYPE.Na],
+  [CATEGORY.Commercial]: [TYPE.Hmo, TYPE.Ppo, TYPE.Epo, TYPE.Pos],
   [CATEGORY.Medicare]: [TYPE.PartA, TYPE.PartB, TYPE.PartC, TYPE.PartD],
   [CATEGORY.RailroadMedicare]: [TYPE.PartA, TYPE.PartB, TYPE.PartC, TYPE.PartD],
   [CATEGORY.Tricare]: [TYPE.CHAMPUS, TYPE.CHAMPVA],
   [CATEGORY.Medicaid]: [TYPE.Na],
   [CATEGORY.MVA]: [TYPE.Na],
   [CATEGORY.WC]: [TYPE.Na],
-  [CATEGORY.HmoManaged]: [TYPE.Hmo, TYPE.Na],
-  [CATEGORY.Na]: [TYPE.Na],
 };
+
+// Plan categories to hide from dropdown (HMO-Managed, N/A — not in Figma)
+const HIDDEN_PLAN_CATEGORIES = new Set([CATEGORY.HmoManaged, CATEGORY.Na]);
 
 const ENTITY_TYPE_LABELS: Record<string | number, string> = {
   [ENUMS.PayerEntityType.Insurance]: "Insurance",
@@ -281,7 +282,7 @@ export function PlanFormModal({
                 className={inputCls}
                 disabled={isNonInsurance}
               >
-                {planCategories.map((c) => (
+                {planCategories.filter((c) => !HIDDEN_PLAN_CATEGORIES.has(Number(c.value))).map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
@@ -304,7 +305,8 @@ export function PlanFormModal({
             </div>
           </div>
 
-          {/* ── Commercial Intelligence ── */}
+          {/* ── Commercial Intelligence — only for Commercial plan category ── */}
+          {form.planCategory === CATEGORY.Commercial && (
           <div className="space-y-4">
             <h3 className="font-aileron text-base font-bold text-[#2A2C33]">Commercial Intelligence</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -316,7 +318,7 @@ export function PlanFormModal({
                   className={inputCls}
                 >
                   <option value="">—</option>
-                  {marketTypes.map((m) => (
+                  {marketTypes.filter((m) => Number(m.value) === 0 || Number(m.value) === 1).map((m) => (
                     <option key={m.value} value={m.value}>{m.label}</option>
                   ))}
                 </select>
@@ -406,6 +408,7 @@ export function PlanFormModal({
               </div>
             )}
           </div>
+          )}
 
           {/* ── Participation & Filing ── */}
           <div className="space-y-4">
