@@ -889,56 +889,52 @@ export default function InsuranceArAnalysisProcessingPage() {
               </div>
             )}
 
-            {showResolutionBlocks && (needsPlanResolution || needsPayerResolution) && (
-              <div className="mt-8 animate-fade-in-up space-y-6">
+            {showResolutionBlocks && isPlanStepCurrent && needsPlanResolution && (
+              <div className="mt-8 animate-fade-in-up space-y-4">
                 <h3 className="mb-2 text-base font-semibold text-amber-900">Action required</h3>
-
-                {needsPlanResolution && (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 space-y-3">
-                    <h4 className="text-sm font-semibold text-amber-900">Plan not found — Pending Plan Enrollment</h4>
-                    <p className="text-sm text-amber-800">
-                      Some plans in your intake were not matched to configured plans. Configure the missing plans in{" "}
-                      <strong>Settings &amp; Configurations &gt; Plans</strong>, then click <strong>Configured and Resume</strong>.
-                    </p>
-                    <Button variant="outline" onClick={handleDownloadPlan} disabled={downloading} className="border-amber-400 text-amber-900 hover:bg-amber-100 text-xs h-8">
-                      Download Plan-NotFound.xlsx
-                    </Button>
-                    {planDownloadError && <p className="text-xs text-red-600">{planDownloadError}</p>}
-                  </div>
-                )}
-
-                {needsPayerResolution && (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 space-y-3">
-                    <h4 className="text-sm font-semibold text-amber-900">Payer not found — Pending Payer Enrollment</h4>
-                    <p className="text-sm text-amber-800">
-                      Some payers in your intake were not matched to configured payers. Configure the missing payers in{" "}
-                      <strong>Settings &amp; Configurations &gt; Payers</strong>, then click <strong>Configured and Resume</strong>.
-                    </p>
-                    <Button variant="outline" onClick={handleDownloadPayer} disabled={downloading} className="border-amber-400 text-amber-900 hover:bg-amber-100 text-xs h-8">
-                      Download Payer-NotFound.xlsx
-                    </Button>
-                    {payerDownloadError && <p className="text-xs text-red-600">{payerDownloadError}</p>}
-                  </div>
-                )}
-
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 space-y-3">
+                  <h4 className="text-sm font-semibold text-amber-900">Plan not found — Pending Plan Enrollment</h4>
+                  <p className="text-sm text-amber-800">
+                    Some plans in your intake were not matched to configured plans. Configure the missing plans in{" "}
+                    <strong>Settings &amp; Configurations &gt; Plans</strong>, then click <strong>Configured and Resume</strong>.
+                  </p>
+                  <Button variant="outline" onClick={handleDownloadPlan} disabled={downloading} className="border-amber-400 text-amber-900 hover:bg-amber-100 text-xs h-8">
+                    Download Plan-NotFound.xlsx
+                  </Button>
+                  {planDownloadError && <p className="text-xs text-red-600">{planDownloadError}</p>}
+                </div>
                 <div className="flex gap-3">
-                  <Button
-                    onClick={handleResumeValidation}
-                    disabled={resumingValidation || downloading || uploading}
-                    className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-                  >
+                  <Button onClick={handleResumeValidation} disabled={resumingValidation || downloading} className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]">
                     {resumingValidation ? "Re-validating..." : "Configured and Resume"}
                   </Button>
-                  {(isPayerStepCurrent || isPlanStepCurrent) && (
-                    <Button
-                      onClick={isPayerStepCurrent ? handleSkipPayer : handleSkipPlan}
-                      disabled={(isPayerStepCurrent ? skippingPayer : skippingPlan) || downloading}
-                      variant="outline"
-                      className="h-10 rounded-[5px] px-[18px] border-amber-400 text-amber-900 hover:bg-amber-100 font-aileron text-[14px]"
-                    >
-                      {(isPayerStepCurrent ? skippingPayer : skippingPlan) ? "Skipping..." : "Skip and Continue"}
-                    </Button>
-                  )}
+                  <Button onClick={handleSkipPlan} disabled={skippingPlan || downloading} variant="outline" className="h-10 rounded-[5px] px-[18px] border-amber-400 text-amber-900 hover:bg-amber-100 font-aileron text-[14px]">
+                    {skippingPlan ? "Skipping..." : "Skip and Continue"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {showResolutionBlocks && isPayerStepCurrent && needsPayerResolution && (
+              <div className="mt-8 animate-fade-in-up space-y-4">
+                <h3 className="mb-2 text-base font-semibold text-amber-900">Action required</h3>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 space-y-3">
+                  <h4 className="text-sm font-semibold text-amber-900">Payer not found — Pending Payer Enrollment</h4>
+                  <p className="text-sm text-amber-800">
+                    Some payers in your intake were not matched to configured payers. Configure the missing payers in{" "}
+                    <strong>Settings &amp; Configurations &gt; Payers</strong>, then click <strong>Configured and Resume</strong>.
+                  </p>
+                  <Button variant="outline" onClick={handleDownloadPayer} disabled={downloading} className="border-amber-400 text-amber-900 hover:bg-amber-100 text-xs h-8">
+                    Download Payer-NotFound.xlsx
+                  </Button>
+                  {payerDownloadError && <p className="text-xs text-red-600">{payerDownloadError}</p>}
+                </div>
+                <div className="flex gap-3">
+                  <Button onClick={handleResumeValidation} disabled={resumingValidation || downloading} className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]">
+                    {resumingValidation ? "Re-validating..." : "Configured and Resume"}
+                  </Button>
+                  <Button onClick={handleSkipPayer} disabled={skippingPayer || downloading} variant="outline" className="h-10 rounded-[5px] px-[18px] border-amber-400 text-amber-900 hover:bg-amber-100 font-aileron text-[14px]">
+                    {skippingPayer ? "Skipping..." : "Skip and Continue"}
+                  </Button>
                 </div>
               </div>
             )}
