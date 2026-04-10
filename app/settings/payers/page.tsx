@@ -413,6 +413,7 @@ export default function PayersPage() {
               <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
             </Button>
           )}
+          {/* Bulk import commented out per Figma
           {canCreate && (
             <BulkImportActions
               apiBase="/api/Payers"
@@ -421,6 +422,7 @@ export default function PayersPage() {
               onLoadingChange={setOverlayLoading}
             />
           )}
+          */}
           {canCreate && (
             <Button
               onClick={openCreate}

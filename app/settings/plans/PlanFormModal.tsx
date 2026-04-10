@@ -401,7 +401,7 @@ export function PlanFormModal({
                   className={inputCls}
                 >
                   <option value="">—</option>
-                  {nsaCategories.map((n) => (
+                  {nsaCategories.filter((n) => Number(n.value) !== 0).map((n) => (
                     <option key={n.value} value={n.value}>{n.label}</option>
                   ))}
                 </select>

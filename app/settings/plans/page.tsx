@@ -443,12 +443,14 @@ export default function PlansPage() {
           )}
           {canCreate && (
             <>
+              {/* Bulk import commented out per Figma
               <BulkImportActions
                 apiBase="/api/Plans"
                 templateFileName="Plans_Import_Template.xlsx"
                 onImportSuccess={reload}
                 onLoadingChange={setOverlayLoading}
               />
+              */}
               <Button
                 onClick={() => openCreate()}
                 className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
