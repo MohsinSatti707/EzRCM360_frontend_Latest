@@ -392,7 +392,7 @@ export function PlanFormModal({
             </label>
             {form.nsaEligible && (
               <div>
-                <label className={labelCls}>NSA Category</label>
+                <label className={labelCls}>Jurisdiction (Required if NSA Eligible = Yes)</label>
                 <select
                   value={form.nsaCategory ?? ""}
                   onChange={(e) => set({ nsaCategory: e.target.value ? Number(e.target.value) : null })}

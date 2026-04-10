@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Search, ArrowRight, Trash2, ChevronUp, Pencil, Trash } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
@@ -551,8 +552,10 @@ export default function PlansPage() {
                           className="flex items-center justify-between border-b border-[#F1F5F9] last:border-b-0 px-6 py-3"
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-aileron text-sm font-semibold text-[#2A2C33]">
-                              {plan.planName}
+                            <div className="font-aileron text-sm font-semibold">
+                              <Link href={`/settings/plans/${plan.id}`} className="text-[#0066CC] hover:underline">
+                                {plan.planName}
+                              </Link>
                             </div>
                             <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-[#64748B]">
                               {plan.planIdPrefix && (
