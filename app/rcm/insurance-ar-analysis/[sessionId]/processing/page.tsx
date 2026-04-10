@@ -48,10 +48,10 @@ const RESOLUTION_HINTS = {
   ),
   providerParticipation: (
     <>
-      <strong>What this file is:</strong> Lists Rendering Provider × Payer × Plan combinations that need participation status. Columns: Client Claim ID, Rendering Provider Name, Primary Payer Name, Plan Name, <strong>Action</strong>.{" "}
-      <strong>Resolve:</strong> Set participation status (e.g. IN or OON) where applicable and set <strong>Action</strong> to <strong>Resolve</strong>.{" "}
-      <strong>Exclude:</strong> Set <strong>Action</strong> to <strong>Exclude</strong> to exclude affected claims.{" "}
-      Then save and re-upload the corrected file.
+      <strong>What this file is:</strong> Lists unique Rendering Provider × Payer × Plan combinations that need participation status.{" "}
+      <strong>Columns:</strong> Rendering Provider Name, Payer Name, Plan Name, Plan ID/Prefix, Plan Type, DOS Range, <strong>Participation Status</strong>, Status.{" "}
+      <strong>Resolve:</strong> Fill in the <strong>Participation Status</strong> column with <strong>IN</strong> (In-Network) or <strong>OON</strong> (Out-of-Network) for each row.{" "}
+      Then save and re-upload the completed file.
     </>
   ),
   facilityParticipation: (
@@ -932,11 +932,11 @@ export default function InsuranceArAnalysisProcessingPage() {
               <div className="mt-8 animate-fade-in-up">
                 <h3 className="mb-4 text-base font-semibold text-amber-900">Action required</h3>
                 <ResolutionBlock
-                  title="Provider participation not found"
-                  description="Rendering provider × payer × plan combinations need participation status. Download the report, set participation status or mark rows as Exclude in the Action column, then re-upload that same corrected file."
+                  title="Rendering Provider Participation Validation"
+                  description="Download the file, fill in the Participation Status column with IN (In-Network) or OON (Out-of-Network) for each rendering provider / payer / plan combination, then re-upload."
                   hint={RESOLUTION_HINTS.providerParticipation}
-                  downloadLabel="Download ProviderParticipation-NotFound.xlsx"
-                  filename="ProviderParticipation-NotFound.xlsx"
+                  downloadLabel="Download RenderingProviderParticipation-Pending.xlsx"
+                  filename="RenderingProviderParticipation-Pending.xlsx"
                   onDownload={handleDownloadProvider}
                   onUpload={handleUploadProvider}
                   file={providerFile}
