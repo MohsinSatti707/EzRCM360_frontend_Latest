@@ -150,16 +150,7 @@ export function PayerFormModal({
               </>
             )}
           </Button>
-          {!editId && isInsurance && form.insuranceSubCategory === 0 && onSubmitAndAddPlan && (
-            <Button
-              type="button"
-              onClick={onSubmitAndAddPlan}
-              disabled={loading}
-              className="h-10 rounded-[5px] px-[18px] py-3 bg-[#0066CC]/80 hover:bg-[#0066CC]/70 text-white font-aileron text-[14px]"
-            >
-              {loading ? "Saving…" : "Add Payer & Add Plan"}
-            </Button>
-          )}
+          {/* Add Payer & Add Plan button removed — plans managed on detail page */}
           <Button
             variant="outline"
             onClick={onClose}
@@ -193,24 +184,10 @@ export function PayerFormModal({
               onChange={(e) => onFormChange({ ...form, aliases: e.target.value })}
             />
             <Select
-              label="Entity type"
+              label="Payer Entity Type"
               options={entityTypeOptions}
               value={form.entityType}
               onChange={(e) => onFormChange({ ...form, entityType: Number(e.target.value), insuranceSubCategory: Number(e.target.value) === Number(insuranceEntityTypeValue) ? form.insuranceSubCategory : null })}
-            />
-            {isInsurance && (
-              <Select
-                label="Insurance sub-category"
-                options={INSURANCE_SUB_CATEGORY_OPTIONS}
-                value={form.insuranceSubCategory ?? ""}
-                onChange={(e) => onFormChange({ ...form, insuranceSubCategory: e.target.value ? Number(e.target.value) : null })}
-              />
-            )}
-            <Select
-              label="Status"
-              options={STATUS_OPTIONS}
-              value={form.status}
-              onChange={(e) => onFormChange({ ...form, status: Number(e.target.value) })}
             />
           </div>
 
@@ -370,52 +347,7 @@ export function PayerFormModal({
             </>
           )}
 
-          {isInsurance && (
-            <div className="space-y-3">
-              <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Linked plans</h3>
-              {linkedPlans.length > 0 ? (
-                <div className="max-h-48 overflow-y-auto rounded-lg border border-[#E2E8F0] p-3">
-                  <div className="space-y-2">
-                    {linkedPlans.map((plan) => (
-                      <div
-                        key={plan.id}
-                        className="flex items-center justify-between gap-2 rounded bg-[#F7F8F9] px-3 py-2"
-                      >
-                        <span className="text-sm text-foreground">{plan.displayName}</span>
-                        <button
-                          type="button"
-                          onClick={() => removePlan(plan.id)}
-                          className="shrink-0 rounded p-0.5 text-[#94A3B8] hover:text-red-600 hover:bg-red-50 transition-colors"
-                          title="Remove plan"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-lg border border-dashed border-[#E2E8F0] p-4 text-center">
-                  <p className="mb-3 text-sm text-muted-foreground">
-                    No plans linked to this payer.
-                  </p>
-                  {onAddNewPlan && editId && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={onAddNewPlan}
-                    >
-                      Add new plan
-                    </Button>
-                  )}
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    To link existing plans, go to Plan Configuration.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Linked plans moved to Payer Detail page */}
         </div>
       </form>
     </DrawerForm>

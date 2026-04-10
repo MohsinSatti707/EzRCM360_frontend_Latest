@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Search, ArrowRight, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
@@ -473,9 +474,10 @@ export default function PayersPage() {
                     )}
                     <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-xs truncate">
-                        <CellTooltip text={row.payerName} />
-                        
-                        </div>
+                        <Link href={`/settings/payers/${row.id}`} className="text-[#0066CC] hover:underline font-medium">
+                          {row.payerName}
+                        </Link>
+                      </div>
                     </TableCell>
                     <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-xs truncate">
