@@ -842,7 +842,7 @@ export default function CategoryFeeSchedulesPage() {
         {wizardStep === 1 && (
           <div>
             <div className="grid gap-4 sm:grid-cols-2">
-              {/* Adopt Fee Schedule ID — shown first for MVA/WC */}
+              {/* Adopt Fee Schedule ID — hidden per Figma
               {categoryConfig.showAdoptFs && (
                 <div className="sm:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-foreground">Adopt Fee Schedule ID (Optional)</label>
@@ -860,6 +860,7 @@ export default function CategoryFeeSchedulesPage() {
                   </select>
                 </div>
               )}
+              */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Fee Schedule ID</label>
                 <input type="text" value={form.scheduleCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, scheduleCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
@@ -1044,7 +1045,7 @@ export default function CategoryFeeSchedulesPage() {
 
               {/* Multiplier %, Status, Source, Notes — hidden per Figma */}
 
-              {/* Fallback category — only for MVA and WC */}
+              {/* Fallback category — hidden per Figma
               {categoryConfig.showFallbackCategory && (
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Fallback category</label>
@@ -1056,6 +1057,7 @@ export default function CategoryFeeSchedulesPage() {
                   </select>
                 </div>
               )}
+              */}
             </div>
           </div>
         )}
