@@ -194,6 +194,9 @@ export function NativeSelect<T extends string | number>({
         aria-invalid={!!error}
         {...rest}
       >
+        {options.length === 0 && (
+          <option value="" disabled>— No options available —</option>
+        )}
         {options.map((opt) => (
           <option key={String(opt.value)} value={String(opt.value)}>
             {opt.label}
