@@ -427,10 +427,6 @@ export default function PlanDetailPage() {
             }
           />
           <InfoField label="NSA Category" value={nsaCategoryLabel(plan.nsaCategory)} />
-          <InfoField
-            label="Created At"
-            value={formatDate((plan as Record<string, unknown>).createdAt as string)}
-          />
         </div>
       </Card>
 
