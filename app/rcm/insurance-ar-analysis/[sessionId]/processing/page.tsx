@@ -250,7 +250,7 @@ function ResolutionBlock({
         </div>
         {file && (
           <Button onClick={onUpload} disabled={uploading} className="mt-3">
-            {uploading ? "Uploading…" : "Upload & Continue"}
+            {uploading ? "Uploading…" : "Resume Analysis"}
           </Button>
         )}
       </div>
@@ -903,7 +903,7 @@ export default function InsuranceArAnalysisProcessingPage() {
                       disabled={uploading}
                       className="mt-3"
                     >
-                      {uploading ? "Uploading…" : "Upload & Continue"}
+                      {uploading ? "Uploading…" : "Resume Analysis"}
                     </Button>
                   )}
                 </div>
