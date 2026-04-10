@@ -137,6 +137,7 @@ export default function FeeScheduleDetailPage() {
   const scheduleId = typeof params.id === "string" ? params.id : "";
   const categoryConfig = CATEGORY_CONFIG[categorySlug];
   const isUCR = categorySlug === "ucr";
+  const isWC = categorySlug === "wc";
 
   if (!categoryConfig) {
     notFound();
@@ -548,6 +549,7 @@ export default function FeeScheduleDetailPage() {
                   {!isUCR && <TableHeaderCell>Fee Amount</TableHeaderCell>}
                   <TableHeaderCell>Modifier</TableHeaderCell>
                   <TableHeaderCell>RV</TableHeaderCell>
+                  {isWC && <TableHeaderCell>PC/TC</TableHeaderCell>}
                   {isUCR && (
                     <>
                       <TableHeaderCell>50th FA</TableHeaderCell>
@@ -581,6 +583,13 @@ export default function FeeScheduleDetailPage() {
                     <TableCell>
                       {line.rv != null ? line.rv.toFixed(4) : "—"}
                     </TableCell>
+                    {isWC && (
+                      <TableCell>
+                        {line.pctcIndicator != null
+                          ? ({ 0: "P", 1: "T", 2: "G" } as Record<number, string>)[Number(line.pctcIndicator)] ?? "—"
+                          : "—"}
+                      </TableCell>
+                    )}
                     {isUCR && (
                       <>
                         <TableCell>{line.fee50th?.toFixed(2) ?? "—"}</TableCell>
