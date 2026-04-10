@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -68,6 +68,7 @@ export default function InsuranceArAnalysisUploadPage() {
   const [columnsPassed, setColumnsPassed] = useState(false);
   const [rowsPassed, setRowsPassed] = useState(false);
   const [validationResult, setValidationResult] = useState<ArIntakeValidationResult | null>(null);
+  const validationResultRef = useRef<HTMLDivElement>(null);
   const [validationLoading, setValidationLoading] = useState(false);
   const [pmFiles, setPmFiles] = useState<File[]>([]);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -138,6 +139,7 @@ export default function InsuranceArAnalysisUploadPage() {
     } finally {
       setSubmitLoading(false);
       setValidationLoading(false);
+      setTimeout(() => validationResultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     }
   }, [practiceName, intakeFile, sessionId, api, toast, validationMode, columnsPassed, rowsPassed]);
 
@@ -364,7 +366,7 @@ export default function InsuranceArAnalysisUploadPage() {
             </div>
 
             {validationResult && (
-              <div className="pt-2">
+              <div className="pt-2" ref={validationResultRef}>
               <ValidationStatus
                 result={validationResult}
                 loading={validationLoading}
