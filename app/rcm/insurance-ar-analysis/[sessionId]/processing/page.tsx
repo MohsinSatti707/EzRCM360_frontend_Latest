@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { FileUploadZone } from "@/components/rcm/FileUploadZone";
 import { Loader } from "@/components/ui/Loader";
+import { ArrowRight } from "lucide-react";
 import { ValidationAnalysisIcon } from "@/components/rcm/ValidationAnalysisIcon";
 import { useToast } from "@/lib/contexts/ToastContext";
 import {
