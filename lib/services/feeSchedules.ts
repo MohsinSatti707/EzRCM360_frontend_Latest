@@ -2,14 +2,31 @@ import { apiRequest, apiRequestForm } from "@/lib/api";
 import { API_URL, AUTH_TOKEN_KEY } from "@/lib/env";
 import type { PaginatedList } from "@/lib/types";
 
+export interface FeeScheduleCategoryCountsDto {
+  medicare: number;
+  ucr: number;
+  mva: number;
+  wc: number;
+}
+
 export interface FeeScheduleDto {
   id: string;
   scheduleCode?: string | null;
-  category: number;
+  category: number | string;
   state?: string | null;
-  status: number;
+  geoType: number | string;
+  geoCode?: string | null;
+  geoName?: string | null;
+  billingType: number | string;
   years: number[];
   quarters: number[];
+  calculationModel: number | string;
+  adoptFeeScheduleId?: string | null;
+  multiplierPct: number;
+  fallbackCategory?: number | string | null;
+  status: number | string;
+  source?: string | null;
+  notes?: string | null;
 }
 
 export interface FeeScheduleDetailDto {
@@ -78,6 +95,8 @@ export interface CreateFeeScheduleCommand {
 
 export function feeSchedulesApi() {
   return {
+    getCategoryCounts: () =>
+      apiRequest<FeeScheduleCategoryCountsDto>("/api/FeeSchedules/counts-by-category"),
     getLookups: () =>
       apiRequest<{
         categories: { value: number; name: string }[];
