@@ -317,6 +317,7 @@ const formattedSession = formatSessionDetails(
               </div>
               <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total MER Allowed</div>
             </div>
+            {/* Total MER OON Plan-Benefits Adjusted — hidden per request
             {report.totalMerOonAdjusted > 0 && (
               <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
                 <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
@@ -325,6 +326,7 @@ const formattedSession = formatSessionDetails(
                 <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total MER OON Plan-Benefits Adjusted</div>
               </div>
             )}
+            */}
           </div>
         </section>
 
