@@ -604,31 +604,12 @@ export default function CategoryFeeSchedulesPage() {
           {submitLoading ? "Saving..." : editId ? "Update" : <>Add Fee Schedule <ArrowRight className="ml-1 h-4 w-4" /></>}
         </Button>
 
-        {!editId && wizardStep === 2 && (
-          <Button onClick={() => { setModalOpen(false); loadList(); }} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
-            Done
-          </Button>
-        )}
       </div>
     </div>
   );
 
-  const wizardStepper = !editId ? (
-    <div className="flex items-center gap-2">
-      {[1, 2].map((s) => (
-        <div key={s} className="flex items-center gap-2">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${wizardStep === s ? "bg-[#0066CC] text-white" : wizardStep > s ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"
-            }`}>
-            {wizardStep > s ? "\u2713" : s}
-          </div>
-          <span className={`text-sm ${wizardStep === s ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-            {s === 1 ? "Configuration" : "CPT Fees"}
-          </span>
-          {s < 2 && <div className={`h-0.5 w-20 ${wizardStep > s ? "bg-green-500" : "bg-gray-200"}`} />}
-        </div>
-      ))}
-    </div>
-  ) : null;
+  // Wizard stepper removed — now 1-step modal
+  const wizardStepper = null;
 
   /* ---------------------------------------------------------------- */
   /*  Permission / loading guards                                      */
