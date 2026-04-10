@@ -49,7 +49,7 @@ const CATEGORY_CONFIG: Record<string, {
   showFallbackCategory?: boolean;
 }> = {
   medicare: { value: 0, label: "Medicare", templateType: "Medicare", lockedGeoType: 1, showAdoptFs: false, showFallbackCategory: false },
-  ucr: { value: 1, label: "UCR", templateType: "UCR", lockedGeoType: 2, lockedBillingType: 0, showAdoptFs: false, showFallbackCategory: false },
+  ucr: { value: 1, label: "UCR", templateType: "UCR", lockedGeoType: 2, showAdoptFs: false, showFallbackCategory: false },
   mva: { value: 2, label: "MVA", templateType: "MVA", lockedGeoType: 1, showAdoptFs: true, showFallbackCategory: true },
   wc: { value: 3, label: "WC", templateType: "WC", lockedGeoType: 1, showAdoptFs: true, showFallbackCategory: true },
 };
@@ -892,17 +892,54 @@ export default function CategoryFeeSchedulesPage() {
                 </div>
               )}
 
-              {/* Geography Code */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Geography Code</label>
-                <input type="text" placeholder="e.g., 01, 99" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-              </div>
-
-              {/* Geography Name */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Geography Name</label>
-                <input type="text" placeholder="e.g., Northern Jersey" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-              </div>
+              {/* Geography Code — UCR (Zip) shows Single/Dual ZIP Range dropdown, others show text input */}
+              {isUCR ? (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Geography Code</label>
+                    <select
+                      value={(form.geoCode ?? "").includes("-") ? "DualZipRange" : "SingleZipRange"}
+                      onChange={(e) => setForm((f) => ({ ...f, geoCode: "" }))}
+                      className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                    >
+                      <option value="SingleZipRange">Single ZIP Range</option>
+                      <option value="DualZipRange">Dual ZIP Range</option>
+                    </select>
+                  </div>
+                  {!(form.geoCode ?? "").includes("-") ? (
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-foreground">ZIP Code</label>
+                      <input type="text" placeholder="e.g., 10001" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-foreground">Start ZIP Code</label>
+                        <input type="text" placeholder="e.g., 10001" value={(form.geoCode ?? "").split("-")[0] ?? ""} onChange={(e) => { const end = (form.geoCode ?? "").split("-")[1] ?? ""; setForm((f) => ({ ...f, geoCode: `${e.target.value}-${end}` })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-foreground">End ZIP Code</label>
+                        <input type="text" placeholder="e.g., 10005" value={(form.geoCode ?? "").split("-")[1] ?? ""} onChange={(e) => { const start = (form.geoCode ?? "").split("-")[0] ?? ""; setForm((f) => ({ ...f, geoCode: `${start}-${e.target.value}` })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Geography Name</label>
+                    <input type="text" placeholder="e.g., Northern Jersey" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Geography Code</label>
+                    <input type="text" placeholder="e.g., 01, 99" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-foreground">Geography Name</label>
+                    <input type="text" placeholder="e.g., Northern Jersey" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                  </div>
+                </>
+              )}
 
               {/* Billing type — locked for UCR (Professional), editable for others */}
               {categoryConfig.lockedBillingType != null ? (
@@ -948,13 +985,43 @@ export default function CategoryFeeSchedulesPage() {
                   </select>
                 </div>
               ) : (
-                <MultiSelectDropdown
-                  label="Year(s)"
-                  options={lookups?.years?.map((y) => ({ value: y, label: String(y) })) ?? []}
-                  selected={form.years}
-                  onChange={(yrs) => setForm((f) => ({ ...f, years: yrs }))}
-                  placeholder="Select year(s)"
-                />
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Effective Year</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <input
+                        type="number"
+                        placeholder="From"
+                        value={form.years[0] ?? ""}
+                        onChange={(e) => {
+                          const from = e.target.value ? Number(e.target.value) : null;
+                          const to = form.years.length > 1 ? form.years[form.years.length - 1] : from;
+                          if (from == null) { setForm((f) => ({ ...f, years: [] })); return; }
+                          const yrs: number[] = [];
+                          for (let y = from; y <= (to ?? from); y++) yrs.push(y);
+                          setForm((f) => ({ ...f, years: yrs }));
+                        }}
+                        className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="number"
+                        placeholder="To"
+                        value={form.years.length > 1 ? form.years[form.years.length - 1] : form.years[0] ?? ""}
+                        onChange={(e) => {
+                          const to = e.target.value ? Number(e.target.value) : null;
+                          const from = form.years[0] ?? to;
+                          if (from == null || to == null) return;
+                          const yrs: number[] = [];
+                          for (let y = from; y <= to; y++) yrs.push(y);
+                          setForm((f) => ({ ...f, years: yrs }));
+                        }}
+                        className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                      />
+                    </div>
+                  </div>
+                </div>
               )}
 
               <div>

@@ -136,6 +136,7 @@ export default function FeeScheduleDetailPage() {
     typeof params.category === "string" ? params.category.toLowerCase() : "";
   const scheduleId = typeof params.id === "string" ? params.id : "";
   const categoryConfig = CATEGORY_CONFIG[categorySlug];
+  const isUCR = categorySlug === "ucr";
 
   if (!categoryConfig) {
     notFound();
@@ -539,13 +540,26 @@ export default function FeeScheduleDetailPage() {
       ) : (
         <>
           <Card className="overflow-hidden">
-            <Table>
+            <Table className={isUCR ? "min-w-[1200px]" : ""}>
               <TableHead>
                 <TableRow>
-                  <TableHeaderCell>CPT/HCPCS</TableHeaderCell>
-                  <TableHeaderCell>Fee Amount</TableHeaderCell>
+                  {isUCR && <TableHeaderCell>Zip</TableHeaderCell>}
+                  <TableHeaderCell>CPT</TableHeaderCell>
+                  {!isUCR && <TableHeaderCell>Fee Amount</TableHeaderCell>}
                   <TableHeaderCell>Modifier</TableHeaderCell>
-                  <TableHeaderCell>RVU</TableHeaderCell>
+                  <TableHeaderCell>RV</TableHeaderCell>
+                  {isUCR && (
+                    <>
+                      <TableHeaderCell>50th FA</TableHeaderCell>
+                      <TableHeaderCell>60th FA</TableHeaderCell>
+                      <TableHeaderCell>70th FA</TableHeaderCell>
+                      <TableHeaderCell>75th FA</TableHeaderCell>
+                      <TableHeaderCell>80th FA</TableHeaderCell>
+                      <TableHeaderCell>85th FA</TableHeaderCell>
+                      <TableHeaderCell>90th FA</TableHeaderCell>
+                      <TableHeaderCell>95th FA</TableHeaderCell>
+                    </>
+                  )}
                   <TableHeaderCell className="w-[100px] text-right">
                     Actions
                   </TableHeaderCell>
@@ -554,16 +568,31 @@ export default function FeeScheduleDetailPage() {
               <TableBody>
                 {linesData.items.map((line) => (
                   <TableRow key={line.id}>
+                    {isUCR && <TableCell>{line.zip ?? "—"}</TableCell>}
                     <TableCell className="font-medium">
                       {line.cptHcpcs}
                     </TableCell>
+                    {!isUCR && (
+                      <TableCell>
+                        ${line.feeAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </TableCell>
+                    )}
+                    <TableCell>{line.modifier ?? "—"}</TableCell>
                     <TableCell>
-                      ${line.feeAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {line.rv != null ? line.rv.toFixed(4) : "—"}
                     </TableCell>
-                    <TableCell>{line.modifier ?? "---"}</TableCell>
-                    <TableCell>
-                      {line.rv != null ? line.rv.toFixed(4) : "---"}
-                    </TableCell>
+                    {isUCR && (
+                      <>
+                        <TableCell>{line.fee50th?.toFixed(2) ?? "—"}</TableCell>
+                        <TableCell>{line.fee60th?.toFixed(2) ?? "—"}</TableCell>
+                        <TableCell>{line.fee70th?.toFixed(2) ?? "—"}</TableCell>
+                        <TableCell>{line.fee75th?.toFixed(2) ?? "—"}</TableCell>
+                        <TableCell>{line.fee80th?.toFixed(2) ?? "—"}</TableCell>
+                        <TableCell>{line.fee85th?.toFixed(2) ?? "—"}</TableCell>
+                        <TableCell>{line.fee90th?.toFixed(2) ?? "—"}</TableCell>
+                        <TableCell>{line.fee95th?.toFixed(2) ?? "—"}</TableCell>
+                      </>
+                    )}
                     <TableCell className="text-right">
                       <TableActionsCell
                         onEdit={
@@ -850,12 +879,16 @@ export default function FeeScheduleDetailPage() {
 
       {/* Tabs */}
       <div className="mb-4 flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-1 w-fit">
-        {(
-          [
-            { key: "lines", label: "CPT Fee Lines" },
-            { key: "zip", label: "ZIP Geography Mapping" },
-            { key: "fallback", label: "Fallback Configuration" },
-          ] as const
+        {(isUCR
+          ? [
+              { key: "lines" as const, label: "CPT Fee Lines" },
+              { key: "fallback" as const, label: "Fallback Configuration" },
+            ]
+          : [
+              { key: "lines" as const, label: "CPT Fee Lines" },
+              { key: "zip" as const, label: "ZIP Geography Mapping" },
+              { key: "fallback" as const, label: "Fallback Configuration" },
+            ]
         ).map((tab) => (
           <button
             key={tab.key}
