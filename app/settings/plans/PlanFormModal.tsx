@@ -28,7 +28,7 @@ const CATEGORY_TO_TYPES: Record<number, number[]> = {
 };
 
 // Plan categories to hide from dropdown (HMO-Managed, N/A — not in Figma)
-const HIDDEN_PLAN_CATEGORIES = new Set([CATEGORY.HmoManaged, CATEGORY.Na]);
+const HIDDEN_PLAN_CATEGORIES = new Set<number>([CATEGORY.HmoManaged, CATEGORY.Na]);
 
 const ENTITY_TYPE_LABELS: Record<string | number, string> = {
   [ENUMS.PayerEntityType.Insurance]: "Insurance",
