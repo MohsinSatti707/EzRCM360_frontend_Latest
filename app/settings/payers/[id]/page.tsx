@@ -332,7 +332,7 @@ export default function PayerDetailPage() {
           </div>
         </div>
         {/* CreatedAt — shown only if available from API */}
-        {(payer as Record<string, unknown>).createdAt && (
+        {typeof (payer as Record<string, unknown>).createdAt === "string" && (
           <div className="mt-4">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Created At
