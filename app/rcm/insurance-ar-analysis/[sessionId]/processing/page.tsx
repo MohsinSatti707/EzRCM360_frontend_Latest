@@ -303,9 +303,8 @@ export default function InsuranceArAnalysisProcessingPage() {
     // Update status state directly from SignalR event — no API call needed
     setStatus((prev) => {
       if (!prev) return prev;
-      // Terminal: pipeline completed — redirect to report
+      // Terminal: pipeline completed — update status (no auto-redirect, let user see summary first)
       if (event.stageName === "Completed" && event.status === "Completed") {
-        routerRef.current.push(`/rcm/insurance-ar-analysis/${sessionId}/report`);
         return { ...prev, sessionStatus: "Completed", currentStage: "Completed" };
       }
       // Terminal: pipeline failed
@@ -356,10 +355,7 @@ export default function InsuranceArAnalysisProcessingPage() {
         const s = await apiRef.current.getStatus(sessionId);
         if (cancelled) return;
         setStatus(s);
-        if (s.sessionStatus === "Completed") {
-          routerRef.current.push(`/rcm/insurance-ar-analysis/${sessionId}/report`);
-          return;
-        }
+        if (s.sessionStatus === "Completed") return;
         if (s.sessionStatus === "Failed") return;
         scheduleNext();
       } catch {
@@ -377,10 +373,7 @@ export default function InsuranceArAnalysisProcessingPage() {
         if (cancelled) return;
         setStatus(s);
         setSession(sess);
-        if (s.sessionStatus === "Completed") {
-          routerRef.current.push(`/rcm/insurance-ar-analysis/${sessionId}/report`);
-          return;
-        }
+        if (s.sessionStatus === "Completed") return;
         if (s.sessionStatus === "Failed") return;
       } catch { /* ignore */ }
 
@@ -410,9 +403,6 @@ export default function InsuranceArAnalysisProcessingPage() {
       ]);
       setStatus(s);
       setSession(sess);
-      if (s.sessionStatus === "Completed") {
-        routerRef.current.push(`/rcm/insurance-ar-analysis/${sessionId}/report`);
-      }
       return s;
     } catch {
       return null;
@@ -1004,6 +994,27 @@ export default function InsuranceArAnalysisProcessingPage() {
               </div>
             )}
           </div>
+
+          {/* Pipeline Complete — show View Report button */}
+          {status?.sessionStatus === "Completed" && (
+            <div className="mt-8 animate-fade-in-up rounded-xl border-2 border-emerald-200 bg-emerald-50 p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <svg className="h-8 w-8 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                <h3 className="text-lg font-bold text-emerald-900">Analysis Complete</h3>
+              </div>
+              <p className="text-sm text-emerald-800 mb-4">
+                The AR Analysis pipeline has completed successfully. Click below to view the full report.
+              </p>
+              <Button
+                onClick={() => router.push(`/rcm/insurance-ar-analysis/${sessionId}/report`)}
+                className="h-10 rounded-[5px] px-6 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+              >
+                View Report <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </Card>
       </div>
     </PageShell>
