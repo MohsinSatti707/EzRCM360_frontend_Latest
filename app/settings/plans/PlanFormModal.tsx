@@ -72,7 +72,7 @@ function PayerDropdown({
   const filtered = useMemo(
     () =>
       payers.filter((p) =>
-        p.payerName.toLowerCase().includes(search.toLowerCase())
+        isInsurancePayer(p) && p.payerName.toLowerCase().includes(search.toLowerCase())
       ),
     [payers, search]
   );
