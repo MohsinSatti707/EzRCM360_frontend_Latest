@@ -67,6 +67,7 @@ const DUMMY_REPORT: ArAnalysisReportDto = {
     totalNoPayLineCount: 8,
     totalDenialLineCount: 2,
   },
+  resolutionSummary: null,
 };
 
 function formatCurrency(n: number) {
@@ -517,6 +518,50 @@ const formattedSession = formatSessionDetails(
                 )}
           </div>
         </Card>
+
+        {report.resolutionSummary && (
+          <Card className="p-0 border-none">
+            <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
+              Resolution Summary
+            </h2>
+            <div className="overflow-x-auto rounded-lg border border-border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[#F1F5F9] text-left">
+                    <th className="px-4 py-3 font-medium text-muted-foreground">Validation Step</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Analyzed</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Pending</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Resolved</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Excluded</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Proceeding</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {([
+                    ["Payer Validation", report.resolutionSummary.payer],
+                    ["Plan Validation", report.resolutionSummary.plan],
+                    ["Provider Participation", report.resolutionSummary.providerParticipation],
+                  ] as [string, typeof report.resolutionSummary.payer][]).map(([label, step]) => (
+                    <tr key={label} className="border-t border-border">
+                      <td className="px-4 py-3 font-medium text-foreground">{label}</td>
+                      {step ? (
+                        <>
+                          <td className="px-4 py-3 text-right">{step.claimsAnalyzed}</td>
+                          <td className="px-4 py-3 text-right">{step.claimsPending}</td>
+                          <td className="px-4 py-3 text-right">{step.claimsResolved}</td>
+                          <td className="px-4 py-3 text-right">{step.claimsExcluded}</td>
+                          <td className="px-4 py-3 text-right font-medium">{step.claimsProceeding}</td>
+                        </>
+                      ) : (
+                        <td colSpan={5} className="px-4 py-3 text-center text-muted-foreground">N/A</td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
       </div>
     </PageShell>
   );

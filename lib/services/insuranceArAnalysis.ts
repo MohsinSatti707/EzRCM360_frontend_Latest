@@ -199,6 +199,20 @@ export interface NoPayDenialSummaryDto {
   totalDenialLineCount: number;
 }
 
+export interface StepResolutionSummary {
+  claimsAnalyzed: number;
+  claimsPending: number;
+  claimsResolved: number;
+  claimsExcluded: number;
+  claimsProceeding: number;
+}
+
+export interface ResolutionSummaryDto {
+  payer?: StepResolutionSummary | null;
+  plan?: StepResolutionSummary | null;
+  providerParticipation?: StepResolutionSummary | null;
+}
+
 export interface ArAnalysisReportDto {
   analysisSummary: ArAnalysisSummaryDto;
   totalClaimsAnalyzed: number;
@@ -216,6 +230,7 @@ export interface ArAnalysisReportDto {
   totalMerAllowed: number;
   totalMerOonAdjusted: number;
   noPayDenialSummary: NoPayDenialSummaryDto;
+  resolutionSummary?: ResolutionSummaryDto | null;
 }
 
 export function insuranceArAnalysisApi() {
