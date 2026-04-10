@@ -649,7 +649,8 @@ export default function InsuranceArAnalysisProcessingPage() {
     try {
       await apiRef.current.resumePayerPlanValidation(sessionId);
       toast.success("Re-validating", "Pipeline is re-checking payers and plans against current configuration...");
-      refreshStatus();
+      await refreshStatus();
+      pollUntilSettled();
     } catch (err) {
       toast.error("Resume Failed", err instanceof Error ? err.message : "Resume failed.");
     } finally {
