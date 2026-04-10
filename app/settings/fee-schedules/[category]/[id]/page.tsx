@@ -776,7 +776,7 @@ export default function FeeScheduleDetailPage() {
             <Button
               variant="outline"
               onClick={() =>
-                router.push(`/settings/fee-schedules/${categorySlug}`)
+                router.push(`/settings/fee-schedules/${categorySlug}?edit=${scheduleId}`)
               }
               className="h-10 rounded-[5px] px-[18px] border-[#E2E8F0] font-aileron text-[14px] text-[#2A2C33]"
             >

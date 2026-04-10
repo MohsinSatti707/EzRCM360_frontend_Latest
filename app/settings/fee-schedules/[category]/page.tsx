@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, useRouter, notFound } from "next/navigation";
+import { useParams, useRouter, useSearchParams, notFound } from "next/navigation";
 import { Search, ArrowRight, Upload, Download, FileSpreadsheet, Trash2, Pencil, Plus } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 // PageHeader not used — custom breadcrumb with intermediate "Fee Schedules" link
@@ -231,10 +231,21 @@ export default function CategoryFeeSchedulesPage() {
     loadList();
   }, [loadList]);
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     api.getLookups().then(setLookups).catch(() => setLookups(null));
     api.getList({ pageSize: 500, status: 0 }).then((res) => setFsOptions(res.items)).catch(() => { });
   }, []);
+
+  // Auto-open edit modal when navigated with ?edit={id}
+  useEffect(() => {
+    const editParam = searchParams.get("edit");
+    if (editParam && data?.items) {
+      const row = data.items.find((r) => r.id === editParam);
+      if (row) openEdit(row);
+    }
+  }, [searchParams, data]);
 
   // Debounced search for fee schedule lines
   useEffect(() => {
@@ -306,12 +317,10 @@ export default function CategoryFeeSchedulesPage() {
         loadList();
         toast.success("Fee Schedule Updated", <>The fee schedule, <strong>{form.scheduleCode}</strong>, has been updated successfully.</>);
       } else {
-        const newId = await api.create(form);
-        setCreatedScheduleIds([newId]);
-        setCreatedScheduleId(newId);
+        await api.create(form);
+        setModalOpen(false);
         loadList();
-        toast.success("Fee Schedule Added", <>A new fee schedule, <strong>{form.scheduleCode}</strong>, has been added successfully. You can now import lines.</>);
-        setWizardStep(2);
+        toast.success("Fee Schedule Added", <>A new fee schedule, <strong>{form.scheduleCode}</strong>, has been added successfully.</>);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
@@ -578,25 +587,19 @@ export default function CategoryFeeSchedulesPage() {
   /*  Step 1 = Configuration, Step 2 = Import Lines (create only)      */
   /* ---------------------------------------------------------------- */
 
-  const wizardTitle = editId
-    ? "Edit fee schedule"
-    : wizardStep === 1
-      ? `Step 1: ${categoryLabel_} Configuration`
-      : `Step 2: Import Lines (${categoryLabel_})`;
+  const wizardTitle = editId ? "Edit Fee Schedule" : "Add Fee Schedule";
 
   const wizardFooter = (
     <div className="flex w-full items-center justify-between border-t border-border bg-card px-6 py-4">
       <div />
       <div className="flex gap-2">
         <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
-          {!editId && wizardStep === 2 ? "Close" : "Cancel"}
+          Cancel
         </Button>
 
-        {wizardStep === 1 && (
-          <Button onClick={handleSubmit} disabled={submitLoading} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
-            {submitLoading ? "Saving..." : editId ? "Update" : <>Next: Import Lines <ArrowRight className="ml-1 h-4 w-4" /></>}
-          </Button>
-        )}
+        <Button onClick={handleSubmit} disabled={submitLoading} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
+          {submitLoading ? "Saving..." : editId ? "Update" : <>Add Fee Schedule <ArrowRight className="ml-1 h-4 w-4" /></>}
+        </Button>
 
         {!editId && wizardStep === 2 && (
           <Button onClick={() => { setModalOpen(false); loadList(); }} className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white">
@@ -974,6 +977,7 @@ export default function CategoryFeeSchedulesPage() {
                 </div>
               )}
 
+              {/* Calculation model, Multiplier %, Status, Source, Notes — hidden per Figma
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Calculation model</label>
                 <select value={form.calculationModel} onChange={(e) => setForm((f) => ({ ...f, calculationModel: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
@@ -982,6 +986,7 @@ export default function CategoryFeeSchedulesPage() {
                   ))}
                 </select>
               </div>
+              */}
 
               {/* Year — Medicare uses From-To, others use single select dropdown */}
               {categorySlug !== "medicare" ? (
@@ -1053,18 +1058,7 @@ export default function CategoryFeeSchedulesPage() {
                 />
               </div>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Multiplier %</label>
-                <input type="number" step={0.01} value={form.multiplierPct} onChange={(e) => setForm((f) => ({ ...f, multiplierPct: Number(e.target.value) || 0 }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
-                <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                  {STATUS_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.name}</option>
-                  ))}
-                </select>
-              </div>
+              {/* Multiplier %, Status, Source, Notes — hidden per Figma */}
 
               {/* Fallback category — only for MVA and WC */}
               {categoryConfig.showFallbackCategory && (
@@ -1078,30 +1072,6 @@ export default function CategoryFeeSchedulesPage() {
                   </select>
                 </div>
               )}
-
-              {/* Adopt fee schedule — only for MVA and WC */}
-              {categoryConfig.showAdoptFs && (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Adopt fee schedule</label>
-                  <select value={form.adoptFeeScheduleId ?? ""} onChange={(e) => setForm((f) => ({ ...f, adoptFeeScheduleId: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                    <option value="">None</option>
-                    {fsOptions.filter((fs) => fs.id !== editId).map((fs) => (
-                      <option key={fs.id} value={fs.id}>
-                        {fs.scheduleCode ?? "\u2014"} {"\u2014"} {categoryLabelFn(fs.category)} {fs.state ? `(${fs.state})` : ""} {fs.years?.join(",")}{fs.quarters?.length ? `/Q${fs.quarters.join(",")}` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Source</label>
-                <input type="text" value={form.source ?? ""} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" placeholder="e.g. CMS Medicare PFS" />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-1 block text-sm font-medium text-foreground">Notes</label>
-                <textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-              </div>
             </div>
           </div>
         )}
