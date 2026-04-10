@@ -818,7 +818,6 @@ export default function InsuranceArAnalysisProcessingPage() {
                     step={s}
                     index={i}
                     isLast={i === status.steps.length - 1}
-                    onSkip={s.name === "Payer & Plan Validation" ? () => router.push(`/rcm/insurance-ar-analysis/${sessionId}/report?dummy=1`) : undefined}
                   />
                 ))}
               </div>
@@ -899,8 +898,6 @@ export default function InsuranceArAnalysisProcessingPage() {
                   uploading={uploading}
                   downloadError={payerDownloadError}
                   showRequiredColumns
-                  onSkip={isPayerStepCurrent ? handleSkipPayer : undefined}
-                  skipping={skippingPayer}
                 />
               </div>
             )}
@@ -922,8 +919,6 @@ export default function InsuranceArAnalysisProcessingPage() {
                   uploading={uploading}
                   downloadError={planDownloadError}
                   showRequiredColumns
-                  onSkip={isPlanStepCurrent ? handleSkipPlan : undefined}
-                  skipping={skippingPlan}
                 />
               </div>
             )}
@@ -944,8 +939,6 @@ export default function InsuranceArAnalysisProcessingPage() {
                   disabled={downloading}
                   uploading={uploading}
                   downloadError={providerDownloadError}
-                  onSkip={isProviderStepCurrent ? handleSkipProvider : undefined}
-                  skipping={skippingProvider}
                 />
               </div>
             )}

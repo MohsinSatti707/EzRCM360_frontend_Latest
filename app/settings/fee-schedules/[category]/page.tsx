@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter, notFound } from "next/navigation";
-import { Search, ArrowRight, ArrowLeft, Upload, Download, FileSpreadsheet, Trash2, Pencil, Plus, ChevronRight } from "lucide-react";
+import { Search, ArrowRight, Upload, Download, FileSpreadsheet, Trash2, Pencil, Plus } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
-import { PageHeader } from "@/components/settings/PageHeader";
+// PageHeader not used — custom breadcrumb with intermediate "Fee Schedules" link
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
@@ -631,7 +631,7 @@ export default function CategoryFeeSchedulesPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
-        <PageHeader title={`${categoryLabel_} Fee Schedules`} description="Centralized valuation datasets." />
+        <h1 className="mb-5 font-aileron font-bold text-[24px] text-[#202830]">{categoryLabel_} Fee Schedules</h1>
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -641,8 +641,8 @@ export default function CategoryFeeSchedulesPage() {
 
   if (!canView) {
     return (
-      <div>
-        <PageHeader title={`${categoryLabel_} Fee Schedules`} description="Centralized valuation datasets." />
+      <div className="px-6">
+        <h1 className="mb-5 font-aileron font-bold text-[24px] text-[#202830]">{categoryLabel_} Fee Schedules</h1>
         <Card>
           <AccessRestrictedContent sectionName="Fee Schedules" />
         </Card>
@@ -657,15 +657,16 @@ export default function CategoryFeeSchedulesPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
       {/* Breadcrumb */}
-      <nav className="mb-2 flex items-center gap-1 text-sm text-muted-foreground">
-        <Link href="/settings/fee-schedules" className="hover:text-foreground hover:underline">
-          Fee Schedules
-        </Link>
-        <ChevronRight className="h-3.5 w-3.5" />
-        <span className="font-medium text-foreground">{categoryLabel_}</span>
-      </nav>
-
-      <PageHeader title={`${categoryLabel_} Fee Schedules`} description={`Manage ${categoryLabel_} fee schedules and CPT fee lines.`} />
+      <div className="mb-5">
+        <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <Link href="/settings" className="transition-colors hover:text-foreground">Settings &amp; Configurations</Link>
+          <span aria-hidden>/</span>
+          <Link href="/settings/fee-schedules" className="transition-colors hover:text-foreground">Fee Schedules</Link>
+          <span aria-hidden>/</span>
+          <span className="text-foreground">{categoryLabel_} Fee Schedules</span>
+        </nav>
+        <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">{categoryLabel_} Fee Schedules</h1>
+      </div>
 
       {/* Toolbar */}
       <div className="mb-3 flex items-center justify-between gap-3">
