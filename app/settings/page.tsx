@@ -74,7 +74,7 @@ const configSections = [
       "Centralized valuation datasets for reimbursement calculation and analysis.",
     links: [
       { label: "Fee Schedules", href: "/settings/fee-schedules" },
-      { label: "Geography Resolution", href: "/settings/geography-resolution" },
+      // { label: "Geography Resolution", href: "/settings/geography-resolution" }, // Moved inside Fee Schedule detail page
       { label: "Applicability Rules", href: "/settings/applicability-rules" },
     ],
   },
