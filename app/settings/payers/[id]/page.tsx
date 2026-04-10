@@ -291,7 +291,7 @@ export default function PayerDetailPage() {
             )}
             {canUpdate && (
               <Button
-                onClick={() => router.push(`/settings/payers?edit=${payerId}`)}
+                onClick={() => router.push(`/settings/payers?edit=${id}`)}
                 className="h-10 rounded-[5px] bg-[#0066CC] px-[18px] text-white hover:bg-[#0066CC]/90 font-aileron text-[14px]"
               >
                 Edit
