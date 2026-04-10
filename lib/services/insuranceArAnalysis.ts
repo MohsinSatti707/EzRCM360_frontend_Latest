@@ -236,6 +236,9 @@ export interface ArAnalysisReportDto {
   totalMerFs: number;
   totalMerAllowed: number;
   totalMerOonAdjusted: number;
+  totalUnderpaymentFs: number;
+  totalUnderpaymentAllowed: number;
+  totalUnderpaymentOon: number;
   noPayDenialSummary: NoPayDenialSummaryDto;
   resolutionSummary?: ResolutionSummaryDto | null;
 }

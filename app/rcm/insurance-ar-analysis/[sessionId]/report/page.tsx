@@ -60,6 +60,9 @@ const DUMMY_REPORT: ArAnalysisReportDto = {
   totalMerFs: 48000,
   totalMerAllowed: 42000,
   totalMerOonAdjusted: 21000,
+  totalUnderpaymentFs: 15500,
+  totalUnderpaymentAllowed: 9500,
+  totalUnderpaymentOon: 0,
   noPayDenialSummary: {
     fullNoPayClaimCount: 2,
     partialNoPayClaimCount: 3,
@@ -269,19 +272,19 @@ const formattedSession = formatSessionDetails(
           <div className="grid gap-5 sm:grid-cols-3 mt-5">
             <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
               <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
-                {formatCurrency(Math.max(0, report.totalMerFs - report.totalPaidAmount))}
+                {formatCurrency(report.totalUnderpaymentFs ?? 0)}
               </div>
               <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (FS)</div>
             </div>
             <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
               <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
-                {formatCurrency(Math.max(0, report.totalMerAllowed - report.totalPaidAmount))}
+                {formatCurrency(report.totalUnderpaymentAllowed ?? 0)}
               </div>
               <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (Allowed)</div>
             </div>
             <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
               <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
-                {formatCurrency(Math.max(0, report.totalMerOonAdjusted - report.totalPaidAmount))}
+                {formatCurrency(report.totalUnderpaymentOon ?? 0)}
               </div>
               <div className="text-[14px] font-['Aileron'] text-muted-foreground">Claim Underpayment (OON)</div>
             </div>
