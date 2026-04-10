@@ -889,51 +889,66 @@ export default function InsuranceArAnalysisProcessingPage() {
               </div>
             )}
 
-            {showResolutionBlocks && (needsPayerResolution || needsPlanResolution) && (
-              <div className="mt-6 space-y-3">
-                <p className="text-[13px] font-['Aileron'] text-muted-foreground rounded-lg bg-muted/50 px-4 py-3">
-                  <strong>Option 1:</strong> Download the report, correct the data, and re-upload.{" "}
-                  <strong>Option 2:</strong> Configure the missing payers/plans in <strong>Settings &amp; Configurations</strong>, then click <strong>Configured and Resume</strong> to re-validate.
-                </p>
-                <Button
-                  onClick={handleResumeValidation}
-                  disabled={resumingValidation || downloading || uploading}
-                  className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-                >
-                  {resumingValidation ? "Re-validating..." : "Configured and Resume"}
-                </Button>
+            {showResolutionBlocks && (needsPlanResolution || needsPayerResolution) && (
+              <div className="mt-8 animate-fade-in-up space-y-6">
+                <h3 className="mb-2 text-base font-semibold text-amber-900">Action required</h3>
+
+                {needsPlanResolution && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 space-y-3">
+                    <h4 className="text-sm font-semibold text-amber-900">Plan not found — Pending Plan Enrollment</h4>
+                    <p className="text-sm text-amber-800">
+                      Some plans in your intake were not matched to configured plans. Configure the missing plans in{" "}
+                      <strong>Settings &amp; Configurations &gt; Plans</strong>, then click <strong>Configured and Resume</strong>.
+                    </p>
+                    <Button variant="outline" onClick={handleDownloadPlan} disabled={downloading} className="border-amber-400 text-amber-900 hover:bg-amber-100 text-xs h-8">
+                      Download Plan-NotFound.xlsx
+                    </Button>
+                    {planDownloadError && <p className="text-xs text-red-600">{planDownloadError}</p>}
+                  </div>
+                )}
+
+                {needsPayerResolution && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 space-y-3">
+                    <h4 className="text-sm font-semibold text-amber-900">Payer not found — Pending Payer Enrollment</h4>
+                    <p className="text-sm text-amber-800">
+                      Some payers in your intake were not matched to configured payers. Configure the missing payers in{" "}
+                      <strong>Settings &amp; Configurations &gt; Payers</strong>, then click <strong>Configured and Resume</strong>.
+                    </p>
+                    <Button variant="outline" onClick={handleDownloadPayer} disabled={downloading} className="border-amber-400 text-amber-900 hover:bg-amber-100 text-xs h-8">
+                      Download Payer-NotFound.xlsx
+                    </Button>
+                    {payerDownloadError && <p className="text-xs text-red-600">{payerDownloadError}</p>}
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleResumeValidation}
+                    disabled={resumingValidation || downloading || uploading}
+                    className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+                  >
+                    {resumingValidation ? "Re-validating..." : "Configured and Resume"}
+                  </Button>
+                  {(isPayerStepCurrent || isPlanStepCurrent) && (
+                    <Button
+                      onClick={isPayerStepCurrent ? handleSkipPayer : handleSkipPlan}
+                      disabled={(isPayerStepCurrent ? skippingPayer : skippingPlan) || downloading}
+                      variant="outline"
+                      className="h-10 rounded-[5px] px-[18px] border-amber-400 text-amber-900 hover:bg-amber-100 font-aileron text-[14px]"
+                    >
+                      {(isPayerStepCurrent ? skippingPayer : skippingPlan) ? "Skipping..." : "Skip and Continue"}
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 
-            {showResolutionBlocks && needsPayerResolution && (
+            {/* Plan/Payer ResolutionBlocks removed — replaced by Configured and Resume above */}
+            {false && needsPlanResolution && (
               <div className="mt-8 animate-fade-in-up">
-                <h3 className="mb-4 text-base font-semibold text-amber-900">Action required</h3>
-                <ResolutionBlock
-                  title="Payer not found"
-                  description="Some payers in your intake were not matched. Download the report, correct the data (map or add payers) or mark rows as Exclude in the Action column, then re-upload that same corrected file."
-                  hint={RESOLUTION_HINTS.payerNotFound}
-                  downloadLabel="Download Payer-NotFound.xlsx"
-                  filename="Payer-NotFound.xlsx"
-                  onDownload={handleDownloadPayer}
-                  onUpload={handleUploadPayer}
-                  file={payerFile}
-                  setFile={setPayerFile}
-                  disabled={downloading}
-                  uploading={uploading}
-                  downloadError={payerDownloadError}
-                  showRequiredColumns
-                  onSkip={isPayerStepCurrent ? handleSkipPayer : undefined}
-                  skipping={skippingPayer}
-                />
-              </div>
-            )}
-
-            {showResolutionBlocks && needsPlanResolution && (
-              <div className="mt-8 animate-fade-in-up">
-                <h3 className="mb-4 text-base font-semibold text-amber-900">Action required</h3>
                 <ResolutionBlock
                   title="Plan not found"
-                  description="Some plans in your intake were not matched. Download the report, correct the data (map to existing plan) or mark rows as Exclude in the Action column, then re-upload that same corrected file."
+                  description=""
                   hint={RESOLUTION_HINTS.planNotFound}
                   downloadLabel="Download Plan-NotFound.xlsx"
                   filename="Plan-NotFound.xlsx"
