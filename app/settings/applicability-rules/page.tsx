@@ -537,7 +537,7 @@ export default function ApplicabilityRulesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[80px] min-w-[80px]">Sort</TableHeaderCell>
+                  {/* <TableHeaderCell className="w-[80px] min-w-[80px]">Sort</TableHeaderCell> */}
                   <TableHeaderCell className="w-[240px] min-w-[240px]">Rule set / Display</TableHeaderCell>
                   <TableHeaderCell className="w-[180px] min-w-[180px]">Payer category</TableHeaderCell>
                   <TableHeaderCell className="w-[100px] min-w-[100px]">Multiplier</TableHeaderCell>
@@ -558,12 +558,13 @@ export default function ApplicabilityRulesPage() {
                         />
                       </TableCell>
                     )}
+                    {/* Sort Order column — hidden for now
                     <TableCell className="w-[80px] min-w-[80px]">
                       <div className="max-w-[60px] truncate">
                         <CellTooltip text={row.sortOrder} />
-                        
                         </div>
                     </TableCell>
+                    */}
                     <TableCell className="w-[240px] min-w-[240px]">
                       <div className="max-w-[220px] truncate">
                         <CellTooltip text={`${row.ruleSetName ?? "—"} / ${row.displayName ?? "—"}`} />
@@ -660,6 +661,7 @@ export default function ApplicabilityRulesPage() {
             </div>
           )}
           <div className="flex flex-col gap-4">
+            {/* Sort order field — hidden for now
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
                 Sort order
@@ -676,6 +678,7 @@ export default function ApplicabilityRulesPage() {
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               />
             </div>
+            */}
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">
                 Rule set name <span className="text-red-500">*</span>
