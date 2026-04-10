@@ -58,56 +58,40 @@ export function FacilityFormModal({
             <Alert variant="error">{error}</Alert>
           </div>
         )}
-        <div className="space-y-2">
+        <div className="space-y-4">
           <Input
-            label="Name"
+            label="Facility Name"
             required
+            placeholder="e.g., City Care Clinic"
             value={form.name}
             onChange={(e) => onFormChange({ ...form, name: e.target.value })}
           />
           <Input
-            label="Facility type"
+            label="Facility Type"
             required
+            placeholder="e.g., Clinic"
             value={form.facilityType}
             onChange={(e) => onFormChange({ ...form, facilityType: e.target.value })}
           />
+          <Input
+            label="Physical Address"
+            placeholder="e.g., 123 Main St, NY 10001"
+            value={form.addressLine1 ?? ""}
+            onChange={(e) => onFormChange({ ...form, addressLine1: e.target.value })}
+          />
           <Select
-            label="Entity"
+            label="Linked Entity"
             required
             options={entityOptions}
             value={form.entityId}
             onChange={(e) => onFormChange({ ...form, entityId: e.target.value })}
           />
           <Input
-            label="Address line 1"
-            value={form.addressLine1 ?? ""}
-            onChange={(e) => onFormChange({ ...form, addressLine1: e.target.value })}
-          />
-          <Input
-            label="Address line 2"
-            value={form.addressLine2 ?? ""}
-            onChange={(e) => onFormChange({ ...form, addressLine2: e.target.value })}
-          />
-          <Input
-            label="Zip code"
-            value={form.zipCode ?? ""}
-            onChange={(e) => onFormChange({ ...form, zipCode: e.target.value })}
-          />
-          <Input
-            label="POS code"
+            label="POS Code"
+            placeholder="e.g., POS #11"
             value={form.posCode ?? ""}
             onChange={(e) => onFormChange({ ...form, posCode: e.target.value })}
           />
-          <label className="inline-flex w-fit cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              id="facility-active-checkbox"
-              checked={form.isActive ?? true}
-              onChange={(e) => onFormChange({ ...form, isActive: e.target.checked })}
-              className="h-5 w-5 rounded border-input mt-2"
-            />
-            <span className="text-sm text-foreground mt-2">Active</span>
-          </label>
         </div>
       </form>
     </DrawerForm>
