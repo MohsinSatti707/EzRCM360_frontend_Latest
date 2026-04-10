@@ -286,6 +286,7 @@ export default function InsuranceArAnalysisProcessingPage() {
   const [skippingPayer, setSkippingPayer] = useState(false);
   const [skippingPlan, setSkippingPlan] = useState(false);
   const [skippingProvider, setSkippingProvider] = useState(false);
+  const [resumingValidation, setResumingValidation] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [planDownloadError, setPlanDownloadError] = useState<string | null>(null);
   const [payerDownloadError, setPayerDownloadError] = useState<string | null>(null);
@@ -621,6 +622,19 @@ export default function InsuranceArAnalysisProcessingPage() {
   );
   const handleSkipPayer = createSkipHandler("Payer validation", () => apiRef.current.skipPayerNotFound(sessionId), setSkippingPayer);
   const handleSkipPlan = createSkipHandler("Plan validation", () => apiRef.current.skipPlanNotFound(sessionId), setSkippingPlan);
+
+  const handleResumeValidation = async () => {
+    setResumingValidation(true);
+    try {
+      await apiRef.current.resumePayerPlanValidation(sessionId);
+      toast.success("Re-validating", "Pipeline is re-checking payers and plans against current configuration...");
+      refreshStatus();
+    } catch (err) {
+      toast.error("Resume Failed", err instanceof Error ? err.message : "Resume failed.");
+    } finally {
+      setResumingValidation(false);
+    }
+  };
   const handleSkipProvider = createSkipHandler("Provider participation", () => apiRef.current.skipProviderParticipationNotFound(sessionId), setSkippingProvider);
 
   const needsConflictResolution =
@@ -876,9 +890,19 @@ export default function InsuranceArAnalysisProcessingPage() {
             )}
 
             {showResolutionBlocks && (needsPayerResolution || needsPlanResolution) && (
-              <p className="mt-6 text-[13px] font-['Aileron'] text-muted-foreground rounded-lg bg-muted/50 px-4 py-3">
-                After uploading both Payer and Plan resolution files (if both were required), the pipeline may take a few minutes to resume. Use <strong>Refresh status</strong> above to check the latest state.
-              </p>
+              <div className="mt-6 space-y-3">
+                <p className="text-[13px] font-['Aileron'] text-muted-foreground rounded-lg bg-muted/50 px-4 py-3">
+                  <strong>Option 1:</strong> Download the report, correct the data, and re-upload.{" "}
+                  <strong>Option 2:</strong> Configure the missing payers/plans in <strong>Settings &amp; Configurations</strong>, then click <strong>Configured and Resume</strong> to re-validate.
+                </p>
+                <Button
+                  onClick={handleResumeValidation}
+                  disabled={resumingValidation || downloading || uploading}
+                  className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+                >
+                  {resumingValidation ? "Re-validating..." : "Configured and Resume"}
+                </Button>
+              </div>
             )}
 
             {showResolutionBlocks && needsPayerResolution && (

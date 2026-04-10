@@ -637,6 +637,22 @@ export function insuranceArAnalysisApi() {
       }
     },
 
+    resumePayerPlanValidation: async (sessionId: string): Promise<void> => {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem(AUTH_TOKEN_KEY)
+          : null;
+      const url = getApiUrl(`${BASE}/${sessionId}/resume-payer-plan-validation`);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(getErrorMessageFromResponse(text, "Resume failed."));
+      }
+    },
+
     skipProviderParticipationNotFound: async (sessionId: string): Promise<void> => {
       const token =
         typeof window !== "undefined"
