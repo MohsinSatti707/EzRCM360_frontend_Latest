@@ -341,12 +341,12 @@ export default function FacilitiesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Name</TableHeaderCell>
-                  <TableHeaderCell className="w-[180px] min-w-[180px]">Type</TableHeaderCell>
-                  <TableHeaderCell className="w-[180px] min-w-[180px]">Entity</TableHeaderCell>
-                  <TableHeaderCell className="w-[220px] min-w-[220px]">Physical address</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">POS code</TableHeaderCell>
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Status</TableHeaderCell>
+                  <TableHeaderCell className="w-[180px] min-w-[180px]">Facility Name</TableHeaderCell>
+                  <TableHeaderCell className="w-[150px] min-w-[150px]">Facility Type</TableHeaderCell>
+                  <TableHeaderCell className="w-[220px] min-w-[220px]">Physical Address</TableHeaderCell>
+                  <TableHeaderCell className="w-[180px] min-w-[180px]">Linked Entity</TableHeaderCell>
+                  <TableHeaderCell className="w-[100px] min-w-[100px]">POS Code</TableHeaderCell>
+                  <TableHeaderCell className="w-[120px] min-w-[120px]">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
                   )}
@@ -363,32 +363,30 @@ export default function FacilitiesPage() {
                         />
                       </TableCell>
                     )}
-                    <TableCell className="w-[200px] min-w-[200px]">
+                    <TableCell className="w-[180px] min-w-[180px]">
                       <div className="max-w-xs truncate">
                         <CellTooltip text={row.name} />
-                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">
+                    <TableCell className="w-[150px] min-w-[150px]">
+                      <div className="max-w-[130px] truncate">
                         <CellTooltip text={row.facilityType} />
-                        
-                        </div>
-                    </TableCell>
-                    <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[140px] truncate">
-                        <CellTooltip text={row.entityDisplayName ?? "—"} />
-                        
-                        </div>
+                      </div>
                     </TableCell>
                     <TableCell className="w-[220px] min-w-[220px]">
-                      <div className="max-w-[180px] truncate">
+                      <div className="max-w-[200px] truncate">
                         <CellTooltip text={[row.addressLine1, row.addressLine2, row.zipCode].filter(Boolean).join(", ") || "—"} />
-                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">
+                    <TableCell className="w-[180px] min-w-[180px]">
+                      <div className="max-w-[160px] truncate">
+                        <CellTooltip text={row.entityDisplayName ?? "—"} />
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[100px] min-w-[100px]">
+                      <div className="max-w-[80px] truncate">
                         <CellTooltip text={row.posCode ?? "—"} />
-                        </div>
+                      </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <select

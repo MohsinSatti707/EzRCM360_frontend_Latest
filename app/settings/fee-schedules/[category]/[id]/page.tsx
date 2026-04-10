@@ -509,7 +509,7 @@ export default function FeeScheduleDetailPage() {
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importLoading}
-                className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+                className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
               >
                 <Upload className="mr-2 h-4 w-4" />
                 {importLoading ? "Importing..." : "Upload CPT Fees"}
