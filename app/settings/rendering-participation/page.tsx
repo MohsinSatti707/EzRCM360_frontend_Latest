@@ -418,14 +418,11 @@ export default function RenderingParticipationPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[180px] min-w-[180px]">Entity</TableHeaderCell>
                   <TableHeaderCell className="w-[200px] min-w-[200px]">Provider</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Payer</TableHeaderCell>
                   <TableHeaderCell className="w-[200px] min-w-[200px]">Plan</TableHeaderCell>
-                  <TableHeaderCell className="w-[140px] min-w-[140px]">Status</TableHeaderCell>
-                  <TableHeaderCell className="w-[140px] min-w-[140px]">Effective from</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">Effective to</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Active</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px]">Participation Status</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Effective From</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Effective To</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
                   )}
@@ -442,61 +439,30 @@ export default function RenderingParticipationPage() {
                         />
                       </TableCell>
                     )}
-                    <TableCell className="w-[180px] min-w-[180px]">
-                      <div className="max-w-[140px] truncate">
-                        <CellTooltip text={entityNameById.get(providerEntityIdById.get(row.entityProviderId) ?? "") ?? "—"} />
-                        
+                    <TableCell className="w-[200px] min-w-[200px]">
+                      <div className="max-w-xs truncate">
+                        <CellTooltip text={row.providerName ?? providerNameById.get(row.entityProviderId) ?? "—"} />
                       </div>
                     </TableCell>
                     <TableCell className="w-[200px] min-w-[200px]">
                       <div className="max-w-xs truncate">
-                        <CellTooltip text={row.providerName ??
-                          providerNameById.get(row.entityProviderId) ??
-                          row.entityProviderId} />
-                        
+                        <CellTooltip text={row.planName ?? planNameById.get(row.planId) ?? "—"} />
                       </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
                       <div className="max-w-[140px] truncate">
-                        <CellTooltip text={row.payerName ?? "—"} />
-                        
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-[200px] min-w-[200px]">
-                      <div className="max-w-xs truncate">
-                        <CellTooltip text={row.planName ?? planNameById.get(row.planId) ?? row.planId} />
-                        
+                        <CellTooltip text={statusLabel(row.participationStatus)} />
                       </div>
                     </TableCell>
                     <TableCell className="w-[140px] min-w-[140px]">
-                      
                       <div className="max-w-[120px] truncate">
-                        <CellTooltip text={statusLabel(row.participationStatus)} />
-                        </div>
-                    </TableCell>
-                    <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">
                         <CellTooltip text={row.effectiveFrom ? toDateInput(row.effectiveFrom) : "—"} />
-                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">
+                    <TableCell className="w-[140px] min-w-[140px]">
+                      <div className="max-w-[120px] truncate">
                         <CellTooltip text={row.effectiveTo ? toDateInput(row.effectiveTo) : "—"} />
-                        </div>
-                    </TableCell>
-                    <TableCell className="w-[160px] min-w-[160px]">
-                      <select
-                        value={row.isActive ? 1 : 0}
-                        onChange={(e) => handleStatusChange(row, Number(e.target.value))}
-                        disabled={!canUpdate || statusUpdatingId === row.id}
-                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                      >
-                        {ACTIVE_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.name}
-                          </option>
-                        ))}
-                      </select>
+                      </div>
                     </TableCell>
                     {(canUpdate || canDelete) && (
                       <TableCell className="!w-[120px] min-w-[120px]">
@@ -558,51 +524,41 @@ export default function RenderingParticipationPage() {
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           {formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>}
           <div className="flex flex-col gap-4">
+            {/* Entity — hidden per Figma, auto-selected from provider */}
+            <input type="hidden" value={selectedEntityId} />
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Entity <span className="text-red-500">*</span></label>
-              <select value={selectedEntityId} onChange={(e) => { setSelectedEntityId(e.target.value); setForm((f) => ({ ...f, entityProviderId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
-                <option value="">Select entity</option>
-                {entities.map((e) => (
-                  <option key={e.id} value={e.id}>{e.displayName}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Provider <span className="text-red-500">*</span></label>
-              <select value={form.entityProviderId} onChange={(e) => setForm((f) => ({ ...f, entityProviderId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required disabled={!selectedEntityId}>
-                <option value="">{selectedEntityId ? "Select provider" : "Select entity first"}</option>
-                {filteredProviders.map((p) => (
+              <label className="mb-1 block text-sm font-medium text-foreground">Provider</label>
+              <select value={form.entityProviderId} onChange={(e) => { const prov = allEntityProviders.find((p) => p.id === e.target.value); if (prov) setSelectedEntityId(prov.entityId); setForm((f) => ({ ...f, entityProviderId: e.target.value })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
+                <option value="">Select provider</option>
+                {allEntityProviders.map((p) => (
                   <option key={p.id} value={p.id}>{p.displayName}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Payer <span className="text-red-500">*</span></label>
-              <select value={selectedPayerId} onChange={(e) => { setSelectedPayerId(e.target.value); setForm((f) => ({ ...f, payerId: e.target.value, planId: "" })); }} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" required>
-                <option value="">Select payer</option>
-                {payers.map((p) => (
-                  <option key={p.id} value={p.id}>{p.payerName}</option>
+            <div className="overflow-hidden">
+              <label className="mb-1 block text-sm font-medium text-foreground">Plan</label>
+              <select value={form.planId ?? ""} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                <option value="">Select plan</option>
+                {allPlans.map((p) => (
+                  <option key={p.id} value={p.id} title={p.displayName}>{p.displayName.length > 60 ? p.displayName.substring(0, 60) + "..." : p.displayName}</option>
                 ))}
               </select>
             </div>
-            {isSelectedPayerCommercialInsurance && (
-              <div className="overflow-hidden">
-                <label className="mb-1 block text-sm font-medium text-foreground">Plan <span className="text-red-500">*</span></label>
-                <select value={form.planId} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" title={filteredPlans.find((p) => p.id === form.planId)?.displayName || ""} required disabled={!selectedPayerId}>
-                  <option value="">{selectedPayerId ? "Select plan" : "Select payer first"}</option>
-                  {filteredPlans.map((p) => (
-                    <option key={p.id} value={p.id} title={p.displayName}>{p.displayName.length > 60 ? p.displayName.substring(0, 60) + "..." : p.displayName}</option>
-                  ))}
-                </select>
-              </div>
-            )}
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Participation status</label>
+              <label className="mb-1 block text-sm font-medium text-foreground">Participation Status</label>
               <select value={form.participationStatus} onChange={(e) => setForm((f) => ({ ...f, participationStatus: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                 {participationStatuses.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective From Date</label>
+              <input type="date" value={toDateInput(form.effectiveFrom ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveFrom: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Effective To Date</label>
+              <input type="date" value={toDateInput(form.effectiveTo ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveTo: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Source</label>
@@ -611,20 +567,6 @@ export default function RenderingParticipationPage() {
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Effective from</label>
-              <input type="date" value={toDateInput(form.effectiveFrom ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveFrom: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Effective to</label>
-              <input type="date" value={toDateInput(form.effectiveTo ?? undefined)} onChange={(e) => setForm((f) => ({ ...f, effectiveTo: e.target.value || null }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-            </div>
-            <div>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} className="h-5 w-5 rounded border-input" />
-                <span className="text-sm text-foreground">Active</span>
-              </label>
             </div>
           </div>
         </form>
