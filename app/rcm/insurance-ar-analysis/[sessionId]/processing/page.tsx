@@ -1088,7 +1088,7 @@ export default function InsuranceArAnalysisProcessingPage() {
                 onClick={() => router.push(`/rcm/insurance-ar-analysis/${sessionId}/report`)}
                 className="h-10 rounded-[5px] px-6 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
               >
-                View Report <ArrowRight className="ml-1 h-4 w-4" />
+                View Report <span className="ml-1 inline-block">→</span>
               </Button>
             </div>
           )}

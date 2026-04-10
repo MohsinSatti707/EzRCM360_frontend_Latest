@@ -331,17 +331,6 @@ export default function PayerDetailPage() {
             <p className="mt-1 font-aileron text-[14px] text-[#202830]">{entityLabel}</p>
           </div>
         </div>
-        {/* CreatedAt — shown only if available from API */}
-        {typeof (payer as Record<string, unknown>).createdAt === "string" && (
-          <div className="mt-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Created At
-            </p>
-            <p className="mt-1 font-aileron text-[14px] text-[#202830]">
-              {formatDate((payer as Record<string, unknown>).createdAt as string)}
-            </p>
-          </div>
-        )}
       </Card>
 
       {/* Conditional section: Insurance -> Linked Plans table, Non-insurance -> Contact Info */}
