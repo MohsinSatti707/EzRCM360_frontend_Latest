@@ -287,6 +287,8 @@ export default function InsuranceArAnalysisProcessingPage() {
   const [skippingPlan, setSkippingPlan] = useState(false);
   const [skippingProvider, setSkippingProvider] = useState(false);
   const [resumingValidation, setResumingValidation] = useState(false);
+  const [providerUploadPreview, setProviderUploadPreview] = useState<{ totalCombos: number; inNetworkCount: number; outOfNetworkCount: number; unfilledCount: number } | null>(null);
+  const [resumingProvider, setResumingProvider] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [planDownloadError, setPlanDownloadError] = useState<string | null>(null);
   const [payerDownloadError, setPayerDownloadError] = useState<string | null>(null);
@@ -584,7 +586,35 @@ export default function InsuranceArAnalysisProcessingPage() {
 
   const handleUploadPayer = createUploadHandler("Payer-NotFound", payerFile, (f) => apiRef.current.uploadPayerNotFound(sessionId, f), setPayerFile);
   const handleUploadPlan = createUploadHandler("Plan-NotFound", planFile, (f) => apiRef.current.uploadPlanNotFound(sessionId, f), setPlanFile);
-  const handleUploadProvider = createUploadHandler("Provider participation", providerFile, (f) => apiRef.current.uploadProviderParticipationNotFound(sessionId, f), setProviderFile);
+  const handleUploadProvider = async () => {
+    if (!providerFile) { toast.error("Validation Error", "Please select a file."); return; }
+    setUploading(true);
+    try {
+      const preview = await apiRef.current.uploadProviderParticipationNotFound(sessionId, providerFile);
+      setProviderUploadPreview(preview);
+      toast.success("File Uploaded", "File uploaded successfully. Review the summary below and click Continue to resume.");
+    } catch (err) {
+      toast.error("Upload Failed", err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleResumeProvider = async () => {
+    setResumingProvider(true);
+    try {
+      await apiRef.current.resumeProviderParticipation(sessionId);
+      setProviderUploadPreview(null);
+      setProviderFile(null);
+      toast.success("Resuming", "Pipeline is resuming with the uploaded participation data...");
+      await refreshStatus();
+      pollUntilSettled();
+    } catch (err) {
+      toast.error("Resume Failed", err instanceof Error ? err.message : "Resume failed.");
+    } finally {
+      setResumingProvider(false);
+    }
+  };
   const handleUploadFacility = createUploadHandler("Facility participation", facilityFile, (f) => apiRef.current.uploadFacilityParticipationNotFound(sessionId, f), setFacilityFile);
 
   const createSkipHandler = (
@@ -955,22 +985,68 @@ export default function InsuranceArAnalysisProcessingPage() {
             {showResolutionBlocks && needsProviderResolution && (
               <div className="mt-8 animate-fade-in-up">
                 <h3 className="mb-4 text-base font-semibold text-amber-900">Action required</h3>
-                <ResolutionBlock
-                  title="Rendering Provider Participation Validation"
-                  description="Download the file, fill in the Participation Status column with IN (In-Network) or OON (Out-of-Network) for each rendering provider / payer / plan combination, then re-upload."
-                  hint={RESOLUTION_HINTS.providerParticipation}
-                  downloadLabel="Download RenderingProviderParticipation-Pending.xlsx"
-                  filename="RenderingProviderParticipation-Pending.xlsx"
-                  onDownload={handleDownloadProvider}
-                  onUpload={handleUploadProvider}
-                  file={providerFile}
-                  setFile={setProviderFile}
-                  disabled={downloading}
-                  uploading={uploading}
-                  downloadError={providerDownloadError}
-                  onSkip={isProviderStepCurrent ? handleSkipProvider : undefined}
-                  skipping={skippingProvider}
-                />
+                {providerUploadPreview ? (
+                  <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50 p-6 space-y-4">
+                    <h4 className="text-base font-semibold text-emerald-900">Participation File Uploaded — Review Summary</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div className="rounded-lg bg-white p-3 text-center border border-emerald-200">
+                        <div className="text-2xl font-bold text-foreground">{providerUploadPreview.totalCombos}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Total Combos</div>
+                      </div>
+                      <div className="rounded-lg bg-white p-3 text-center border border-emerald-200">
+                        <div className="text-2xl font-bold text-emerald-700">{providerUploadPreview.inNetworkCount}</div>
+                        <div className="text-xs text-muted-foreground mt-1">In-Network (IN)</div>
+                      </div>
+                      <div className="rounded-lg bg-white p-3 text-center border border-emerald-200">
+                        <div className="text-2xl font-bold text-amber-700">{providerUploadPreview.outOfNetworkCount}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Out-of-Network (OON)</div>
+                      </div>
+                      <div className="rounded-lg bg-white p-3 text-center border border-emerald-200">
+                        <div className="text-2xl font-bold text-red-600">{providerUploadPreview.unfilledCount}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Unfilled</div>
+                      </div>
+                    </div>
+                    {providerUploadPreview.unfilledCount > 0 && (
+                      <p className="text-sm text-amber-800 bg-amber-100 rounded px-3 py-2">
+                        {providerUploadPreview.unfilledCount} row(s) have no participation status. These will be treated as unknown during processing.
+                      </p>
+                    )}
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        onClick={handleResumeProvider}
+                        disabled={resumingProvider}
+                        className="h-10 rounded-[5px] px-6 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+                      >
+                        {resumingProvider ? "Resuming..." : "Continue"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => { setProviderUploadPreview(null); setProviderFile(null); }}
+                        disabled={resumingProvider}
+                        className="h-10 rounded-[5px] px-[18px] border-border"
+                      >
+                        Re-upload Different File
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <ResolutionBlock
+                    title="Rendering Provider Participation Validation"
+                    description="Download the file, fill in the Participation Status column with IN (In-Network) or OON (Out-of-Network) for each rendering provider / payer / plan combination, then re-upload."
+                    hint={RESOLUTION_HINTS.providerParticipation}
+                    downloadLabel="Download RenderingProviderParticipation-Pending.xlsx"
+                    filename="RenderingProviderParticipation-Pending.xlsx"
+                    onDownload={handleDownloadProvider}
+                    onUpload={handleUploadProvider}
+                    file={providerFile}
+                    setFile={setProviderFile}
+                    disabled={downloading}
+                    uploading={uploading}
+                    downloadError={providerDownloadError}
+                    onSkip={isProviderStepCurrent ? handleSkipProvider : undefined}
+                    skipping={skippingProvider}
+                  />
+                )}
               </div>
             )}
 

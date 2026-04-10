@@ -773,7 +773,9 @@ export default function CategoryFeeSchedulesPage() {
                     )}
                     <TableCell className="w-[150px] min-w-[150px]">
                       <div className="max-w-[130px] truncate">
-                        <CellTooltip text={row.scheduleCode ?? "\u2014"} />
+                        <Link href={`/settings/fee-schedules/${categorySlug}/${row.id}`} className="text-[#0066CC] hover:underline font-medium">
+                          {row.scheduleCode ?? "\u2014"}
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell className="w-[120px] min-w-[120px]">

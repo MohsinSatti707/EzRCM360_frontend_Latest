@@ -207,6 +207,13 @@ export interface StepResolutionSummary {
   claimsProceeding: number;
 }
 
+export interface ProviderParticipationUploadPreview {
+  totalCombos: number;
+  inNetworkCount: number;
+  outOfNetworkCount: number;
+  unfilledCount: number;
+}
+
 export interface ResolutionSummaryDto {
   payer?: StepResolutionSummary | null;
   plan?: StepResolutionSummary | null;
@@ -528,7 +535,7 @@ export function insuranceArAnalysisApi() {
       return res.blob();
     },
 
-    uploadProviderParticipationNotFound: async (sessionId: string, file: File): Promise<void> => {
+    uploadProviderParticipationNotFound: async (sessionId: string, file: File): Promise<ProviderParticipationUploadPreview> => {
       const fd = new FormData();
       fd.append("file", file);
       const token =
@@ -544,6 +551,24 @@ export function insuranceArAnalysisApi() {
       if (!res.ok) {
         const text = await res.text();
         throw new Error(getErrorMessageFromResponse(text, "Failed to upload."));
+      }
+      const json = await res.json();
+      return json.data ?? json;
+    },
+
+    resumeProviderParticipation: async (sessionId: string): Promise<void> => {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem(AUTH_TOKEN_KEY)
+          : null;
+      const url = getApiUrl(`${BASE}/${sessionId}/provider-participation-not-found/resume`);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(getErrorMessageFromResponse(text, "Resume failed."));
       }
     },
 
