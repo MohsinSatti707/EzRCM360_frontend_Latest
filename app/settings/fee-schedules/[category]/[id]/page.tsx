@@ -657,65 +657,52 @@ export default function FeeScheduleDetailPage() {
   );
 
   const renderFallbackTab = () => {
-    const adoptId = detail.adoptFeeScheduleId;
     const fallbackCat = detail.fallbackCategory;
+    const hasFallback = fallbackCat != null;
 
     return (
-      <Card className="p-6">
-        <div className="space-y-6">
-          <h3 className="font-aileron text-[16px] font-semibold text-[#202830]">
-            Fallback Configuration
-          </h3>
+      <div className="space-y-6">
+        <h3 className="font-aileron text-[16px] font-semibold text-[#202830]">
+          CPT-Level Fallback Rules
+        </h3>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Adopt Fee Schedule ID */}
-            <div className="rounded-lg border border-[#E2E8F0] p-4">
-              <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-                Adopt Fee Schedule ID
-              </p>
-              <p className="font-aileron text-[14px] text-[#202830]">
-                {adoptId ?? "Not configured"}
-              </p>
-            </div>
-
-            {/* Fallback Category */}
-            <div className="rounded-lg border border-[#E2E8F0] p-4">
-              <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-                Fallback Category
-              </p>
-              <p className="font-aileron text-[14px] text-[#202830]">
-                {fallbackCat != null ? categoryLabel(fallbackCat) : "Not configured"}
-              </p>
-            </div>
-          </div>
-
-          {/* Default rule */}
-          <div className="rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-4">
-            <div className="flex items-start gap-3">
-              <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#0066CC]" />
-              <div>
-                <p className="mb-1 font-aileron text-[13px] font-semibold text-[#202830]">
-                  Default Rule
-                </p>
-                <p className="font-aileron text-[13px] text-[#64748B]">
-                  If a CPT code is not found in this fee schedule, the system
-                  will flag it for review.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Multiplier */}
-          <div className="rounded-lg border border-[#E2E8F0] p-4">
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Multiplier Percentage
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {(detail.multiplierPct * 100).toFixed(0)}%
-            </p>
-          </div>
+        {/* Default rule */}
+        <div className="rounded-lg border-l-4 border-l-[#0066CC] bg-[#F7F8F9] p-4">
+          <p className="font-aileron text-[14px] font-semibold text-[#202830]">
+            Default Rule
+          </p>
+          <p className="mt-1 font-aileron text-[13px] text-[#64748B]">
+            If a CPT code is not found in this fee schedule, the system will flag the claim line for manual review.
+          </p>
         </div>
-      </Card>
+
+        {/* Missing CPT Fallback Category */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-aileron text-[14px] font-medium text-[#202830]">
+                Missing CPT Fallback Category
+              </p>
+              <p className="font-aileron text-[13px] text-[#64748B]">
+                If configured, the system will attempt to price using the selected fallback category before flagging.
+              </p>
+            </div>
+            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${hasFallback ? "bg-[#0066CC]" : "bg-[#CBD5E1]"}`}>
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasFallback ? "translate-x-6" : "translate-x-1"}`} />
+            </div>
+          </div>
+          {hasFallback && (
+            <select disabled className="w-full max-w-xs rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
+              <option>{categoryLabel(fallbackCat)}</option>
+            </select>
+          )}
+          {!hasFallback && (
+            <select disabled className="w-full max-w-xs rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+              <option>Select</option>
+            </select>
+          )}
+        </div>
+      </div>
     );
   };
 

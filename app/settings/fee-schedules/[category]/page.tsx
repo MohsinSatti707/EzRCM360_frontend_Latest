@@ -50,8 +50,8 @@ const CATEGORY_CONFIG: Record<string, {
 }> = {
   medicare: { value: 0, label: "Medicare", templateType: "Medicare", lockedGeoType: 1, showAdoptFs: false, showFallbackCategory: false },
   ucr: { value: 1, label: "UCR", templateType: "UCR", lockedGeoType: 2, showAdoptFs: false, showFallbackCategory: false },
-  mva: { value: 2, label: "MVA", templateType: "MVA", lockedGeoType: 1, showAdoptFs: true, showFallbackCategory: true },
-  wc: { value: 3, label: "WC", templateType: "WC", lockedGeoType: 1, showAdoptFs: true, showFallbackCategory: true },
+  mva: { value: 2, label: "MVA", templateType: "MVA", showAdoptFs: true, showFallbackCategory: true },
+  wc: { value: 3, label: "WC", templateType: "WC", showAdoptFs: true, showFallbackCategory: true },
 };
 
 const STATUS_OPTIONS = [{ value: 0, name: "Active" }, { value: 1, name: "Inactive" }];
@@ -111,7 +111,7 @@ export default function CategoryFeeSchedulesPage() {
     scheduleCode: "",
     category: categoryValue,
     state: "",
-    geoType: categoryConfig.lockedGeoType ?? 0,
+    geoType: categoryConfig.lockedGeoType ?? 1,
     geoCode: "",
     geoName: "",
     billingType: categoryConfig.lockedBillingType ?? 0,
@@ -258,7 +258,7 @@ export default function CategoryFeeSchedulesPage() {
     setForm({
       ...defaultForm,
       category: categoryValue,
-      geoType: categoryConfig.lockedGeoType ?? 0,
+      geoType: categoryConfig.lockedGeoType ?? 1,
       billingType: categoryConfig.lockedBillingType ?? 0,
       years: [lookups?.years?.find((y) => y === currentYear) ?? lookups?.years?.[0] ?? currentYear],
       quarters: [],
@@ -855,8 +855,26 @@ export default function CategoryFeeSchedulesPage() {
         {wizardStep === 1 && (
           <div>
             <div className="grid gap-4 sm:grid-cols-2">
+              {/* Adopt Fee Schedule ID — shown first for MVA/WC */}
+              {categoryConfig.showAdoptFs && (
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-sm font-medium text-foreground">Adopt Fee Schedule ID (Optional)</label>
+                  <select
+                    value={form.adoptFeeScheduleId ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, adoptFeeScheduleId: e.target.value || null }))}
+                    className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                  >
+                    <option value="">— None —</option>
+                    {fsOptions.map((fs) => (
+                      <option key={fs.id} value={fs.id}>
+                        {fs.scheduleCode ?? "—"} — {categoryLabelFn(fs.category)} {fs.state ? `(${fs.state})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Schedule code</label>
+                <label className="mb-1 block text-sm font-medium text-foreground">Fee Schedule ID</label>
                 <input type="text" value={form.scheduleCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, scheduleCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
               </div>
               <div>
@@ -883,12 +901,8 @@ export default function CategoryFeeSchedulesPage() {
                 </div>
               ) : (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Geo type</label>
-                  <select value={form.geoType} onChange={(e) => setForm((f) => ({ ...f, geoType: Number(e.target.value), geoCode: "", geoName: "" }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                    {lookups?.geoTypes?.map((g) => (
-                      <option key={g.value} value={g.value}>{g.name}</option>
-                    ))}
-                  </select>
+                  <label className="mb-1 block text-sm font-medium text-foreground">Geography Type</label>
+                  <input type="text" placeholder="e.g., Area Region" value={geoTypeLabelFn(form.geoType)} readOnly className="w-full rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground" />
                 </div>
               )}
 
@@ -969,8 +983,8 @@ export default function CategoryFeeSchedulesPage() {
                 </select>
               </div>
 
-              {/* Year(s) — UCR uses single select, others use multi-select */}
-              {isUCR ? (
+              {/* Year — Medicare uses From-To, others use single select dropdown */}
+              {categorySlug !== "medicare" ? (
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Year</label>
                   <select
