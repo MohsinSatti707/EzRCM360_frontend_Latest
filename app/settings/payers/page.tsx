@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, ArrowRight, Trash2 } from "lucide-react";
@@ -99,10 +100,21 @@ export default function PayersPage() {
     fetch: api.getList,
   });
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     lookupsApi().getPayerEntityTypes().then(setEntityTypes).catch(() => setEntityTypes([]));
     lookupsApi().getPlans().then(setPlanOptions).catch(() => setPlanOptions([]));
   }, []);
+
+  // Auto-open edit modal when navigated with ?edit={id}
+  useEffect(() => {
+    const editParam = searchParams.get("edit");
+    if (editParam && data?.items) {
+      const row = data.items.find((r) => r.id === editParam);
+      if (row) openEdit(row);
+    }
+  }, [searchParams, data]);
 
   const openCreate = () => {
     setEditId(null);
