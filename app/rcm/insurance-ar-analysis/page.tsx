@@ -46,13 +46,9 @@ const STATUS_OPTIONS: { value: ArAnalysisSessionStatus | ""; label: string }[] =
 function formatDate(s: string) {
   try {
     const d = new Date(s);
-    return d.toLocaleString(undefined, {
-      month: "numeric",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
+    const date = d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    return `${date} - ${time}`;
   } catch {
     return s;
   }
@@ -68,7 +64,6 @@ export default function InsuranceArAnalysisListPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
-  const [uploadedBy, setUploadedBy] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<ArAnalysisSessionStatus | "">("");
   const [downloading, setDownloading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -88,20 +83,14 @@ export default function InsuranceArAnalysisListPage() {
     reload();
   }, [statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps -- reload refetches with new status
 
-  const uniqueUploadedBy = data
-    ? Array.from(new Set(data.items.map((r) => r.uploadedBy))).filter(Boolean).sort()
-    : [];
-
   const displayedItems = (() => {
-    let items = uploadedBy ? data?.items.filter((r) => r.uploadedBy === uploadedBy) ?? [] : data?.items ?? [];
+    let items = data?.items ?? [];
     if (search.trim()) {
       const term = search.trim().toLowerCase();
       items = items.filter(
         (r) =>
           r.sessionName?.toLowerCase().includes(term) ||
-          r.practiceName?.toLowerCase().includes(term) ||
-          r.uploadedBy?.toLowerCase().includes(term) ||
-          r.sourceType?.toLowerCase().includes(term)
+          r.practiceName?.toLowerCase().includes(term)
       );
     }
     return items;
@@ -212,30 +201,6 @@ export default function InsuranceArAnalysisListPage() {
       {/* Toolbar */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0">
-          <select
-            id="status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as ArAnalysisSessionStatus | "")}
-            className="h-10 w-[160px] rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            {STATUS_OPTIONS.map((o) => (
-              <option key={o.value || "_all"} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-          <select
-            id="uploaded-by"
-            value={uploadedBy}
-            onChange={(e) => {
-              setUploadedBy(e.target.value);
-              setPage(1);
-            }}
-            className="h-10 w-[150px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="">Uploaded By</option>
-            {uniqueUploadedBy.map((u) => (
-              <option key={u} value={u}>{u}</option>
-            ))}
-          </select>
           <div className="relative min-w-0 flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
             <input
@@ -243,9 +208,19 @@ export default function InsuranceArAnalysisListPage() {
               placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 w-full min-w-0 rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] text-[#202830] placeholder:text-[#94A3B8] focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full min-w-0 rounded-l-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] text-[#202830] placeholder:text-[#94A3B8] focus:outline-none focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
+          <select
+            id="status"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as ArAnalysisSessionStatus | "")}
+            className="h-10 w-[160px] rounded-r-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value || "_all"} value={o.value}>{o.label}</option>
+            ))}
+          </select>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {selectedIds.size > 0 && (

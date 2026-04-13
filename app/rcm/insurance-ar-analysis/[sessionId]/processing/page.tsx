@@ -711,13 +711,12 @@ export default function InsuranceArAnalysisProcessingPage() {
                 <dt className="text-muted-foreground">Uploaded at</dt>
                 <dd className="font-medium text-foreground">
                   {session.uploadedAt
-                    ? new Date(session.uploadedAt).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })
+                    ? (() => {
+                        const d = new Date(session.uploadedAt);
+                        const date = d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+                        const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+                        return `${date} - ${time}`;
+                      })()
                     : "—"}
                 </dd>
               </div>

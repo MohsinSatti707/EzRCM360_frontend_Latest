@@ -246,16 +246,17 @@ export default function InsuranceArAnalysisUploadPage() {
   const formatDate = (s: string) => {
     try {
       const d = new Date(s);
-      const date = d.toLocaleDateString(undefined, {
-        month: "numeric",
-        day: "numeric",
+      const date = d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
         year: "numeric",
       });
-      const time = d.toLocaleTimeString(undefined, {
+      const time = d.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
+        hour12: true,
       });
-      return `${date}. ${time}`;
+      return `${date} - ${time}`;
     } catch {
       return s;
     }

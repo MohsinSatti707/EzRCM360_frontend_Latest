@@ -10,7 +10,6 @@ import {
   Download,
   Pencil,
   Plus,
-  Info,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -31,12 +30,15 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
+import { CellTooltip } from "@/components/ui/CellTooltip";
 import { feeSchedulesApi } from "@/lib/services/feeSchedules";
+import { geographyApi } from "@/lib/services/geography";
 import type {
   FeeScheduleDetailDto,
   FeeScheduleLineDto,
   CreateFeeScheduleLineRequest,
 } from "@/lib/services/feeSchedules";
+import type { ZipGeoMappingDto } from "@/lib/services/geography";
 import type { PaginatedList } from "@/lib/types";
 
 /* ------------------------------------------------------------------ */
@@ -101,6 +103,14 @@ const categoryLabel = (v: number | string) => {
     WC: "WC",
   };
   return map[String(v)] ?? String(v);
+};
+
+/** Map fee-schedule category (0=Medicare,1=UCR,2=MVA,3=WC) → ZipGeoFsCategory */
+const FS_TO_ZIPGEO: Record<number, number> = { 0: 0, 2: 1, 3: 2, 1: 3 };
+
+const quarterLabel = (q: number | null) => {
+  if (q == null) return "\u2014";
+  return `Q${q}`;
 };
 
 /* ------------------------------------------------------------------ */
@@ -186,6 +196,17 @@ export default function FeeScheduleDetailPage() {
   const [lineDeleteId, setLineDeleteId] = useState<string | null>(null);
   const [lineDeleteLoading, setLineDeleteLoading] = useState(false);
 
+  // ZIP Geography Mapping state
+  const [zipData, setZipData] = useState<PaginatedList<ZipGeoMappingDto> | null>(null);
+  const [zipPage, setZipPage] = useState(1);
+  const [zipPageSize, setZipPageSize] = useState(10);
+  const [zipSearch, setZipSearch] = useState("");
+  const debouncedZipSearch = useDebounce(zipSearch, 300);
+  const [zipLoading, setZipLoading] = useState(false);
+  const [zipImportLoading, setZipImportLoading] = useState(false);
+  const zipFileInputRef = useRef<HTMLInputElement>(null);
+  const geoApi = geographyApi();
+
   /* ---------------------------------------------------------------- */
   /*  Data loading                                                     */
   /* ---------------------------------------------------------------- */
@@ -228,12 +249,72 @@ export default function FeeScheduleDetailPage() {
     loadDetail();
   }, [loadDetail]);
 
+  const loadZipMappings = useCallback(
+    (pg: number, ps: number, search?: string) => {
+      if (!detail) return;
+      const fsCat = FS_TO_ZIPGEO[Number(detail.category)];
+      if (fsCat == null) return;
+      setZipLoading(true);
+      geoApi
+        .getList({
+          fsCategory: fsCat,
+          zip: search || undefined,
+          pageNumber: pg,
+          pageSize: ps,
+        })
+        .then(setZipData)
+        .catch(() => toast.error("Load Failed", "Failed to load ZIP geography mappings."))
+        .finally(() => setZipLoading(false));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [detail],
+  );
+
   useEffect(() => {
     if (activeTab === "lines") {
       loadLines(linesPage, linesPageSize, debouncedLinesSearch);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, linesPage, linesPageSize, debouncedLinesSearch]);
+
+  useEffect(() => {
+    if (activeTab === "zip") {
+      loadZipMappings(zipPage, zipPageSize, debouncedZipSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, zipPage, zipPageSize, debouncedZipSearch]);
+
+  /* ---------------------------------------------------------------- */
+  /*  ZIP Geo handlers                                                 */
+  /* ---------------------------------------------------------------- */
+
+  const handleZipImport = async (file: File) => {
+    if (!detail) return;
+    const fsCat = FS_TO_ZIPGEO[Number(detail.category)];
+    if (fsCat == null) return;
+    setZipImportLoading(true);
+    try {
+      await geoApi.importMappings(fsCat, file);
+      toast.success("Import Successful", "ZIP geography mappings imported.");
+      loadZipMappings(zipPage, zipPageSize, debouncedZipSearch);
+    } catch (err) {
+      toast.error("Import Failed", err instanceof Error ? err.message : "Failed to import.");
+    } finally {
+      setZipImportLoading(false);
+      if (zipFileInputRef.current) zipFileInputRef.current.value = "";
+    }
+  };
+
+  const handleZipDownloadTemplate = async () => {
+    if (!detail) return;
+    const fsCat = FS_TO_ZIPGEO[Number(detail.category)];
+    if (fsCat == null) return;
+    try {
+      await geoApi.downloadTemplate(fsCat);
+    } catch (err) {
+      toast.error("Download Failed", err instanceof Error ? err.message : "Failed to download template.");
+    }
+  };
 
   /* ---------------------------------------------------------------- */
   /*  Line CRUD handlers                                               */
@@ -641,28 +722,125 @@ export default function FeeScheduleDetailPage() {
   );
 
   const renderZipGeoTab = () => (
-    <Card className="p-8">
-      <div className="flex flex-col items-center justify-center gap-3 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F0F7FF]">
-          <Info className="h-6 w-6 text-[#0066CC]" />
-        </div>
+    <div className="space-y-4">
+      {/* Header row: title + actions */}
+      <div className="flex items-center justify-between">
         <h3 className="font-aileron text-[16px] font-semibold text-[#202830]">
           ZIP Geography Mapping
         </h3>
-        <p className="max-w-md font-aileron text-[14px] text-[#64748B]">
-          ZIP Geography Mapping data is managed in Settings &gt; Geography
-          Resolution. Visit the Geography Resolution settings to view and manage
-          ZIP-to-geography mappings for your fee schedules.
-        </p>
-        <Button
-          variant="outline"
-          className="mt-2"
-          onClick={() => router.push("/settings/geography-resolution")}
-        >
-          Go to Geography Resolution
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="h-9 rounded-[5px] px-3 font-aileron text-[13px]"
+            onClick={handleZipDownloadTemplate}
+          >
+            <Download className="mr-1.5 h-4 w-4" /> Download Template
+          </Button>
+          <Button
+            className="h-9 rounded-[5px] px-3 bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[13px]"
+            onClick={() => zipFileInputRef.current?.click()}
+            disabled={zipImportLoading}
+          >
+            <Upload className="mr-1.5 h-4 w-4" /> Upload ZIP Mappings
+          </Button>
+          <input
+            ref={zipFileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleZipImport(f);
+            }}
+          />
+        </div>
       </div>
-    </Card>
+
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+        <input
+          type="text"
+          placeholder="Search by ZIP code..."
+          value={zipSearch}
+          onChange={(e) => { setZipSearch(e.target.value); setZipPage(1); }}
+          className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+        />
+      </div>
+
+      {/* Loading */}
+      {zipLoading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader variant="inline" label="Loading" />
+        </div>
+      )}
+
+      {/* Table */}
+      {!zipLoading && zipData && zipData.items.length === 0 && (
+        <Card className="p-8">
+          <div className="flex flex-col items-center justify-center gap-2 text-center">
+            <p className="font-aileron text-[14px] text-[#64748B]">
+              No ZIP geography mappings found for this category.
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {!zipLoading && zipData && zipData.items.length > 0 && (
+        <>
+          <Card className="overflow-x-auto overflow-y-auto rounded-[5px]">
+            <Table className="min-w-full table-fixed">
+              <TableHead className="sticky top-0 z-20">
+                <TableRow>
+                  <TableHeaderCell className="w-[120px] min-w-[120px]">State</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">ZIP Code</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px]">Geography Code</TableHeaderCell>
+                  <TableHeaderCell className="w-[120px] min-w-[120px]">Year</TableHeaderCell>
+                  <TableHeaderCell className="w-[120px] min-w-[120px]">Quarter</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {zipData.items.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="w-[120px] min-w-[120px]">
+                      <CellTooltip text={row.state ?? "\u2014"} />
+                    </TableCell>
+                    <TableCell className="w-[140px] min-w-[140px]">
+                      <CellTooltip text={row.zip ?? "\u2014"} />
+                    </TableCell>
+                    <TableCell className="w-[160px] min-w-[160px]">
+                      <CellTooltip text={row.geoCode ?? "\u2014"} />
+                    </TableCell>
+                    <TableCell className="w-[120px] min-w-[120px]">
+                      {row.year}
+                    </TableCell>
+                    <TableCell className="w-[120px] min-w-[120px]">
+                      {quarterLabel(row.quarter)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+
+          <Pagination
+            pageNumber={zipData.pageNumber}
+            totalPages={zipData.totalPages}
+            totalCount={zipData.totalCount}
+            hasPreviousPage={zipData.hasPreviousPage}
+            hasNextPage={zipData.hasNextPage}
+            onPrevious={() => setZipPage((p) => Math.max(1, p - 1))}
+            onNext={() => setZipPage((p) => p + 1)}
+            onPageChange={(p) => setZipPage(p)}
+            pageSize={zipPageSize}
+            onPageSizeChange={(s) => {
+              setZipPageSize(s);
+              setZipPage(1);
+            }}
+          />
+        </>
+      )}
+    </div>
   );
 
   const renderFallbackTab = () => {
@@ -685,32 +863,34 @@ export default function FeeScheduleDetailPage() {
           </p>
         </div>
 
-        {/* Missing CPT Fallback Category */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-aileron text-[14px] font-medium text-[#202830]">
-                Missing CPT Fallback Category
-              </p>
-              <p className="font-aileron text-[13px] text-[#64748B]">
-                If configured, the system will attempt to price using the selected fallback category before flagging.
-              </p>
+        {/* Missing CPT Fallback Category — only for MVA and WC */}
+        {(categorySlug === "mva" || categorySlug === "wc") && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-aileron text-[14px] font-medium text-[#202830]">
+                  Missing CPT Fallback Category
+                </p>
+                <p className="font-aileron text-[13px] text-[#64748B]">
+                  If configured, the system will attempt to price using the selected fallback category before flagging.
+                </p>
+              </div>
+              <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${hasFallback ? "bg-[#0066CC]" : "bg-[#CBD5E1]"}`}>
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasFallback ? "translate-x-6" : "translate-x-1"}`} />
+              </div>
             </div>
-            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${hasFallback ? "bg-[#0066CC]" : "bg-[#CBD5E1]"}`}>
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasFallback ? "translate-x-6" : "translate-x-1"}`} />
-            </div>
+            {hasFallback && (
+              <select disabled className="w-full max-w-xs rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
+                <option>{categoryLabel(fallbackCat)}</option>
+              </select>
+            )}
+            {!hasFallback && (
+              <select disabled className="w-full max-w-xs rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                <option>Select</option>
+              </select>
+            )}
           </div>
-          {hasFallback && (
-            <select disabled className="w-full max-w-xs rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
-              <option>{categoryLabel(fallbackCat)}</option>
-            </select>
-          )}
-          {!hasFallback && (
-            <select disabled className="w-full max-w-xs rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-              <option>Select</option>
-            </select>
-          )}
-        </div>
+        )}
       </div>
     );
   };

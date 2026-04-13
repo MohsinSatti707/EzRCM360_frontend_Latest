@@ -131,13 +131,10 @@ export default function InsuranceArAnalysisReportPage() {
 
   const formatDate = (s: string) => {
     try {
-      return new Date(s).toLocaleString(undefined, {
-        month: "numeric",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      });
+      const d = new Date(s);
+      const date = d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+      const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+      return `${date} - ${time}`;
     } catch {
       return s;
     }
