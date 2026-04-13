@@ -15,6 +15,7 @@ import {
   insuranceArAnalysisApi,
   type ArAnalysisProcessingStatusDto,
   type ArAnalysisSessionDetailDto,
+  type StepResolutionSummary,
 } from "@/lib/services/insuranceArAnalysis";
 import { usePipelineSignalR } from "@/lib/hooks/usePipelineSignalR";
 
@@ -70,11 +71,13 @@ function PipelineStep({
   index,
   isLast,
   onSkip,
+  resolutionStep,
 }: {
   step: { name: string; status: string; message?: string | null; count?: number | null };
   index: number;
   isLast: boolean;
   onSkip?: () => void;
+  resolutionStep?: StepResolutionSummary | null;
 }) {
   const completed = step.status === "Completed";
   const inProgress = step.status === "InProgress";
@@ -143,6 +146,22 @@ function PipelineStep({
             <span className="ml-1.5 text-muted-foreground">({step.count})</span>
           ) : null}
         </p>
+        {completed && resolutionStep && (
+          <div className="mt-2 grid grid-cols-5 gap-2 max-w-md">
+            {([
+              ["Analyzed", resolutionStep.claimsAnalyzed],
+              ["Pending", resolutionStep.claimsPending],
+              ["Resolved", resolutionStep.claimsResolved],
+              ["Excluded", resolutionStep.claimsExcluded],
+              ["Proceeding", resolutionStep.claimsProceeding],
+            ] as [string, number][]).map(([label, val]) => (
+              <div key={label} className="text-center rounded bg-[#F1F5F9] px-2 py-1.5">
+                <div className="text-xs font-semibold text-foreground">{val}</div>
+                <div className="text-[10px] text-muted-foreground leading-tight">{label}</div>
+              </div>
+            ))}
+          </div>
+        )}
         {failed && step.message && (
           <p className="mt-1 text-xs text-red-600">{step.message}</p>
         )}
@@ -852,12 +871,21 @@ export default function InsuranceArAnalysisProcessingPage() {
                   const step = status.sessionStatus === "Completed"
                     ? { ...s, status: "Completed", message: null }
                     : s;
+                  // Map step names to resolution summary keys
+                  const rs = status.resolutionSummary;
+                  const sn = s.name.toLowerCase();
+                  const resStep =
+                    sn.includes("claim integrity") ? rs?.claimIntegrity :
+                    sn.includes("payer") && sn.includes("plan") ? (rs?.payer ?? rs?.plan) :
+                    sn.includes("provider participation") ? rs?.providerParticipation :
+                    null;
                   return (
                   <PipelineStep
                     key={s.name}
                     step={step}
                     index={i}
                     isLast={i === status.steps.length - 1}
+                    resolutionStep={resStep}
                   />
                   );
                 })}

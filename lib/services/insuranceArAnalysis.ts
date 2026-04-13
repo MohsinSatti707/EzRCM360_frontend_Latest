@@ -121,6 +121,7 @@ export interface ArAnalysisProcessingStatusDto {
   nextStepName?: string | null;
   currentStepIndex?: number | null;
   totalStepCount: number;
+  resolutionSummary?: ResolutionSummaryDto | null;
 }
 
 export interface ArAnalysisSummaryDto {
