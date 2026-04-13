@@ -105,8 +105,13 @@ const categoryLabel = (v: number | string) => {
   return map[String(v)] ?? String(v);
 };
 
-/** Map fee-schedule category (0=Medicare,1=UCR,2=MVA,3=WC) → ZipGeoFsCategory */
-const FS_TO_ZIPGEO: Record<number, number> = { 0: 0, 2: 1, 3: 2, 1: 3 };
+/** Map fee-schedule category → ZipGeoFsCategory (handles both numeric and string enum values) */
+const FS_TO_ZIPGEO: Record<string, number> = {
+  "0": 0, Medicare: 0,
+  "2": 1, MVA: 1,
+  "3": 2, WC: 2,
+  "1": 3, UCR: 3,
+};
 
 const quarterLabel = (q: number | null) => {
   if (q == null) return "\u2014";
@@ -252,7 +257,7 @@ export default function FeeScheduleDetailPage() {
   const loadZipMappings = useCallback(
     (pg: number, ps: number, search?: string) => {
       if (!detail) return;
-      const fsCat = FS_TO_ZIPGEO[Number(detail.category)];
+      const fsCat = FS_TO_ZIPGEO[String(detail.category)];
       if (fsCat == null) return;
       setZipLoading(true);
       geoApi
@@ -290,7 +295,7 @@ export default function FeeScheduleDetailPage() {
 
   const handleZipImport = async (file: File) => {
     if (!detail) return;
-    const fsCat = FS_TO_ZIPGEO[Number(detail.category)];
+    const fsCat = FS_TO_ZIPGEO[String(detail.category)];
     if (fsCat == null) return;
     setZipImportLoading(true);
     try {
@@ -307,7 +312,7 @@ export default function FeeScheduleDetailPage() {
 
   const handleZipDownloadTemplate = async () => {
     if (!detail) return;
-    const fsCat = FS_TO_ZIPGEO[Number(detail.category)];
+    const fsCat = FS_TO_ZIPGEO[String(detail.category)];
     if (fsCat == null) return;
     try {
       await geoApi.downloadTemplate(fsCat);
