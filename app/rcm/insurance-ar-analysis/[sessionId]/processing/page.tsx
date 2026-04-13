@@ -322,18 +322,15 @@ export default function InsuranceArAnalysisProcessingPage() {
   // Only falls back to polling when SignalR is not connected.
   const signalRConnectedRef = useRef(false);
   const { connected: signalRConnected } = usePipelineSignalR(sessionId, (event) => {
-    // Update status state directly from SignalR event — no API call needed
+    // Optimistic UI update from SignalR event
     setStatus((prev) => {
       if (!prev) return prev;
-      // Terminal: pipeline completed — update status (no auto-redirect, let user see summary first)
       if (event.stageName === "Completed" && event.status === "Completed") {
         return { ...prev, sessionStatus: "Completed", currentStage: "Completed" };
       }
-      // Terminal: pipeline failed
       if (event.status === "Failed") {
         return { ...prev, sessionStatus: "Failed", currentStage: event.message ?? event.stageName };
       }
-      // Action required (pause step) — update session status + step
       if (event.status === "ActionRequired") {
         const updatedSteps = prev.steps.map((s) =>
           s.name === event.stageName ? { ...s, status: "Failed", message: event.message } : s
@@ -341,12 +338,15 @@ export default function InsuranceArAnalysisProcessingPage() {
         const sessionStatus = event.stageName.includes("Claim integrity") ? "ConflictResolution" : "EnrichmentPending";
         return { ...prev, steps: updatedSteps, sessionStatus, currentStage: event.message ?? event.stageName };
       }
-      // Stage completed — mark it and advance
       const updatedSteps = prev.steps.map((s) =>
         s.name === event.stageName ? { ...s, status: "Completed" } : s
       );
       return { ...prev, steps: updatedSteps, currentStage: event.stageName };
     });
+    // Full refetch after every event to get resolution summaries, counts, etc.
+    if (sessionId) {
+      apiRef.current.getStatus(sessionId).then((s) => setStatus(s)).catch(() => {});
+    }
   });
   signalRConnectedRef.current = signalRConnected;
 
