@@ -173,13 +173,13 @@ export function PayerFormModal({
           {/* Basic info */}
           <div className="space-y-4">
             <Input
-              label="Payer name"
+              label="Payer Name"
               required
               value={form.payerName}
               onChange={(e) => onFormChange({ ...form, payerName: e.target.value })}
             />
             <Input
-              label="Aliases"
+              label="Payer Aliases"
               value={form.aliases ?? ""}
               onChange={(e) => onFormChange({ ...form, aliases: e.target.value })}
             />

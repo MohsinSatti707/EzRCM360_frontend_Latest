@@ -389,15 +389,17 @@ export default function PayersPage() {
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="payerName">Payer Name</SelectItem>
+              <SelectItem value="payerAliases">Payer Aliases</SelectItem>
+              <SelectItem value="payerEntitytype">Payer Entity type</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -428,7 +430,7 @@ export default function PayersPage() {
               onClick={openCreate}
               className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
             >
-              <>Add Payer <ArrowRight className="ml-1 h-4 w-4" /></>
+              <>Add New Payer <ArrowRight className="ml-1 h-4 w-4" /></>
             </Button>
           )}
         </div>
@@ -466,9 +468,9 @@ export default function PayersPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[250px] min-w-[250px]">Payer name</TableHeaderCell>
-                  <TableHeaderCell className="w-[140px] min-w-[140px]">Aliases</TableHeaderCell>
-                  <TableHeaderCell className="w-[140px] min-w-[140px]">Entity type</TableHeaderCell>
+                  <TableHeaderCell className="w-[250px] min-w-[250px]">Payer Name</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Payer Aliases</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Payer Entity type</TableHeaderCell>
                   <TableHeaderCell className="w-[140px] min-w-[140px]">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[100px] min-w-[100px]">Actions</TableHeaderCell>
