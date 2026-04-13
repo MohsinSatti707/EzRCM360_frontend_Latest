@@ -998,7 +998,7 @@ export default function InsuranceArAnalysisProcessingPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="rounded-lg bg-white p-3 text-center border border-emerald-200">
                         <div className="text-2xl font-bold text-foreground">{providerUploadPreview.totalCombos}</div>
-                        <div className="text-xs text-muted-foreground mt-1">Total Entries</div>
+                        <div className="text-xs text-muted-foreground mt-1">Total Pending Providers</div>
                       </div>
                       <div className="rounded-lg bg-white p-3 text-center border border-emerald-200">
                         <div className="text-2xl font-bold text-emerald-700">{providerUploadPreview.inNetworkCount}</div>
