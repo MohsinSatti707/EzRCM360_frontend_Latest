@@ -12,6 +12,7 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import {
   insuranceArAnalysisApi,
   type ArAnalysisReportDto,
+  type StepResolutionSummary,
 } from "@/lib/services/insuranceArAnalysis";
 
 /** Dummy successful report for "Skip (dummy)" preview. */
@@ -340,16 +341,12 @@ const formattedSession = formatSessionDetails(
               </div>
               <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total MER Allowed</div>
             </div>
-            {/* Total MER OON Plan-Benefits Adjusted — hidden per request
-            {report.totalMerOonAdjusted > 0 && (
-              <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
-                <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
-                  {formatCurrency(report.totalMerOonAdjusted)}
-                </div>
-                <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total MER OON Plan-Benefits Adjusted</div>
+            <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-border">
+              <div className="text-[28px] font-bold font-['Aileron'] text-foreground mb-1">
+                {formatCurrency(report.totalMerOonAdjusted)}
               </div>
-            )}
-            */}
+              <div className="text-[14px] font-['Aileron'] text-muted-foreground">Total MER OON Plan-Benefits Adjusted</div>
+            </div>
           </div>
         </section>
 
@@ -399,122 +396,135 @@ const formattedSession = formatSessionDetails(
           )}
         </Card>
 
-        {report.underpaymentByPriority?.length > 0 && (
-          <Card className="p-0 border-none">
+        <Card className="p-0 border-none">
             <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
               Underpayment Analysis by Priority
             </h2>
-            <div className="space-y-3">
-              {report.underpaymentByPriority.map((item, i) => {
-                const isHigh = item.priority.toLowerCase().includes("high");
-                const isMid = item.priority.toLowerCase().includes("mid");
-                const isLow = item.priority.toLowerCase().includes("low");
-                const bg = isHigh
-                  ? "rgba(220, 38, 38, 0.1)"
-                  : isMid
-                    ? "rgba(245, 158, 11, 0.1)"
-                    : "rgba(59, 130, 246, 0.12)";
-                const color = isHigh ? "#DC2626" : isMid ? "#F59E0B" : "#2563EB";
-                return (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between rounded px-5 py-4"
-                    style={{ backgroundColor: bg }}
-                  >
-                    <span className="text-[14px] font-['Aileron'] font-medium" style={{ color }}>
-                      {item.priority}
-                    </span>
-                    <span className="text-[14px] font-['Aileron'] font-medium text-right" style={{ color }}>
-                      {formatCurrency(item.amount)}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-        )}
-
-        {report.noPayDenialSummary && (report.noPayDenialSummary.fullNoPayClaimCount > 0 || report.noPayDenialSummary.partialNoPayClaimCount > 0 || report.noPayDenialSummary.denialClaimCount > 0) && (
-          <Card className="p-0 border-none">
-            <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
-              No-Pay / Denial Summary
-            </h2>
-            <div className="grid gap-5 sm:grid-cols-3 mb-4">
-              <div className="bg-[#FEF2F2] rounded-lg p-5 text-center border border-[#DC2626]/20">
-                <div className="text-[28px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
-                  {report.noPayDenialSummary.fullNoPayClaimCount}
-                </div>
-                <div className="text-[13px] font-['Aileron'] text-muted-foreground">Full No-Pay Claims</div>
+            {report.underpaymentByPriority?.length > 0 ? (
+              <div className="space-y-3">
+                {report.underpaymentByPriority.map((item, i) => {
+                  const isHigh = item.priority.toLowerCase().includes("high");
+                  const isMid = item.priority.toLowerCase().includes("mid");
+                  const bg = isHigh
+                    ? "rgba(220, 38, 38, 0.1)"
+                    : isMid
+                      ? "rgba(245, 158, 11, 0.1)"
+                      : "rgba(59, 130, 246, 0.12)";
+                  const color = isHigh ? "#DC2626" : isMid ? "#F59E0B" : "#2563EB";
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between rounded px-5 py-4"
+                      style={{ backgroundColor: bg }}
+                    >
+                      <span className="text-[14px] font-['Aileron'] font-medium" style={{ color }}>
+                        {item.priority}
+                      </span>
+                      <span className="text-[14px] font-['Aileron'] font-medium text-right" style={{ color }}>
+                        {formatCurrency(item.amount)}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="bg-[#FFFBEB] rounded-lg p-5 text-center border border-[#F59E0B]/20">
-                <div className="text-[28px] font-bold font-['Aileron'] text-[#D97706] mb-1">
-                  {report.noPayDenialSummary.partialNoPayClaimCount}
-                </div>
-                <div className="text-[13px] font-['Aileron'] text-muted-foreground">Partial No-Pay Claims</div>
-              </div>
-              <div className="bg-[#FEF2F2] rounded-lg p-5 text-center border border-[#DC2626]/20">
-                <div className="text-[28px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
-                  {report.noPayDenialSummary.denialClaimCount}
-                </div>
-                <div className="text-[13px] font-['Aileron'] text-muted-foreground">Claims with Denials</div>
-              </div>
-            </div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Total No-Pay Service Lines</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground font-medium">{report.noPayDenialSummary.totalNoPayLineCount}</span>
-              </div>
-              <div className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded">
-                <span className="text-[14px] font-['Aileron'] text-muted-foreground">Total Denial Service Lines</span>
-                <span className="text-[14px] font-['Aileron'] text-foreground font-medium">{report.noPayDenialSummary.totalDenialLineCount}</span>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {report.recoveryProjectionSummary && (
-          <Card className="p-0 border-none">
-            <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
-              Recovery Projection Summary
-            </h2>
-            <div className="grid gap-5 sm:grid-cols-2 mb-5">
-              <div className="bg-background rounded-lg p-6 sm:p-7 text-center border border-border">
-                <div className="text-[32px] font-bold font-['Aileron'] text-foreground mb-2">
-                  {formatCurrency(totalUnderpayment)}
-                </div>
-                <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-muted-foreground">
-                  Total Underpayment
-                </div>
-              </div>
-              {/* Maximum Potential Recovery card — commented out for future use
-              <div className="bg-background rounded-lg p-6 sm:p-7 text-center border border-border">
-                <div className="text-[32px] font-bold font-['Aileron'] text-foreground mb-2">
-                  {formatCurrency(report.recoveryProjectionSummary.maxPotentialRecovery)}
-                </div>
-                <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-muted-foreground">
-                  Maximum Potential Recovery
-                </div>
-              </div>
-              */}
-              <div className=" rounded-lg p-6 sm:p-7 text-center border-2 border-[#16A34A] bg-green-50/50">
-                <div className="text-[32px] font-bold font-['Aileron'] text-[#16A34A] mb-2">
-                  {formatCurrency(report.recoveryProjectionSummary.riskAdjustedRecovery)}
-                </div>
-                <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-[#16A34A]">
-                  Risk-Adjusted Recovery
-                  {report.recoveryProjectionSummary.historicalCollectionRatePct != null
-                    ? ` (${report.recoveryProjectionSummary.historicalCollectionRatePct}% Historical)`
-                    : ""}
-                </div>
-              </div>
-            </div>
-            {report.recoveryProjectionSummary.historicalCollectionRatePct != null && (
-              <p className="text-[13px] font-['Aileron'] text-muted-foreground text-center pt-1">
-                Historical Collection Rate: {report.recoveryProjectionSummary.historicalCollectionRatePct}% (based on 3-year rolling average)
+            ) : (
+              <p className="text-[13px] font-['Aileron'] text-muted-foreground italic py-4 px-4 bg-[#F9FAFC] rounded">
+                No underpayment detected — all claims were paid at or above the expected MER.
               </p>
             )}
           </Card>
-        )}
+
+        <Card className="p-0 border-none">
+          <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
+            No-Pay / Denial Summary
+          </h2>
+          {report.noPayDenialSummary && (report.noPayDenialSummary.fullNoPayClaimCount > 0 || report.noPayDenialSummary.partialNoPayClaimCount > 0 || report.noPayDenialSummary.denialClaimCount > 0) ? (
+            <>
+              <div className="grid gap-5 sm:grid-cols-3 mb-4">
+                <div className="bg-[#FEF2F2] rounded-lg p-5 text-center border border-[#DC2626]/20">
+                  <div className="text-[28px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
+                    {report.noPayDenialSummary.fullNoPayClaimCount}
+                  </div>
+                  <div className="text-[13px] font-['Aileron'] text-muted-foreground">Full No-Pay Claims</div>
+                </div>
+                <div className="bg-[#FFFBEB] rounded-lg p-5 text-center border border-[#F59E0B]/20">
+                  <div className="text-[28px] font-bold font-['Aileron'] text-[#D97706] mb-1">
+                    {report.noPayDenialSummary.partialNoPayClaimCount}
+                  </div>
+                  <div className="text-[13px] font-['Aileron'] text-muted-foreground">Partial No-Pay Claims</div>
+                </div>
+                <div className="bg-[#FEF2F2] rounded-lg p-5 text-center border border-[#DC2626]/20">
+                  <div className="text-[28px] font-bold font-['Aileron'] text-[#DC2626] mb-1">
+                    {report.noPayDenialSummary.denialClaimCount}
+                  </div>
+                  <div className="text-[13px] font-['Aileron'] text-muted-foreground">Claims with Denials</div>
+                </div>
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Total No-Pay Service Lines</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground font-medium">{report.noPayDenialSummary.totalNoPayLineCount}</span>
+                </div>
+                <div className="flex justify-between py-4 px-4 bg-[#F9FAFC] rounded">
+                  <span className="text-[14px] font-['Aileron'] text-muted-foreground">Total Denial Service Lines</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground font-medium">{report.noPayDenialSummary.totalDenialLineCount}</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="text-[13px] font-['Aileron'] text-muted-foreground italic py-4 px-4 bg-[#F9FAFC] rounded">
+              No no-pay or denial conditions were detected in this analysis. All service lines received payment.
+            </p>
+          )}
+        </Card>
+
+        <Card className="p-0 border-none">
+          <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
+            Recovery Projection Summary
+          </h2>
+          {report.recoveryProjectionSummary ? (
+            <>
+              <div className="grid gap-5 sm:grid-cols-3 mb-5">
+                <div className="bg-background rounded-lg p-6 sm:p-7 text-center border border-border">
+                  <div className="text-[32px] font-bold font-['Aileron'] text-foreground mb-2">
+                    {formatCurrency(totalUnderpayment)}
+                  </div>
+                  <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-muted-foreground">
+                    Total Underpayment
+                  </div>
+                </div>
+                <div className="bg-background rounded-lg p-6 sm:p-7 text-center border border-border">
+                  <div className="text-[32px] font-bold font-['Aileron'] text-foreground mb-2">
+                    {formatCurrency(report.recoveryProjectionSummary.maxPotentialRecovery)}
+                  </div>
+                  <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-muted-foreground">
+                    Maximum Potential Recovery
+                  </div>
+                </div>
+                <div className="rounded-lg p-6 sm:p-7 text-center border-2 border-[#16A34A] bg-green-50/50">
+                  <div className="text-[32px] font-bold font-['Aileron'] text-[#16A34A] mb-2">
+                    {formatCurrency(report.recoveryProjectionSummary.riskAdjustedRecovery)}
+                  </div>
+                  <div className="text-[15px] font-['Aileron'] font-normal leading-snug text-center text-[#16A34A]">
+                    Risk-Adjusted Recovery
+                    {report.recoveryProjectionSummary.historicalCollectionRatePct != null
+                      ? ` (${report.recoveryProjectionSummary.historicalCollectionRatePct}% Historical)`
+                      : ""}
+                  </div>
+                </div>
+              </div>
+              {report.recoveryProjectionSummary.historicalCollectionRatePct != null && (
+                <p className="text-[13px] font-['Aileron'] text-muted-foreground text-center pt-1">
+                  Historical Collection Rate: {report.recoveryProjectionSummary.historicalCollectionRatePct}% (based on 3-year rolling average)
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-[13px] font-['Aileron'] text-muted-foreground italic py-4 px-4 bg-[#F9FAFC] rounded">
+              No recovery projection available. This may occur when no underpayment was identified.
+            </p>
+          )}
+        </Card>
 
         <Card className="p-0 border-none">
           <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
@@ -544,49 +554,48 @@ const formattedSession = formatSessionDetails(
           </div>
         </Card>
 
-        {report.resolutionSummary && (
-          <Card className="p-0 border-none">
-            <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
-              Resolution Summary
-            </h2>
-            <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-[#F1F5F9] text-left">
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Validation Step</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Analyzed</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Pending</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Resolved</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Excluded</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground text-right">Proceeding</th>
+        <Card className="p-0 border-none">
+          <h2 className="mb-3 text-[17px] font-bold font-['Aileron'] text-foreground">
+            Resolution Summary
+          </h2>
+          <div className="overflow-x-auto rounded-lg border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-[#F1F5F9] text-left">
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Validation Step</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground text-right">Analyzed</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground text-right">Pending</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground text-right">Resolved</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground text-right">Excluded</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground text-right">Proceeding</th>
+                </tr>
+              </thead>
+              <tbody>
+                {([
+                  ["Claim Integrity", report.resolutionSummary?.claimIntegrity],
+                  ["Payer Validation", report.resolutionSummary?.payer],
+                  ["Plan Validation", report.resolutionSummary?.plan],
+                  ["Provider Participation", report.resolutionSummary?.providerParticipation],
+                ] as [string, StepResolutionSummary | null | undefined][]).map(([label, step]) => (
+                  <tr key={label} className="border-t border-border">
+                    <td className="px-4 py-3 font-medium text-foreground">{label}</td>
+                    {step ? (
+                      <>
+                        <td className="px-4 py-3 text-right">{step.claimsAnalyzed}</td>
+                        <td className="px-4 py-3 text-right">{step.claimsPending}</td>
+                        <td className="px-4 py-3 text-right">{step.claimsResolved}</td>
+                        <td className="px-4 py-3 text-right">{step.claimsExcluded}</td>
+                        <td className="px-4 py-3 text-right font-medium">{step.claimsProceeding}</td>
+                      </>
+                    ) : (
+                      <td colSpan={5} className="px-4 py-3 text-center text-muted-foreground">N/A</td>
+                    )}
                   </tr>
-                </thead>
-                <tbody>
-                  {([
-                    ["Payer Validation", report.resolutionSummary.payer],
-                    ["Plan Validation", report.resolutionSummary.plan],
-                    ["Provider Participation", report.resolutionSummary.providerParticipation],
-                  ] as [string, typeof report.resolutionSummary.payer][]).map(([label, step]) => (
-                    <tr key={label} className="border-t border-border">
-                      <td className="px-4 py-3 font-medium text-foreground">{label}</td>
-                      {step ? (
-                        <>
-                          <td className="px-4 py-3 text-right">{step.claimsAnalyzed}</td>
-                          <td className="px-4 py-3 text-right">{step.claimsPending}</td>
-                          <td className="px-4 py-3 text-right">{step.claimsResolved}</td>
-                          <td className="px-4 py-3 text-right">{step.claimsExcluded}</td>
-                          <td className="px-4 py-3 text-right font-medium">{step.claimsProceeding}</td>
-                        </>
-                      ) : (
-                        <td colSpan={5} className="px-4 py-3 text-center text-muted-foreground">N/A</td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        )}
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
     </PageShell>
   );
