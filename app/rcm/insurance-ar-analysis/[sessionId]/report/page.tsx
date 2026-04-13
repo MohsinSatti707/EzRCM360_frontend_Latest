@@ -572,6 +572,7 @@ const formattedSession = formatSessionDetails(
               </thead>
               <tbody>
                 {([
+                  ["Data Validation", report.resolutionSummary?.dataValidation],
                   ["Claim Integrity", report.resolutionSummary?.claimIntegrity],
                   ["Payer Validation", report.resolutionSummary?.payer],
                   ["Plan Validation", report.resolutionSummary?.plan],

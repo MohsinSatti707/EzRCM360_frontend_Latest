@@ -875,6 +875,7 @@ export default function InsuranceArAnalysisProcessingPage() {
                   const rs = status.resolutionSummary;
                   const sn = s.name.toLowerCase();
                   const resStep =
+                    sn.includes("validation results") ? rs?.dataValidation :
                     sn.includes("claim integrity") ? rs?.claimIntegrity :
                     sn.includes("payer") && sn.includes("plan") ? (rs?.payer ?? rs?.plan) :
                     sn.includes("provider participation") ? rs?.providerParticipation :

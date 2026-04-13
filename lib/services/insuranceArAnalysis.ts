@@ -216,6 +216,7 @@ export interface ProviderParticipationUploadPreview {
 }
 
 export interface ResolutionSummaryDto {
+  dataValidation?: StepResolutionSummary | null;
   claimIntegrity?: StepResolutionSummary | null;
   payer?: StepResolutionSummary | null;
   plan?: StepResolutionSummary | null;
