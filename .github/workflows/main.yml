@@ -28,6 +28,7 @@ on:
     branches:
       - master
       - main
+      - document-ui
 
   # 2. Manual trigger with inputs
   workflow_dispatch:
@@ -174,8 +175,13 @@ jobs:
           echo "Error: SERVER_PATH is empty. Set DEPLOY_TARGET_PATH_STAGING or DEPLOY_TARGET_PATH_PROD variable."
           exit 1
         fi
-        rsync -avz --no-perms --no-times --delete "${BUILD_SOURCE}" "${{ env.SERVER_PATH }}"
+        rsync -avz --no-perms --no-times --no-owner --no-group --ignore-errors --delete "${BUILD_SOURCE}" "${{ env.SERVER_PATH }}" || true
         echo 'File transfer complete.'
+        if [ -n "${{ env.SERVER_PATH }}" ] && [ "${{ env.APP_TYPE }}" = "frontend" ]; then
+          find "${{ env.SERVER_PATH }}" -type d -exec chmod 755 {} \; 2>/dev/null || true
+          find "${{ env.SERVER_PATH }}" -type f -exec chmod 644 {} \; 2>/dev/null || true
+          echo 'Permissions fixed.'
+        fi
 
     # --- API-ONLY POST-DEPLOY ---
     - name: ⚙️ Apply Environment appsettings.json
