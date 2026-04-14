@@ -28,6 +28,8 @@ import { PayerFormModal } from "./PayerFormModal";
 import { AddPlanModal } from "./AddPlanModal";
 import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { payersApi } from "@/lib/services/payers";
+import { plansApi } from "@/lib/services/plans";
+import type { PlanDetailDto } from "@/lib/services/plans";
 import { lookupsApi } from "@/lib/services/lookups";
 import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { resolveEnum, ENUMS } from "@/lib/utils";
@@ -68,6 +70,7 @@ export default function PayersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchField, setSearchField] = useState<string>("payerName");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -82,6 +85,7 @@ export default function PayersPage() {
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [addPlanOpen, setAddPlanOpen] = useState(false);
   const [originalPlanIds, setOriginalPlanIds] = useState<string[]>([]);
+  const [linkedPlanDetails, setLinkedPlanDetails] = useState<PlanDetailDto[]>([]);
 
   const api = payersApi();
   const toast = useToast();
@@ -120,6 +124,7 @@ export default function PayersPage() {
     setEditId(null);
     setForm({ ...defaultForm });
     setFormError(null);
+    setLinkedPlanDetails([]);
     setModalOpen(true);
   };
 
@@ -149,6 +154,10 @@ export default function PayersPage() {
         })) ?? [];
       const planIds = detail.planIds ?? [];
       setOriginalPlanIds(planIds);
+      // Fetch rich plan details for linked plans
+      const planDetailsPromises = planIds.map((pid) => plansApi().getById(pid).catch(() => null));
+      const planDetailsResults = await Promise.all(planDetailsPromises);
+      setLinkedPlanDetails(planDetailsResults.filter((p): p is PlanDetailDto => p !== null));
       setForm({
         payerName: detail.payerName,
         aliases: detail.aliases ?? "",
@@ -383,15 +392,14 @@ export default function PayersPage() {
       {/* Toolbar: search + add button */}
       <div className="mb-3 flex items-center justify-between gap-3 ">
         <div className="flex flex-1 items-center">
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All Status" />
+          <Select value={searchField} onValueChange={(v) => setSearchField(v)}>
+            <SelectTrigger className="w-[180px] h-10 border-[#E2E8F0] rounded-l-[5px] rounded-r-none border-r-0 font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <SelectValue placeholder="Payer Name" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="payerName">Payer Name</SelectItem>
               <SelectItem value="payerAliases">Payer Aliases</SelectItem>
-              <SelectItem value="payerEntitytype">Payer Entity type</SelectItem>
+              <SelectItem value="payerEntityType">Payer Entity Type</SelectItem>
               <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>
@@ -566,6 +574,11 @@ export default function PayersPage() {
         onFormChange={setForm}
         entityTypeOptions={entityTypes}
         planOptions={planOptions}
+        linkedPlanDetails={linkedPlanDetails}
+        onRemovePlan={(planId) => {
+          setLinkedPlanDetails((prev) => prev.filter((p) => p.id !== planId));
+          setForm((f) => ({ ...f, planIds: (f.planIds ?? []).filter((id) => id !== planId) }));
+        }}
         onSubmit={handleSubmit}
         onSubmitAndAddPlan={handleSubmitAndAddPlan}
         loading={submitLoading}
