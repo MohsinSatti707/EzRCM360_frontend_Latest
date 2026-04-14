@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Eye } from "lucide-react";
+import { ArrowRight, XCircle, Link2, Users } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -108,15 +108,36 @@ export default function PayerDetailPage() {
       const detail = await payersApi().getById(id);
       setPayer(detail);
 
-      // If Insurance payer, fetch linked plans
-      const entityNum = resolveEnum(detail.entityType, ENUMS.PayerEntityType);
-      if (entityNum === ENUMS.PayerEntityType.Insurance) {
-        try {
-          const planResult = await plansApi().getList({ payerId: id, pageSize: 200 });
-          setPlans(planResult.items ?? []);
-        } catch {
+      // Fetch linked plans — try by payerId first, fallback to individual plan fetches
+      try {
+        const planResult = await plansApi().getList({ payerId: id, pageSize: 200 });
+        if (planResult.items && planResult.items.length > 0) {
+          setPlans(planResult.items);
+        } else if (detail.planIds && detail.planIds.length > 0) {
+          // Fallback: fetch each plan individually by ID
+          const fetched = await Promise.all(
+            detail.planIds.map((pid) =>
+              plansApi().getById(pid).then((p) => ({
+                id: p.id,
+                planName: p.planName,
+                planIdPrefix: p.planIdPrefix ?? null,
+                payerId: p.payerId,
+                linkedPayerName: "",
+                planCategory: p.planCategory,
+                planType: p.planType,
+                oonBenefits: p.oonBenefits,
+                nsaEligible: p.nsaEligible,
+                nsaCategory: p.nsaCategory ?? null,
+                status: p.status,
+              } as PlanListItemDto)).catch(() => null)
+            )
+          );
+          setPlans(fetched.filter((p): p is PlanListItemDto => p !== null));
+        } else {
           setPlans([]);
         }
+      } catch {
+        setPlans([]);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to load payer details.";
@@ -240,21 +261,25 @@ export default function PayerDetailPage() {
         </nav>
       </div>
 
+      {/* Page Title */}
+      <h1 className="mb-4 font-aileron text-[24px] font-bold text-[#202830]">Payer Details</h1>
+
       {/* Header Card */}
       <Card className="mb-6 p-6">
         <div className="flex items-center justify-between">
-          {/* Left: avatar + name + entity badge */}
+          {/* Left: avatar + name + entity type */}
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0066CC] text-lg font-bold text-white">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0066CC] text-lg font-bold text-white font-aileron">
               {initials}
             </div>
             <div>
-              <h1 className="font-aileron text-[20px] font-bold leading-tight text-[#202830]">
+              <h2 className="font-aileron text-[20px] font-bold leading-tight text-[#202830]">
                 {payerName}
-              </h1>
-              <span className="mt-1 inline-block rounded-full bg-[#E8F0FE] px-3 py-0.5 text-xs font-medium text-[#0066CC]">
-                {entityLabel}
-              </span>
+              </h2>
+              <div className="mt-1 flex items-center gap-1.5 text-[13px] text-[#64748B] font-aileron">
+                <Users className="h-4 w-4" />
+                <span>{entityLabel}</span>
+              </div>
             </div>
           </div>
 
@@ -294,7 +319,7 @@ export default function PayerDetailPage() {
                 onClick={() => router.push(`/settings/payers?edit=${id}`)}
                 className="h-10 rounded-[5px] bg-[#0066CC] px-[18px] text-white hover:bg-[#0066CC]/90 font-aileron text-[14px]"
               >
-                Edit
+                Edit <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             )}
           </div>
@@ -303,42 +328,56 @@ export default function PayerDetailPage() {
 
       {/* General Information */}
       <Card className="mb-6 p-6">
-        <h2 className="mb-4 font-aileron text-[16px] font-bold text-[#202830]">
-          General Information
-        </h2>
+        <div className="mb-4 flex items-center gap-2">
+          <Users className="h-5 w-5 text-[#64748B]" />
+          <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
+            General Information
+          </h2>
+        </div>
         <div className="grid grid-cols-3 gap-6">
           {/* Payer Name */}
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="text-[12px] font-['Aileron'] font-medium text-[#64748B] tracking-wide">
               Payer Name
             </p>
-            <p className="mt-1 font-aileron text-[14px] text-[#202830]">{payerName}</p>
+            <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{payerName}</p>
           </div>
           {/* Aliases */}
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="text-[12px] font-['Aileron'] font-medium text-[#64748B] tracking-wide">
               Payer Aliases
             </p>
-            <p className="mt-1 font-aileron text-[14px] text-[#202830]">
+            <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">
               {payer.aliases || "-"}
             </p>
           </div>
           {/* Entity Type */}
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="text-[12px] font-['Aileron'] font-medium text-[#64748B] tracking-wide">
               Payer Entity Type
             </p>
-            <p className="mt-1 font-aileron text-[14px] text-[#202830]">{entityLabel}</p>
+            <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{entityLabel}</p>
           </div>
+        </div>
+        {/* Created At */}
+        <div className="mt-4">
+          <p className="text-[12px] font-['Aileron'] font-medium text-[#64748B] tracking-wide">
+            Created At
+          </p>
+          <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">
+            {formatDate(payer.createdAt)}
+          </p>
         </div>
       </Card>
 
-      {/* Conditional section: Insurance -> Linked Plans table, Non-insurance -> Contact Info */}
-      {isInsurance ? (
-        <Card className="mb-6 p-6">
-          <h2 className="mb-4 font-aileron text-[16px] font-bold text-[#202830]">
-            Linked Plans
-          </h2>
+      {/* Linked Plans — always shown */}
+      <Card className="mb-6 p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Link2 className="h-5 w-5 text-[#64748B]" />
+            <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
+              Linked Plan
+            </h2>
+          </div>
           {plans.length === 0 ? (
             <p className="py-4 text-center text-sm text-muted-foreground">
               No plans linked to this payer.
@@ -348,54 +387,43 @@ export default function PayerDetailPage() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableHeaderCell>Plan Name</TableHeaderCell>
-                    <TableHeaderCell>Plan ID</TableHeaderCell>
-                    <TableHeaderCell>Plan Category</TableHeaderCell>
-                    <TableHeaderCell>Plan Type</TableHeaderCell>
-                    <TableHeaderCell>Out-of-Network Benefits</TableHeaderCell>
-                    <TableHeaderCell>NSA Eligible</TableHeaderCell>
-                    <TableHeaderCell className="w-[80px]">Actions</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Plan Name</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Plan ID</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Plan Category</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Plan Type</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Out-of-Network Benefits</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">NSA Eligible</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold w-[80px]">Actions</TableHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {plans.map((plan) => (
                     <TableRow key={plan.id}>
                       <TableCell>
-                        <span className="font-medium text-[#202830]">{plan.planName}</span>
-                      </TableCell>
-                      <TableCell>{plan.planIdPrefix || "-"}</TableCell>
-                      <TableCell>{planCategoryName(plan.planCategory, planCategories)}</TableCell>
-                      <TableCell>{planTypeName(plan.planType, planTypes)}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                            plan.oonBenefits
-                              ? "bg-green-50 text-green-700"
-                              : "bg-red-50 text-red-700"
-                          }`}
-                        >
-                          {plan.oonBenefits ? "Yes" : "No"}
-                        </span>
+                        <span className="font-aileron text-[14px] text-[#202830]">{plan.planName}</span>
                       </TableCell>
                       <TableCell>
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                            plan.nsaEligible
-                              ? "bg-green-50 text-green-700"
-                              : "bg-red-50 text-red-700"
-                          }`}
-                        >
-                          {plan.nsaEligible ? "Yes" : "No"}
-                        </span>
+                        <span className="font-aileron text-[14px] text-[#202830]">{plan.planIdPrefix || "-"}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-aileron text-[14px] text-[#202830]">{planCategoryName(plan.planCategory, planCategories)}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-aileron text-[14px] text-[#202830]">{planTypeName(plan.planType, planTypes)}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-aileron text-[14px] text-[#202830]">{plan.oonBenefits ? "Yes" : "No"}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-aileron text-[14px] text-[#202830]">{plan.nsaEligible ? "Yes" : "No"}</span>
                       </TableCell>
                       <TableCell>
                         <button
                           type="button"
-                          title="View plan"
-                          onClick={() => router.push(`/settings/plans/${plan.id}`)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[#F1F5F9] hover:text-[#0066CC]"
+                          title="Remove plan"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] transition-colors hover:text-[#EF4444]"
                         >
-                          <Eye className="h-4 w-4" />
+                          <XCircle className="h-5 w-5" />
                         </button>
                       </TableCell>
                     </TableRow>
@@ -405,7 +433,9 @@ export default function PayerDetailPage() {
             </div>
           )}
         </Card>
-      ) : (
+
+      {/* Contact info — only for non-insurance payers */}
+      {!isInsurance && (
         <>
           {/* Addresses */}
           <Card className="mb-6 p-6">

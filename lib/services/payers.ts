@@ -49,6 +49,7 @@ export interface PayerDetailDto {
   phoneNumbers: PayerPhoneDto[];
   emails: PayerEmailDto[];
   planIds: string[];
+  createdAt?: string | null;
 }
 
 // Request shapes for create/update (API expects camelCase in JSON)

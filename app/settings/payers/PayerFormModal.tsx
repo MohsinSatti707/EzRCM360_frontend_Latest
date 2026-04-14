@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, XCircle } from "lucide-react";
 import { DrawerForm } from "@/components/ui/DrawerForm";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -14,6 +14,8 @@ import type {
 } from "@/lib/services/payers";
 import type { SelectOption } from "@/components/ui/Select";
 import type { PlanLookupDto } from "@/lib/services/lookups";
+import type { PlanDetailDto } from "@/lib/services/plans";
+import { ENUMS } from "@/lib/utils";
 
 const STATUS_OPTIONS: SelectOption<number>[] = [
   { value: 0, label: "Inactive" },
@@ -59,6 +61,8 @@ export interface PayerFormModalProps {
   onFormChange: (form: CreatePayerRequest) => void;
   entityTypeOptions: { value: string; label: string }[];
   planOptions: PlanLookupDto[];
+  linkedPlanDetails?: PlanDetailDto[];
+  onRemovePlan?: (planId: string) => void;
   onSubmit: () => void;
   onSubmitAndAddPlan?: () => void;
   loading: boolean;
@@ -76,6 +80,8 @@ export function PayerFormModal({
   planOptions,
   onSubmit,
   onSubmitAndAddPlan,
+  linkedPlanDetails = [],
+  onRemovePlan,
   loading,
   error,
   onAddNewPlan,
@@ -91,7 +97,6 @@ export function PayerFormModal({
   const addresses = form.addresses ?? [];
   const phoneNumbers = form.phoneNumbers ?? [];
   const emails = form.emails ?? [];
-  const planIds = form.planIds ?? [];
 
   const setAddresses = (list: PayerAddressRequest[]) =>
     onFormChange({ ...form, addresses: list });
@@ -126,16 +131,16 @@ export function PayerFormModal({
     setEmails(next);
   };
 
-  const linkedPlans = planOptions.filter((p) => planIds.includes(p.id));
-  const removePlan = (planId: string) => {
-    onFormChange({ ...form, planIds: planIds.filter((id) => id !== planId) });
-  };
+  const planCategoryLabel = (v: number) =>
+    Object.entries(ENUMS.PlanCategory).find(([, n]) => n === v)?.[0]?.replace(/([a-z])([A-Z])/g, "$1 $2") ?? String(v);
+  const planTypeLabel = (v: number) =>
+    Object.entries(ENUMS.PlanType).find(([, n]) => n === v)?.[0]?.replace(/([a-z])([A-Z])/g, "$1 $2")?.toUpperCase() ?? String(v);
 
   return (
     <DrawerForm
       open={open}
       onOpenChange={(v) => !v && onClose()}
-      title={editId ? "Edit Payer" : "Add Payer"}
+      title={editId ? "Update Payer" : "Add Payer"}
       footer={
         <div className="flex flex-1 justify-start gap-3">
           <Button
@@ -347,7 +352,54 @@ export function PayerFormModal({
             </>
           )}
 
-          {/* Linked plans moved to Payer Detail page */}
+          {/* Linked Plans */}
+          {linkedPlanDetails.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="font-aileron text-sm font-semibold text-[#2A2C33]">Linked Plan</h3>
+              {linkedPlanDetails.map((plan) => (
+                <div
+                  key={plan.id}
+                  className="rounded-lg border border-[#E2E8F0]  p-4 space-y-3"
+                >
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                    <div>
+                      <p className="text-[12px] font-['Aileron'] font-[14px] text-base   text-[#64748B] tracking-wide">Plan Name</p>
+                      <p className="text-[14px] font-['Aileron'] font-[14px] text-base text-[#2A2C33]">{plan.planName}</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-['Aileron'] font-[14px] text-base text-[#64748B] tracking-wide">Plan ID</p>
+                      <p className="text-[14px] font-['Aileron'] font-[14px] text-base text-[#2A2C33]">{plan.planIdPrefix || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-['Aileron'] font-[14px] text-base text-[#64748B] tracking-wide">Plan Category</p>
+                      <p className="text-[14px] font-['Aileron'] font-[14px] text-base text-[#2A2C33]">{planCategoryLabel(plan.planCategory)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-['Aileron'] font-[14px]  text-base text-[#64748B] tracking-wide">Plan Type</p>
+                      <p className="text-[14px] font-['Aileron'] font-[14px]  text-base text-[#2A2C33]">{planTypeLabel(plan.planType)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-['Aileron'] font-[14px] text-base text-[#64748B] tracking-wide">Out-of-Network Benefits</p>
+                      <p className="text-[14px] font-['Aileron'] font-[14px] text-base text-[#2A2C33]">{plan.oonBenefits ? "Yes" : "No"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-['Aileron'] font-[14px] text-[#64748B] tracking-wide">NSA Eligible</p>
+                      <p className="text-[14px] font-['Aileron'] font-[14px] text-base text-[#2A2C33]">{plan.nsaEligible ? "Yes" : "No"}</p>
+                    </div>
+                  </div>
+                  {onRemovePlan && (
+                    <button
+                      type="button"
+                      onClick={() => onRemovePlan(plan.id)}
+                      className="flex items-center gap-1 text-[13px] font-['Aileron'] font-semibold text-[#0066CC] hover:text-[#0066CC]/80"
+                    >
+                      <XCircle className="h-4 w-4" /> Remove Plan
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </form>
     </DrawerForm>
