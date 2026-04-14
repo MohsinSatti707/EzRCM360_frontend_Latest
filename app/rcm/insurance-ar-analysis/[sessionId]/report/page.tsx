@@ -14,6 +14,7 @@ import {
   type ArAnalysisReportDto,
   type StepResolutionSummary,
 } from "@/lib/services/insuranceArAnalysis";
+import { formatDateTime, formatSessionName } from "@/lib/utils";
 
 /** Dummy successful report for "Skip (dummy)" preview. */
 const DUMMY_REPORT: ArAnalysisReportDto = {
@@ -130,39 +131,6 @@ export default function InsuranceArAnalysisReportPage() {
     }
   };
 
-  const formatDate = (s: string) => {
-    try {
-      const d = new Date(s);
-      const date = d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
-      const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-      return `${date} - ${time}`;
-    } catch {
-      return s;
-    }
-  };
-  const formatSessionDetails = (sessionName: string, uploadedAt: string) => {
-  // Split session name
-  const parts = sessionName?.split(" - ") || [];
-  const name = parts.slice(0, -1).join(" - ") || sessionName;
-
-  // Format uploadedAt
-  let formattedDate = "";
-  if (uploadedAt) {
-    const d = new Date(uploadedAt);
-
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-
-    const hours = String(d.getHours()).padStart(2, "0");
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-
-    formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
-  }
-
-  return { name, date: formattedDate };
-};
-
   if (loading || !report) {
     return (
       <div className="flex min-h-[20rem] flex-col items-center justify-center gap-4 py-16">
@@ -173,17 +141,15 @@ export default function InsuranceArAnalysisReportPage() {
   }
 
   const { analysisSummary, totalClaimsAnalyzed, totalUnderpayment, riskAdjustedRecovery } = report;
-const formattedSession = formatSessionDetails(
-  analysisSummary.sessionName,
-  analysisSummary.uploadedAt
-);
+  const displaySessionName = formatSessionName(analysisSummary.sessionName, analysisSummary.uploadedAt);
+
   return (
     <PageShell
       breadcrumbs={[
         { label: "Insurance AR Analysis", href: "/rcm/insurance-ar-analysis" },
-        { label: `${analysisSummary.practiceName} – ${formatDate(analysisSummary.uploadedAt)}` },
+        { label: `${analysisSummary.practiceName} – ${formatDateTime(analysisSummary.uploadedAt)}` },
       ]}
-      title={`${formattedSession.name} - ${formattedSession.date}`}
+      title={displaySessionName}
       description={`AR Analysis report for ${analysisSummary.practiceName}`}
       titleWrapperClassName="px-6"
       actions={
@@ -209,8 +175,8 @@ const formattedSession = formatSessionDetails(
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Session Name</span>
               <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%] pr-[10px]">
-  {formattedSession.name} - {formattedSession.date}
-</span>
+                {displaySessionName}
+              </span>
             </div>
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Practice Name</span>
@@ -222,7 +188,7 @@ const formattedSession = formatSessionDetails(
             </div>
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Uploaded at</span>
-              <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%] pr-[10px]">{formatDate(analysisSummary.uploadedAt)}</span>
+              <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%] pr-[10px]">{formatDateTime(analysisSummary.uploadedAt)}</span>
             </div>
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-[14px] font-['Aileron'] text-muted-foreground pl-[8px]">Source Type</span>

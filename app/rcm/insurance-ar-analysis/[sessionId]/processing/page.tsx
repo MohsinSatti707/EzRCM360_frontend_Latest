@@ -147,19 +147,21 @@ function PipelineStep({
           ) : null}
         </p>
         {completed && resolutionStep && (
-          <div className="mt-2 grid grid-cols-5 gap-2 max-w-md">
-            {([
-              ["Analyzed", resolutionStep.claimsAnalyzed],
-              ["Pending", resolutionStep.claimsPending],
-              ["Resolved", resolutionStep.claimsResolved],
-              ["Excluded", resolutionStep.claimsExcluded],
-              ["Proceeding", resolutionStep.claimsProceeding],
-            ] as [string, number][]).map(([label, val]) => (
-              <div key={label} className="text-center rounded bg-[#F1F5F9] px-2 py-1.5">
-                <div className="text-xs font-semibold text-foreground">{val}</div>
-                <div className="text-[10px] text-muted-foreground leading-tight">{label}</div>
-              </div>
-            ))}
+          <div className="mt-3 rounded-xl border-2 border-emerald-200 bg-emerald-50 p-4">
+            <div className="grid grid-cols-5 gap-4 max-w-2xl">
+              {([
+                ["Analyzed", resolutionStep.claimsAnalyzed, "text-foreground"],
+                ["Pending", resolutionStep.claimsPending, "text-amber-700"],
+                ["Resolved", resolutionStep.claimsResolved, "text-emerald-700"],
+                ["Excluded", resolutionStep.claimsExcluded, "text-red-600"],
+                ["Proceeding", resolutionStep.claimsProceeding, "text-foreground"],
+              ] as [string, number, string][]).map(([label, val, color]) => (
+                <div key={label} className="rounded-lg bg-white p-3 text-center border border-emerald-200">
+                  <div className={`text-2xl font-bold ${color}`}>{val}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {failed && step.message && (
