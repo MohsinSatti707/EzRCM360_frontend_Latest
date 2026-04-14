@@ -26,6 +26,7 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import { insuranceArAnalysisApi, type ArAnalysisSessionListItemDto, type ArAnalysisSessionStatus } from "@/lib/services/insuranceArAnalysis";
 import { usePaginatedList } from "@/lib/hooks";
 import { CellTooltip } from "@/components/ui/CellTooltip";
+import { formatDateTime, formatSessionName } from "@/lib/utils";
 
 const STATUS_OPTIONS: { value: ArAnalysisSessionStatus | ""; label: string }[] = [
   { value: "", label: "All Statuses" },
@@ -43,16 +44,6 @@ const STATUS_OPTIONS: { value: ArAnalysisSessionStatus | ""; label: string }[] =
   { value: "Failed", label: "Failed" },
 ];
 
-function formatDate(s: string) {
-  try {
-    const d = new Date(s);
-    const date = d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
-    const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-    return `${date} - ${time}`;
-  } catch {
-    return s;
-  }
-}
 
 const MODULE_NAME = "Insurance AR Analysis";
 
@@ -346,7 +337,7 @@ export default function InsuranceArAnalysisListPage() {
                           />
                         </TableCell>
                         <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
-                          <CellTooltip text={row.sessionName} />
+                          <CellTooltip text={formatSessionName(row.sessionName, row.uploadedAt)} />
                         </TableCell>
                         <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
                           <CellTooltip text={row.practiceName ?? "—"} />
@@ -358,7 +349,7 @@ export default function InsuranceArAnalysisListPage() {
                           <CellTooltip text={row.uploadedBy} />
                         </TableCell>
                         <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
-                          <CellTooltip text={formatDate(row.uploadedAt)} />
+                          <CellTooltip text={formatDateTime(row.uploadedAt)} />
                         </TableCell>
                         <TableCell className="w-[300px] min-w-[300px] whitespace-nowrap">
                           <CellTooltip text={row.sourceType} />

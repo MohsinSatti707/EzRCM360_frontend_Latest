@@ -30,6 +30,7 @@ import {
   type DryRunArAnalysisResult,
   type DryRunIssueGroup,
 } from "@/lib/services/insuranceArAnalysis";
+import { formatSessionName, formatDateTime } from "@/lib/utils";
 
 type Step = 1 | 2 | 3;
 type ValidationMode = "Full" | "ColumnsThenRows";
@@ -243,24 +244,6 @@ export default function InsuranceArAnalysisUploadPage() {
     }
   }, [step, sessionId, sessionDetail, api]);
 
-  const formatDate = (s: string) => {
-    try {
-      const d = new Date(s);
-      const date = d.toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      });
-      const time = d.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
-      return `${date} - ${time}`;
-    } catch {
-      return s;
-    }
-  };
 
   return (
     <PageShell
@@ -515,7 +498,7 @@ export default function InsuranceArAnalysisUploadPage() {
               <div className="space-y-0 px-2">
                 <div className="flex justify-between py-3 border-b border-border">
                   <span className="text-[14px] font-['Aileron'] text-muted-foreground">Session Name</span>
-                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{sessionDetail.sessionName}</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{formatSessionName(sessionDetail.sessionName, sessionDetail.uploadedAt)}</span>
                 </div>
                 <div className="flex justify-between py-3 border-b border-border">
                   <span className="text-[14px] font-['Aileron'] text-muted-foreground">Practice Name</span>
@@ -527,7 +510,7 @@ export default function InsuranceArAnalysisUploadPage() {
                 </div>
                 <div className="flex justify-between py-3 border-b border-border">
                   <span className="text-[14px] font-['Aileron'] text-muted-foreground">Uploaded at</span>
-                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{formatDate(sessionDetail.uploadedAt)}</span>
+                  <span className="text-[14px] font-['Aileron'] text-foreground text-right max-w-[60%]">{formatDateTime(sessionDetail.uploadedAt)}</span>
                 </div>
                 <div className="flex justify-between py-3 border-b border-border">
                   <span className="text-[14px] font-['Aileron'] text-muted-foreground">Source Type</span>

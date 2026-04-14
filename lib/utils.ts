@@ -38,6 +38,38 @@ export const ENUMS = {
   ProviderType: { Physician: 0, NonPhysician: 1 },
 } as const;
 
+/**
+ * Format an ISO date string as "MMM DD, YYYY - h:mm A" in the user's local timezone.
+ * Example: "Apr 13, 2026 - 5:10 PM"
+ */
+export function formatDateTime(s: string): string {
+  try {
+    const d = new Date(s);
+    const date = d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    return `${date} - ${time}`;
+  } catch {
+    return s;
+  }
+}
+
+/**
+ * Replace the UTC time in a stored session name with the local time from uploadedAt.
+ * Session names are stored as "AR Analysis - <practice> - <UTC date/time>".
+ * This strips the last " - <time>" segment and appends the locally-formatted uploadedAt.
+ */
+export function formatSessionName(sessionName: string, uploadedAt?: string): string {
+  if (!sessionName) return sessionName;
+  // Strip the time portion (last " - <time>" segment: e.g. " - 12:10 PM")
+  const stripped = sessionName.replace(/\s*-\s*\d{1,2}:\d{2}\s*(AM|PM)$/i, "");
+  if (uploadedAt) {
+    const d = new Date(uploadedAt);
+    const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    return `${stripped} - ${time}`;
+  }
+  return stripped;
+}
+
 /** Format ISO date string for use in <input type="date"> (YYYY-MM-DD) */
 export function toDateInput(value: string | null | undefined): string {
   if (!value) return "";
