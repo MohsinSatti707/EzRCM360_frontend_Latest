@@ -145,19 +145,13 @@ export default function InsuranceArAnalysisReportPage() {
   const parts = sessionName?.split(" - ") || [];
   const name = parts.slice(0, -1).join(" - ") || sessionName;
 
-  // Format uploadedAt
+  // Format uploadedAt using standard format: MMM DD, YYYY - h:mm A
   let formattedDate = "";
   if (uploadedAt) {
     const d = new Date(uploadedAt);
-
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-
-    const hours = String(d.getHours()).padStart(2, "0");
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-
-    formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
+    const date = d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    formattedDate = `${date} - ${time}`;
   }
 
   return { name, date: formattedDate };
