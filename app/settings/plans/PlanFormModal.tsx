@@ -194,7 +194,7 @@ export function PlanFormModal({
     <DrawerForm
       open={open}
       onOpenChange={(v) => !v && onClose()}
-      title={editId ? "Edit Plan" : "Add Plan"}
+      title={editId ? "Update Plan" : "Add Plan"}
       footer={
         <div className="flex flex-1 justify-start gap-3">
           <Button

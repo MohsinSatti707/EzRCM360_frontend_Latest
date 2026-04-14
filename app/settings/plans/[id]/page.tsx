@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Building2, Tag } from "lucide-react";
+import Image from "next/image";
+import { Building2, Tag, ArrowRight } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -17,10 +18,11 @@ import { Loader } from "@/components/ui/Loader";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
-import { resolveEnum, ENUMS } from "@/lib/utils";
+import { resolveEnum, resolveEnumNullable, ENUMS } from "@/lib/utils";
 import { plansApi } from "@/lib/services/plans";
 import { lookupsApi } from "@/lib/services/lookups";
-import type { PlanDetailDto, UpdatePlanRequest } from "@/lib/services/plans";
+import { PlanFormModal } from "../PlanFormModal";
+import type { PlanDetailDto, UpdatePlanRequest, CreatePlanRequest } from "@/lib/services/plans";
 import type { PayerLookupDto } from "@/lib/services/lookups";
 
 const MODULE_NAME = "Plans";
@@ -29,6 +31,28 @@ const STATUS_OPTIONS: { value: number; name: string }[] = [
   { value: 1, name: "Active" },
   { value: 0, name: "Inactive" },
 ];
+
+const EMPTY_FORM: CreatePlanRequest = {
+  payerId: "",
+  planName: "",
+  aliases: "",
+  planIdPrefix: "",
+  planCategory: 0,
+  planType: 0,
+  marketType: null,
+  oonBenefits: false,
+  planResponsibilityPct: null,
+  patientResponsibilityPct: null,
+  typicalDeductible: null,
+  oopMax: null,
+  nsaEligible: false,
+  nsaCategory: null,
+  providerParticipationApplicable: false,
+  timelyFilingInitialDays: 0,
+  timelyFilingResubmissionDays: null,
+  timelyFilingAppealDays: 0,
+  status: 1,
+};
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -184,6 +208,16 @@ export default function PlanDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
 
+  /* ---- modal state ---- */
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState<CreatePlanRequest>(EMPTY_FORM);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [planCategories, setPlanCategories] = useState<{ value: string; label: string }[]>([]);
+  const [planTypes, setPlanTypes] = useState<{ value: string; label: string }[]>([]);
+  const [marketTypes, setMarketTypes] = useState<{ value: string; label: string }[]>([]);
+  const [nsaCategories, setNsaCategories] = useState<{ value: string; label: string }[]>([]);
+
   /* ---- data fetching ---- */
 
   const fetchPlan = useCallback(async () => {
@@ -211,7 +245,63 @@ export default function PlanDetailPage() {
       .getPayers()
       .then(setPayers)
       .catch(() => setPayers([]));
+    lookupsApi().getPlanCategories().then(setPlanCategories).catch(() => setPlanCategories([]));
+    lookupsApi().getPlanTypes().then(setPlanTypes).catch(() => setPlanTypes([]));
+    lookupsApi().getMarketTypes().then(setMarketTypes).catch(() => setMarketTypes([]));
+    lookupsApi().getNsaCategories().then(setNsaCategories).catch(() => setNsaCategories([]));
   }, []);
+
+  /* ---- open edit modal ---- */
+
+  const openEditModal = () => {
+    if (!plan) return;
+    setFormError(null);
+    setForm({
+      payerId: plan.payerId,
+      planName: plan.planName,
+      aliases: plan.aliases ?? "",
+      planIdPrefix: plan.planIdPrefix ?? "",
+      planCategory: resolveEnum(plan.planCategory, ENUMS.PlanCategory),
+      planType: resolveEnum(plan.planType, ENUMS.PlanType),
+      marketType: resolveEnumNullable(plan.marketType, ENUMS.MarketType),
+      oonBenefits: plan.oonBenefits,
+      planResponsibilityPct: plan.planResponsibilityPct ?? null,
+      patientResponsibilityPct: plan.patientResponsibilityPct ?? null,
+      typicalDeductible: plan.typicalDeductible ?? null,
+      oopMax: plan.oopMax ?? null,
+      nsaEligible: plan.nsaEligible,
+      nsaCategory: resolveEnumNullable(plan.nsaCategory, ENUMS.NsaCategory),
+      providerParticipationApplicable: plan.providerParticipationApplicable,
+      timelyFilingInitialDays: plan.timelyFilingInitialDays,
+      timelyFilingResubmissionDays: plan.timelyFilingResubmissionDays ?? null,
+      timelyFilingAppealDays: plan.timelyFilingAppealDays,
+      status: resolveEnum(plan.status, ENUMS.PayerStatus),
+    });
+    setModalOpen(true);
+  };
+
+  /* ---- submit edit ---- */
+
+  const handleSubmit = async () => {
+    setFormError(null);
+    if (!form.planName.trim() || !form.payerId) {
+      setFormError("Payer and plan name are required.");
+      return;
+    }
+    setSubmitLoading(true);
+    try {
+      await plansApi().update(id, form as UpdatePlanRequest);
+      setModalOpen(false);
+      await fetchPlan();
+      toast.success("Plan Updated", <>The plan <strong>{form.planName}</strong> has been updated successfully.</>);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Save failed.";
+      setFormError(msg);
+      toast.error("Save Failed", msg);
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
 
   /* ---- status update ---- */
 
@@ -312,6 +402,8 @@ export default function PlanDetailPage() {
           <span aria-hidden>/</span>
           <span className="text-foreground">{planName}</span>
         </nav>
+
+        <h1 className="font-aileron text-[22px] font-bold text-[#202830]">Plan Details</h1>
       </div>
 
       {/* Header Card */}
@@ -319,13 +411,13 @@ export default function PlanDetailPage() {
         <div className="flex items-center justify-between">
           {/* Left: avatar + name + meta */}
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0066CC] text-lg font-bold text-white">
-              {initials}
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#E8EEF4]">
+              <Image src="/icons/svg/admin.svg" alt="" width={28} height={28} />
             </div>
             <div>
-              <h1 className="font-aileron text-[20px] font-bold leading-tight text-[#202830]">
+              <h2 className="font-aileron text-[20px] font-bold leading-tight text-[#202830]">
                 {planName}
-              </h1>
+              </h2>
               <div className="mt-1 flex items-center gap-4">
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Building2 className="h-3.5 w-3.5" />
@@ -341,6 +433,14 @@ export default function PlanDetailPage() {
 
           {/* Right: Edit button + status dropdown */}
           <div className="flex items-center gap-3">
+            {canUpdate && (
+              <Button
+                onClick={openEditModal}
+                className="h-10 rounded-[5px] bg-[#0066CC] px-[18px] text-white hover:bg-[#0066CC]/90 font-aileron text-[14px] inline-flex items-center gap-2"
+              >
+                Edit <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
             {canUpdate && (
               <Select
                 value={String(statusNum)}
@@ -370,23 +470,18 @@ export default function PlanDetailPage() {
                 {statusNum === 1 ? "Active" : "Inactive"}
               </span>
             )}
-            {canUpdate && (
-              <Button
-                onClick={() => router.push("/settings/plans")}
-                className="h-10 rounded-[5px] bg-[#0066CC] px-[18px] text-white hover:bg-[#0066CC]/90 font-aileron text-[14px]"
-              >
-                Edit
-              </Button>
-            )}
           </div>
         </div>
       </Card>
 
       {/* General Information */}
       <Card className="mb-6 p-6">
-        <h2 className="mb-4 font-aileron text-[16px] font-bold text-[#202830]">
-          General Information
-        </h2>
+        <div className="mb-4 flex items-center gap-2">
+          <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} className="text-muted-foreground" />
+          <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
+            General Information
+          </h2>
+        </div>
         <div className="grid grid-cols-3 gap-6">
           {/* Row 1 */}
           <InfoField label="Plan Name" value={planName} />
@@ -396,78 +491,43 @@ export default function PlanDetailPage() {
           {/* Row 2 */}
           <InfoField label="Plan Category" value={planCategoryLabel(plan.planCategory)} />
           <InfoField label="Plan Type" value={planTypeLabel(plan.planType)} />
-          <InfoField
-            label="Out-of-Network Benefits"
-            value={
-              <span
-                className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                  plan.oonBenefits
-                    ? "bg-green-50 text-green-700"
-                    : "bg-red-50 text-red-700"
-                }`}
-              >
-                {plan.oonBenefits ? "Yes" : "No"}
-              </span>
-            }
-          />
+          <InfoField label="Out-of-Network Benefits" value={plan.oonBenefits ? "Yes" : "No"} />
 
           {/* Row 3 */}
-          <InfoField
-            label="NSA Eligible"
-            value={
-              <span
-                className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                  plan.nsaEligible
-                    ? "bg-green-50 text-green-700"
-                    : "bg-red-50 text-red-700"
-                }`}
-              >
-                {plan.nsaEligible ? "Yes" : "No"}
-              </span>
-            }
-          />
+          <InfoField label="NSA Eligible" value={plan.nsaEligible ? "Yes" : "No"} />
           <InfoField label="NSA Category" value={nsaCategoryLabel(plan.nsaCategory)} />
+          <InfoField label="Created At" value={formatDate(plan.createdAt)} />
         </div>
       </Card>
 
       {/* Commercial Intelligence — only for Commercial plans */}
       {isCommercial && (
         <Card className="mb-6 p-6">
-          <h2 className="mb-4 font-aileron text-[16px] font-bold text-[#202830]">
-            Commercial Intelligence
-          </h2>
+          <div className="mb-4 flex items-center gap-2">
+            <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} className="text-muted-foreground" />
+            <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
+              Commercial Intelligence
+            </h2>
+          </div>
           <div className="grid grid-cols-3 gap-6">
             {/* Row 1 */}
             <InfoField label="Market Type" value={marketTypeLabel(plan.marketType)} />
+            <InfoField label="Out-of-Network Benefits" value={plan.oonBenefits ? "Yes" : "No"} />
             <InfoField
-              label="Out-of-Network Benefits"
-              value={
-                <span
-                  className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                    plan.oonBenefits
-                      ? "bg-green-50 text-green-700"
-                      : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  {plan.oonBenefits ? "Yes" : "No"}
-                </span>
-              }
-            />
-            <InfoField
-              label="Plan Responsibility"
+              label="Plan Responsibility (%)"
               value={formatPct(plan.planResponsibilityPct)}
             />
 
             {/* Row 2 */}
             <InfoField
-              label="Patient Responsibility"
+              label="Patient Responsibility (%)"
               value={formatPct(plan.patientResponsibilityPct)}
             />
             <InfoField
-              label="Deductible"
+              label="Deductible ($)"
               value={formatCurrency(plan.typicalDeductible)}
             />
-            <InfoField label="OOP Max" value={formatCurrency(plan.oopMax)} />
+            <InfoField label="OOP Max ($)" value={formatCurrency(plan.oopMax)} />
 
             {/* Row 3 — Jurisdiction shown when NSA Eligible */}
             {plan.nsaEligible && (
@@ -479,6 +539,23 @@ export default function PlanDetailPage() {
           </div>
         </Card>
       )}
+
+      {/* Edit Plan Modal */}
+      <PlanFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        editId={id}
+        form={form}
+        onFormChange={setForm}
+        payers={payers}
+        planCategories={planCategories}
+        planTypes={planTypes}
+        marketTypes={marketTypes}
+        nsaCategories={nsaCategories}
+        onSubmit={handleSubmit}
+        loading={submitLoading}
+        error={formError}
+      />
     </div>
   );
 }

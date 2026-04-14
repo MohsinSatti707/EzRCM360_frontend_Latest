@@ -36,6 +36,7 @@ export interface PlanDetailDto {
   timelyFilingResubmissionDays?: number | null;
   timelyFilingAppealDays: number;
   status: number;
+  createdAt?: string | null;
 }
 
 export interface CreatePlanRequest {
