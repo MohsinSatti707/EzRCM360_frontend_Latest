@@ -121,6 +121,7 @@ export interface ArAnalysisProcessingStatusDto {
   nextStepName?: string | null;
   currentStepIndex?: number | null;
   totalStepCount: number;
+  resolutionSummary?: ResolutionSummaryDto | null;
 }
 
 export interface ArAnalysisSummaryDto {
@@ -215,6 +216,8 @@ export interface ProviderParticipationUploadPreview {
 }
 
 export interface ResolutionSummaryDto {
+  dataValidation?: StepResolutionSummary | null;
+  claimIntegrity?: StepResolutionSummary | null;
   payer?: StepResolutionSummary | null;
   plan?: StepResolutionSummary | null;
   providerParticipation?: StepResolutionSummary | null;
