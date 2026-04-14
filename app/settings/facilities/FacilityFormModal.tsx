@@ -41,7 +41,7 @@ export function FacilityFormModal({
     <DrawerForm
       open={open}
       onOpenChange={(v) => !v && onClose()}
-      title={editId ? "Edit Facility" : "Add Facility"}
+      title={editId ? "Update Facility" : "Add Facility"}
       footer={
         <DrawerFooter
           onCancel={onClose}

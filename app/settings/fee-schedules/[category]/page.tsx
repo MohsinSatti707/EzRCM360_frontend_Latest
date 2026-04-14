@@ -590,7 +590,7 @@ export default function CategoryFeeSchedulesPage() {
   /*  Step 1 = Configuration, Step 2 = Import Lines (create only)      */
   /* ---------------------------------------------------------------- */
 
-  const wizardTitle = editId ? "Edit Fee Schedule" : "Add Fee Schedule";
+  const wizardTitle = editId ? "Update Fee Schedule" : "Add Fee Schedule.......";
 
   const wizardFooter = (
     <div className="flex w-full items-center justify-between border-t border-border bg-card px-6 py-4">
@@ -735,15 +735,17 @@ export default function CategoryFeeSchedulesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[150px] min-w-[150px]">Fee Schedule ID</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">State</TableHeaderCell>
-                  <TableHeaderCell className="w-[130px] min-w-[130px]">Geography Type</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">{isUCR ? "Zip Range Code" : "Geography Code"}</TableHeaderCell>
-                  <TableHeaderCell className="w-[140px] min-w-[140px]">Geography Name</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">Billing Type</TableHeaderCell>
-                  <TableHeaderCell className="w-[110px] min-w-[110px]">Effective Year</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">FEE SCHEDULE ID</TableHeaderCell>
+                  <TableHeaderCell className="w-[100px] min-w-[100px] whitespace-nowrap">STATE</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY TYPE</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY CODE</TableHeaderCell>
+                  {(categorySlug === "medicare") && (
+                    <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY NAME</TableHeaderCell>
+                  )}
+                  <TableHeaderCell className="w-[140px] min-w-[140px] whitespace-nowrap">BILLING TYPE</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">{isUCR ? "YEAR" : "EFFECTIVE YEAR"}</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
+                    <TableHeaderCell className="!w-[120px] min-w-[120px] whitespace-nowrap">ACTIONS</TableHeaderCell>
                   )}
                 </TableRow>
               </TableHead>
@@ -775,23 +777,25 @@ export default function CategoryFeeSchedulesPage() {
                         <CellTooltip text={geoTypeLabelFn(row.geoType)} />
                       </div>
                     </TableCell>
-                    <TableCell className="w-[120px] min-w-[120px]">
-                      <div className="max-w-[100px] truncate">
+                    <TableCell className="w-[150px] min-w-[150px]">
+                      <div className="max-w-[130px] truncate">
                         <CellTooltip text={row.geoCode ?? "\u2014"} />
                       </div>
                     </TableCell>
-                    <TableCell className="w-[140px] min-w-[140px]">
-                      <div className="max-w-[120px] truncate">
-                        <CellTooltip text={row.geoName ?? "\u2014"} />
-                      </div>
-                    </TableCell>
+                    {(categorySlug === "medicare") && (
+                      <TableCell className="w-[140px] min-w-[140px]">
+                        <div className="max-w-[120px] truncate">
+                          <CellTooltip text={row.geoName ?? "\u2014"} />
+                        </div>
+                      </TableCell>
+                    )}
                     <TableCell className="w-[120px] min-w-[120px]">
                       <div className="max-w-[100px] truncate">
                         <CellTooltip text={billingTypeLabelFn(row.billingType)} />
                       </div>
                     </TableCell>
-                    <TableCell className="w-[110px] min-w-[110px]">
-                      <div className="max-w-[90px] truncate">
+                    <TableCell className="w-[150px] min-w-[150px]">
+                      <div className="max-w-[130px] truncate">
                         <CellTooltip text={row.years?.join(", ") ?? "\u2014"} />
                       </div>
                     </TableCell>
@@ -841,7 +845,7 @@ export default function CategoryFeeSchedulesPage() {
         {/* STEP 1: Configuration fields */}
         {wizardStep === 1 && (
           <div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1">
               {/* Adopt Fee Schedule ID — hidden per Figma
               {categoryConfig.showAdoptFs && (
                 <div className="sm:col-span-2">
@@ -865,14 +869,14 @@ export default function CategoryFeeSchedulesPage() {
                 <label className="mb-1 block text-sm font-medium text-foreground">Fee Schedule ID</label>
                 <input type="text" value={form.scheduleCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, scheduleCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
               </div>
-              <div>
+              {/* <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Category</label>
                 <div className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">{categoryLabel_}</div>
-              </div>
+              </div> */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">State</label>
                 <select value={form.state ?? ""} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                  <option value="">{"\u2014"}</option>
+                  <option value="">Select</option>
                   {lookups?.states?.map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
@@ -884,7 +888,7 @@ export default function CategoryFeeSchedulesPage() {
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">Geography Type</label>
                   <select disabled className="w-full rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
-                    <option>{categoryConfig.lockedGeoType === 1 ? "Area - Region" : categoryConfig.lockedGeoType === 2 ? "Zip" : lookups?.geoTypes?.find((g) => g.value === categoryConfig.lockedGeoType)?.name ?? "—"}</option>
+                    <option>{categoryConfig.lockedGeoType === 1 ? "Area - Region" : categoryConfig.lockedGeoType === 2 ? "ZIP" : lookups?.geoTypes?.find((g) => g.value === categoryConfig.lockedGeoType)?.name ?? "—"}</option>
                   </select>
                 </div>
               ) : (
@@ -936,10 +940,12 @@ export default function CategoryFeeSchedulesPage() {
                     <label className="mb-1 block text-sm font-medium text-foreground">Geography Code</label>
                     <input type="text" placeholder="e.g., 01, 99" value={form.geoCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoCode: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
                   </div>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-foreground">Geography Name</label>
-                    <input type="text" placeholder="e.g., Northern Jersey" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
-                  </div>
+                  {categorySlug !== "medicare" && (
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-foreground">Geography Name</label>
+                      <input type="text" placeholder="e.g., Northern Jersey" value={form.geoName ?? ""} onChange={(e) => setForm((f) => ({ ...f, geoName: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
+                    </div>
+                  )}
                 </>
               )}
 
@@ -1030,17 +1036,31 @@ export default function CategoryFeeSchedulesPage() {
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Quarter (Optional)</label>
-                <MultiSelectDropdown
-                  options={[
-                    { value: 1, label: "Q1" },
-                    { value: 2, label: "Q2" },
-                    { value: 3, label: "Q3" },
-                    { value: 4, label: "Q4" },
-                  ]}
-                  selected={form.quarters}
-                  onChange={(vals) => setForm((f) => ({ ...f, quarters: vals.sort() }))}
-                  placeholder="Select"
-                />
+                {isUCR ? (
+                  <select
+                    value={form.quarters[0] ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, quarters: e.target.value ? [Number(e.target.value)] : [] }))}
+                    className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                  >
+                    <option value="">Select</option>
+                    <option value="1">Q1</option>
+                    <option value="2">Q2</option>
+                    <option value="3">Q3</option>
+                    <option value="4">Q4</option>
+                  </select>
+                ) : (
+                  <MultiSelectDropdown
+                    options={[
+                      { value: 1, label: "Q1" },
+                      { value: 2, label: "Q2" },
+                      { value: 3, label: "Q3" },
+                      { value: 4, label: "Q4" },
+                    ]}
+                    selected={form.quarters}
+                    onChange={(vals) => setForm((f) => ({ ...f, quarters: vals.sort() }))}
+                    placeholder="Select"
+                  />
+                )}
               </div>
 
               {/* Multiplier %, Status, Source, Notes — hidden per Figma */}

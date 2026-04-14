@@ -22,8 +22,10 @@ export interface FacilityDetailDto {
   addressLine2?: string | null;
   zipCode?: string | null;
   entityId: string;
+  entityDisplayName?: string | null;
   posCode?: string | null;
   isActive: boolean;
+  createdAt?: string | null;
 }
 
 export interface CreateFacilityRequest {

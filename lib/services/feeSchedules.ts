@@ -47,6 +47,7 @@ export interface FeeScheduleDetailDto {
   status: number;
   source?: string | null;
   notes?: string | null;
+  createdAt?: string | null;
 }
 
 export interface FeeScheduleLineDto {

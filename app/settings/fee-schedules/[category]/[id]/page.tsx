@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter, notFound } from "next/navigation";
+import Image from "next/image";
 import {
   Search,
   ArrowLeft,
@@ -118,6 +119,50 @@ const quarterLabel = (q: number | null) => {
   return `Q${q}`;
 };
 
+const calculationModelLabel = (v: number | string) => {
+  const map: Record<string, string> = {
+    "0": "Direct Fee",
+    "1": "RBRVS",
+    "2": "UCR",
+    "3": "State Fee",
+    DirectFee: "Direct Fee",
+    Rbrvs: "RBRVS",
+    Ucr: "UCR",
+    StateFee: "State Fee",
+  };
+  return map[String(v)] ?? String(v);
+};
+
+const formatDate = (value: string | null | undefined): string => {
+  if (!value) return "\u2014";
+  try {
+    const d = new Date(value);
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch {
+    return "\u2014";
+  }
+};
+
+/* ------------------------------------------------------------------ */
+/*  InfoField component                                                */
+/* ------------------------------------------------------------------ */
+
+function InfoField({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">{label}</p>
+      <p className="font-aileron text-[14px] text-[#202830]">{value}</p>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  Empty default for line form                                        */
 /* ------------------------------------------------------------------ */
@@ -175,6 +220,8 @@ export default function FeeScheduleDetailPage() {
   const [detail, setDetail] = useState<FeeScheduleDetailDto | null>(null);
   const [detailLoading, setDetailLoading] = useState(true);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [localFallbackCat, setLocalFallbackCat] = useState<number | null>(null);
+  const [fallbackSaving, setFallbackSaving] = useState(false);
 
   // Active tab: "lines" | "zip" | "fallback"
   const [activeTab, setActiveTab] = useState<"lines" | "zip" | "fallback">(
@@ -222,7 +269,7 @@ export default function FeeScheduleDetailPage() {
     setDetailError(null);
     api
       .getById(scheduleId)
-      .then(setDetail)
+      .then((d) => { setDetail(d); setLocalFallbackCat(d.fallbackCategory ?? null); })
       .catch((err) =>
         setDetailError(
           err instanceof Error ? err.message : "Failed to load fee schedule.",
@@ -557,19 +604,7 @@ export default function FeeScheduleDetailPage() {
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-          <input
-            type="text"
-            placeholder="Search CPT/HCPCS..."
-            value={linesSearch}
-            onChange={(e) => {
-              setLinesSearch(e.target.value);
-              setLinesPage(1);
-            }}
-            className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0"
-          />
-        </div>
+        <h3 className="font-aileron text-[16px] font-semibold text-[#202830]">CPT Fee Lines</h3>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -579,7 +614,6 @@ export default function FeeScheduleDetailPage() {
             <Download className="mr-2 h-4 w-4" />
             Download Template
           </Button>
-
           {canCreate && (
             <>
               <input
@@ -602,17 +636,21 @@ export default function FeeScheduleDetailPage() {
               </Button>
             </>
           )}
-
-          {canCreate && (
-            <Button
-              onClick={openAddLine}
-              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Line
-            </Button>
-          )}
         </div>
+      </div>
+      {/* Search */}
+      <div className="relative w-full">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+        <input
+          type="text"
+          placeholder="Search"
+          value={linesSearch}
+          onChange={(e) => {
+            setLinesSearch(e.target.value);
+            setLinesPage(1);
+          }}
+          className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0"
+        />
       </div>
 
       {/* Table */}
@@ -634,7 +672,7 @@ export default function FeeScheduleDetailPage() {
                   <TableHeaderCell>CPT</TableHeaderCell>
                   {!isUCR && <TableHeaderCell>Fee Amount</TableHeaderCell>}
                   <TableHeaderCell>Modifier</TableHeaderCell>
-                  <TableHeaderCell>RV</TableHeaderCell>
+                  <TableHeaderCell>RVU</TableHeaderCell>
                   {isWC && <TableHeaderCell>PC/TC</TableHeaderCell>}
                   {isUCR && (
                     <>
@@ -848,30 +886,60 @@ export default function FeeScheduleDetailPage() {
     </div>
   );
 
+  const saveFallbackCategory = async (value: number | null) => {
+    if (!detail) return;
+    setFallbackSaving(true);
+    try {
+      await api.update(scheduleId, {
+        scheduleCode: detail.scheduleCode ?? "",
+        category: detail.category,
+        state: detail.state ?? "",
+        geoType: detail.geoType,
+        geoCode: detail.geoCode ?? "",
+        geoName: detail.geoName ?? "",
+        billingType: detail.billingType,
+        years: detail.years ?? [],
+        quarters: detail.quarters ?? [],
+        calculationModel: detail.calculationModel,
+        adoptFeeScheduleId: detail.adoptFeeScheduleId ?? null,
+        multiplierPct: detail.multiplierPct,
+        fallbackCategory: value,
+        status: detail.status,
+        source: detail.source ?? "",
+        notes: detail.notes ?? "",
+      });
+      setDetail((prev) => prev ? { ...prev, fallbackCategory: value } : prev);
+      toast.success("Fallback Updated", "Fallback category has been updated successfully.");
+    } catch (err) {
+      toast.error("Update Failed", err instanceof Error ? err.message : "Failed to update fallback category.");
+    } finally {
+      setFallbackSaving(false);
+    }
+  };
+
   const renderFallbackTab = () => {
-    const fallbackCat = detail.fallbackCategory;
-    const hasFallback = fallbackCat != null;
+    const hasFallback = localFallbackCat != null;
 
     return (
       <div className="space-y-6">
-        <h3 className="font-aileron text-[16px] font-semibold text-[#202830]">
+        <h3 className="font-aileron text-[16px] font-bold text-[#202830]">
           CPT-Level Fallback Rules
         </h3>
 
         {/* Default rule */}
-        <div className="rounded-lg border-l-4 border-l-[#0066CC] bg-[#F7F8F9] p-4">
-          <p className="font-aileron text-[14px] font-semibold text-[#202830]">
+        <div className="rounded-[5px] border-l-4 border-l-[#F59E0B] bg-[#FFFBEB] p-4">
+          <p className="font-aileron text-[14px] font-bold text-[#202830]">
             Default Rule
           </p>
           <p className="mt-1 font-aileron text-[13px] text-[#64748B]">
-            If a CPT code is not found in this fee schedule, the system will flag the claim line for manual review.
+            If CPT code is not found in this fee schedule, the system will flag the claim line for manual review.
           </p>
         </div>
 
         {/* Missing CPT Fallback Category — only for MVA and WC */}
         {(categorySlug === "mva" || categorySlug === "wc") && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-aileron text-[14px] font-medium text-[#202830]">
                   Missing CPT Fallback Category
@@ -880,20 +948,33 @@ export default function FeeScheduleDetailPage() {
                   If configured, the system will attempt to price using the selected fallback category before flagging.
                 </p>
               </div>
-              <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${hasFallback ? "bg-[#0066CC]" : "bg-[#CBD5E1]"}`}>
+              <button
+                type="button"
+                disabled={!canUpdate || fallbackSaving}
+                onClick={() => {
+                  const newVal = hasFallback ? null : 0;
+                  setLocalFallbackCat(newVal);
+                  saveFallbackCategory(newVal);
+                }}
+                className={`shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${hasFallback ? "bg-[#0066CC]" : "bg-[#CBD5E1]"}`}
+              >
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasFallback ? "translate-x-6" : "translate-x-1"}`} />
-              </div>
+              </button>
             </div>
-            {hasFallback && (
-              <select disabled className="w-full max-w-xs rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-foreground">
-                <option>{categoryLabel(fallbackCat)}</option>
-              </select>
-            )}
-            {!hasFallback && (
-              <select disabled className="w-full max-w-xs rounded-[5px] border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-                <option>Select</option>
-              </select>
-            )}
+            <select
+              disabled={!canUpdate || fallbackSaving}
+              value={localFallbackCat ?? ""}
+              onChange={(e) => {
+                const val = e.target.value === "" ? null : Number(e.target.value);
+                setLocalFallbackCat(val);
+                saveFallbackCategory(val);
+              }}
+              className="w-[180px] rounded-[5px] border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-0 disabled:opacity-50"
+            >
+              <option value="">Select</option>
+              <option value="0">Medicare</option>
+              <option value="1">UCR</option>
+            </select>
           </div>
         )}
       </div>
@@ -932,6 +1013,9 @@ export default function FeeScheduleDetailPage() {
           <span aria-hidden>/</span>
           <span className="text-foreground">{scheduleCode}</span>
         </nav>
+        <h1 className="font-aileron text-[22px] font-bold text-[#202830]">
+          {categoryConfig.label} Fee Schedule Details
+        </h1>
       </div>
 
       {/* Header Card */}
@@ -953,8 +1037,7 @@ export default function FeeScheduleDetailPage() {
               </span>
             </div>
             <p className="mt-1.5 font-aileron text-[14px] text-[#64748B]">
-              {categoryLabel(detail.category)} &bull; {stateName} &bull;{" "}
-              {yearsDisplay}
+              {categoryLabel(detail.category)} &bull; {stateName} &bull; {yearsDisplay}
             </p>
           </div>
           {canUpdate && (
@@ -973,93 +1056,46 @@ export default function FeeScheduleDetailPage() {
       </Card>
 
       {/* General Information */}
-      <Card className="mb-6 p-6">
-        <h2 className="mb-4 font-aileron text-[16px] font-semibold text-[#202830]">
-          General Information
-        </h2>
-        <div className="grid grid-cols-3 gap-x-8 gap-y-5">
-          {/* Row 1 */}
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Fee Schedule ID
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {scheduleCode}
-            </p>
-          </div>
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Category
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {categoryLabel(detail.category)}
-            </p>
-          </div>
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              State
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {stateName}
-            </p>
-          </div>
-
-          {/* Row 2 */}
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Geography Type
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {geoTypeLabel(detail.geoType)}
-            </p>
-          </div>
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Geography Code
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {detail.geoCode ?? "---"}
-            </p>
-          </div>
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Geography Name
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {detail.geoName ?? "---"}
-            </p>
-          </div>
-
-          {/* Row 3 */}
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Billing Type
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {billingTypeLabel(detail.billingType)}
-            </p>
-          </div>
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Effective Year
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {yearsDisplay}
-            </p>
-          </div>
-          <div>
-            <p className="mb-1 font-aileron text-[12px] font-medium uppercase tracking-wide text-[#64748B]">
-              Quarter
-            </p>
-            <p className="font-aileron text-[14px] text-[#202830]">
-              {quartersDisplay}
-            </p>
-          </div>
+      <div className="mb-6 px-0">
+        <div className="mb-4 flex items-center gap-2">
+          <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
+          <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
+            General Information
+          </h2>
         </div>
-      </Card>
+        <div className="grid grid-cols-3 gap-x-8 gap-y-5">
+          {/* Medicare / UCR layout */}
+          {(categorySlug === "medicare" || categorySlug === "ucr") && (
+            <>
+              <InfoField label="Fee Schedule ID" value={scheduleCode} />
+              <InfoField label="Category" value={categoryLabel(detail.category)} />
+              <InfoField label="State" value={stateName} />
+              <InfoField label="Geography Type" value={geoTypeLabel(detail.geoType)} />
+              <InfoField label="Geography Code" value={detail.geoCode ?? "\u2014"} />
+              <InfoField label="Geography Name" value={detail.geoName ?? "\u2014"} />
+              <InfoField label="Billing Type" value={billingTypeLabel(detail.billingType)} />
+              <InfoField label="Effective Year (From - To)" value={yearsDisplay} />
+              <InfoField label="Quarter" value={quartersDisplay} />
+            </>
+          )}
+          {/* MVA / WC layout */}
+          {(categorySlug === "mva" || categorySlug === "wc") && (
+            <>
+              <InfoField label="Category" value={categoryLabel(detail.category)} />
+              <InfoField label="State" value={stateName} />
+              <InfoField label="Geography Type" value={geoTypeLabel(detail.geoType)} />
+              <InfoField label="Geography Code" value={detail.geoCode ?? "\u2014"} />
+              <InfoField label="Geography Name" value={detail.geoName ?? "\u2014"} />
+              <InfoField label="Effective Year" value={yearsDisplay} />
+              <InfoField label="Calculation" value={calculationModelLabel(detail.calculationModel)} />
+              <InfoField label="Created At" value={formatDate(detail.createdAt)} />
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Tabs */}
-      <div className="mb-4 flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-1 w-fit">
+      <div className="mb-4 flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-1 w-full">
         {(isUCR
           ? [
               { key: "lines" as const, label: "CPT Fee Lines" },
@@ -1074,7 +1110,7 @@ export default function FeeScheduleDetailPage() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`rounded-md px-4 py-2 font-aileron text-[14px] font-medium transition-colors ${
+            className={`flex-1 rounded-md px-4 py-2 font-aileron text-[14px] font-medium transition-colors ${
               activeTab === tab.key
                 ? "bg-white text-[#202830] shadow-sm"
                 : "text-[#64748B] hover:text-[#202830]"

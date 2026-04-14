@@ -417,8 +417,8 @@ export default function PlansPage() {
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="category">Category</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>
           <div className="relative flex-1">

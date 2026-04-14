@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Search, ArrowRight, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
@@ -365,7 +366,12 @@ export default function FacilitiesPage() {
                     )}
                     <TableCell className="w-[180px] min-w-[180px]">
                       <div className="max-w-xs truncate">
-                        <CellTooltip text={row.name} />
+                        <Link
+                          href={`/settings/facilities/${row.id}`}
+                          className="font-aileron text-[14px] text-[#0066CC] hover:underline"
+                        >
+                          {row.name}
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell className="w-[150px] min-w-[150px]">
