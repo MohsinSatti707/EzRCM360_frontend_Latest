@@ -21,6 +21,7 @@ export interface EntityDetailDto {
   status: number;
   organizationId: string;
   createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface CreateEntityRequest {
