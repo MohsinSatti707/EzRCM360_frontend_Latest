@@ -156,8 +156,12 @@ export default function RenderingParticipationPage() {
 
   const handleSubmit = async () => {
     setFormError(null);
-    if (!form.entityProviderId || !form.planId || !form.payerId) {
+    if (!form.entityProviderId || !form.planId) {
       setFormError("Provider and plan are required.");
+      return;
+    }
+    if (!form.payerId) {
+      setFormError("Selected plan is not linked to a payer. Link the plan to a payer first.");
       return;
     }
     setSubmitLoading(true);
@@ -533,7 +537,7 @@ export default function RenderingParticipationPage() {
                 className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
               >
                 <option value="">Select plan</option>
-                {allPlans.map((p) => (
+                {allPlans.filter((p) => !!p.payerId).map((p) => (
                   <option key={p.id} value={p.id} title={p.displayName}>{p.displayName.length > 60 ? p.displayName.substring(0, 60) + "..." : p.displayName}</option>
                 ))}
               </select>
