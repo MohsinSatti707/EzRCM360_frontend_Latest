@@ -1,6 +1,6 @@
 /**
  * Post-build script: copies static + public into .next/standalone,
- * then creates deploy.zip in the project root.
+ * then creates deploy.tar.gz in the project root.
  *
  * Usage: node scripts/package-standalone.js
  */
@@ -10,7 +10,7 @@ const { execSync } = require("child_process");
 
 const root = path.resolve(__dirname, "..");
 const standalone = path.join(root, ".next", "standalone");
-const zipPath = path.join(root, ".next", "deploy.zip");
+const archivePath = path.join(root, ".next", "deploy.tar.gz");
 
 // 1. Copy .next/static -> .next/standalone/.next/static
 const srcStatic = path.join(root, ".next", "static");
@@ -32,17 +32,17 @@ if (fs.existsSync(srcPublic)) {
   console.warn("WARNING: public folder not found - skipping");
 }
 
-// 3. Create deploy.zip using Windows tar.exe (bsdtar, built into Windows 10+)
-//    tar with .zip extension auto-selects zip format via -a flag
-if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+// 3. Create deploy.tar.gz — works on Linux, macOS, and Windows 10+
+//    (GNU tar on Linux/macOS; bsdtar shipped as `tar` on Windows 10+)
+if (fs.existsSync(archivePath)) fs.unlinkSync(archivePath);
 try {
-  execSync(`tar.exe -a -cf "${zipPath}" -C "${standalone}" .`, {
+  execSync(`tar -czf "${archivePath}" -C "${standalone}" .`, {
     stdio: "inherit",
   });
-  const sizeMB = (fs.statSync(zipPath).size / 1024 / 1024).toFixed(1);
-  console.log(`Created deploy.zip (${sizeMB} MB)`);
+  const sizeMB = (fs.statSync(archivePath).size / 1024 / 1024).toFixed(1);
+  console.log(`Created deploy.tar.gz (${sizeMB} MB)`);
 } catch (err) {
-  console.error("Failed to create zip:", err.message);
+  console.error("Failed to create archive:", err.message);
   process.exit(1);
 }
 

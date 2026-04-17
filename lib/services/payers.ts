@@ -50,6 +50,7 @@ export interface PayerDetailDto {
   emails: PayerEmailDto[];
   planIds: string[];
   createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 // Request shapes for create/update (API expects camelCase in JSON)
@@ -102,6 +103,7 @@ export function payersApi() {
     getList: (params?: {
       status?: number;
       search?: string;
+      searchField?: string;
       organizationId?: string;
       pageNumber?: number;
       pageSize?: number;
@@ -109,6 +111,7 @@ export function payersApi() {
       const q = new URLSearchParams();
       if (params?.status != null) q.set("status", String(params.status));
       if (params?.search) q.set("search", params.search ?? "");
+      if (params?.searchField) q.set("searchField", params.searchField);
       if (params?.organizationId) q.set("OrganizationId", params.organizationId);
       if (params?.pageNumber != null) q.set("pageNumber", String(params.pageNumber));
       if (params?.pageSize != null) q.set("pageSize", String(params.pageSize));

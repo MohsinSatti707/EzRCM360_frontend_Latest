@@ -29,6 +29,7 @@ on:
       - master
       - main
       - document-ui
+      - feature/fee-schedules-and-participation
 
   # 2. Manual trigger with inputs
   workflow_dispatch:
@@ -135,6 +136,27 @@ jobs:
           echo "Warning: $ENV_FILE not found, using default .env"
         fi
 
+    - name: 🧹 Clean Frontend Build Cache
+      if: env.APP_TYPE == 'frontend'
+      run: |
+        # Detect framework from config files and clean the right build artifacts.
+        if ls next.config.* >/dev/null 2>&1; then
+          echo "Detected Next.js — cleaning .next and node_modules/.cache"
+          rm -rf .next node_modules/.cache
+        elif ls nuxt.config.* >/dev/null 2>&1; then
+          echo "Detected Nuxt — cleaning .nuxt, .output, dist, and node_modules/.cache"
+          rm -rf .nuxt .output dist node_modules/.cache
+        elif [ -f "vite.config.js" ] || [ -f "vite.config.ts" ]; then
+          echo "Detected Vite — cleaning dist and node_modules/.cache"
+          rm -rf dist node_modules/.cache
+        elif [ -f "angular.json" ]; then
+          echo "Detected Angular — cleaning dist and node_modules/.cache"
+          rm -rf dist node_modules/.cache
+        else
+          echo "Unknown framework — cleaning generic caches"
+          rm -rf .next .nuxt .output dist build node_modules/.cache
+        fi
+
     - name: 🏗️ Build Frontend Assets
       if: env.APP_TYPE == 'frontend'
       run: ${{ vars.FRONTEND_BUILD_COMMAND }}
@@ -175,7 +197,12 @@ jobs:
           echo "Error: SERVER_PATH is empty. Set DEPLOY_TARGET_PATH_STAGING or DEPLOY_TARGET_PATH_PROD variable."
           exit 1
         fi
-        rsync -avz --no-perms --no-times --no-owner --no-group --ignore-errors --delete "${BUILD_SOURCE}" "${{ env.SERVER_PATH }}" || true
+        # For frontend, preserve ecosystem.config.js on the server (pm2 config is env-specific).
+        RSYNC_EXTRA=""
+        if [ "${{ env.APP_TYPE }}" = "frontend" ]; then
+          RSYNC_EXTRA="--exclude=ecosystem.config.js"
+        fi
+        rsync -avz --no-perms --no-times --no-owner --no-group --delete $RSYNC_EXTRA "${BUILD_SOURCE}" "${{ env.SERVER_PATH }}"
         echo 'File transfer complete.'
         if [ -n "${{ env.SERVER_PATH }}" ] && [ "${{ env.APP_TYPE }}" = "frontend" ]; then
           find "${{ env.SERVER_PATH }}" -type d -exec chmod 755 {} \; 2>/dev/null || true
@@ -200,3 +227,15 @@ jobs:
       run: |
         echo "Restarting service: ${{ vars.API_SUPERVISOR_BASE }}"
         sudo /usr/bin/supervisorctl restart ${{ vars.API_SUPERVISOR_BASE }}
+
+    # --- FRONTEND-ONLY POST-DEPLOY ---
+    - name: ♻️ Restart Frontend Service (pm2)
+      if: env.APP_TYPE == 'frontend'
+      run: |
+        PM2_NAME="${{ vars.FRONTEND_PM2_NAME }}"
+        if [ -z "$PM2_NAME" ]; then
+          echo "Error: FRONTEND_PM2_NAME repo variable is not set."
+          exit 1
+        fi
+        echo "Restarting pm2 process: $PM2_NAME"
+        pm2 restart "$PM2_NAME"
