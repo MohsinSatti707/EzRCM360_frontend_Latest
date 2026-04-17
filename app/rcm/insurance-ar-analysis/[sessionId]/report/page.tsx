@@ -262,13 +262,13 @@ export default function InsuranceArAnalysisReportPage() {
           </div>
           {(report.underbilledClaimCount > 0 || report.totalUnderbilledAmount > 0) && (
             <div className="grid gap-5 sm:grid-cols-2 mt-5">
-              <div className="bg-[#FFFBEB] rounded-lg p-6 text-center border border-[#F59E0B]/30">
+              <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-[#F59E0B]/30">
                 <div className="text-[32px] font-bold font-['Aileron'] text-[#D97706] mb-1">
                   {report.underbilledClaimCount.toLocaleString()}
                 </div>
                 <div className="text-[14px] font-['Aileron'] text-muted-foreground">Underbilled Claims</div>
               </div>
-              <div className="bg-[#FFFBEB] rounded-lg p-6 text-center border border-[#F59E0B]/30">
+              <div className="bg-[#F8FAFC] rounded-lg p-6 text-center border border-[#F59E0B]/30">
                 <div className="text-[32px] font-bold font-['Aileron'] text-[#D97706] mb-1">
                   {formatCurrency(report.totalUnderbilledAmount)}
                 </div>

@@ -3,15 +3,12 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { getApiUrl } from "@/lib/api";
 import { Upload } from "lucide-react";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import { organizationsApi } from "@/lib/services/organizations";
-import { usersApi } from "@/lib/services/users";
-import type { UserListItemDto } from "@/lib/services/users";
 import { OrganizationIcon } from "@/lib/icons/OrganizationIcon";
 import { PhoneIcon } from "@/lib/icons/PhoneIcon";
 import type {
@@ -19,14 +16,11 @@ import type {
   UpdateCurrentOrganizationRequest,
 } from "@/lib/services/organizations";
 import { PageShell } from "@/components/layout/PageShell";
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase() || "—";
-}
+import { DrawerForm } from "@/components/ui/DrawerForm";
+import { DrawerFooter } from "@/components/ui/ModalFooter";
+import { Input } from "@/components/ui/Input";
+import { NativeSelect } from "@/components/ui/Select";
+import { Label } from "@/components/ui/Label";
 
 /** First letter of first two words only (e.g. "PrimeCare Billing Solutions" → "PB"). */
 function getAvatarInitials(name: string): string {
@@ -39,95 +33,78 @@ function getAvatarInitials(name: string): string {
   return chars.toUpperCase() || "—";
 }
 
-function formatId(id: string | null | undefined): string {
-  if (!id || !id.trim()) return "—";
-  if (id.length <= 20) return id;
-  return `${id.slice(0, 25)}…`;
+const EMPLOYEE_COUNT_OPTIONS = [
+  { value: "", label: "Select" },
+  { value: "1-10", label: "1-10" },
+  { value: "11-50", label: "11-50" },
+  { value: "51-200", label: "51-200" },
+  { value: "201-500", label: "201-500" },
+  { value: "501-1000", label: "501-1000" },
+  { value: "1001-5000", label: "1001-5000" },
+  { value: "5000+", label: "5000+" },
+];
+
+const COUNTRY_OPTIONS = [
+  { value: "", label: "Select" },
+  { value: "USA", label: "United States" },
+  { value: "Canada", label: "Canada" },
+  { value: "UK", label: "United Kingdom" },
+  { value: "India", label: "India" },
+  { value: "Australia", label: "Australia" },
+];
+
+const COUNTRY_CODE_OPTIONS = [
+  { code: "+1", flag: "🇺🇸", label: "+1" },
+  { code: "+44", flag: "🇬🇧", label: "+44" },
+  { code: "+91", flag: "🇮🇳", label: "+91" },
+  { code: "+61", flag: "🇦🇺", label: "+61" },
+  { code: "+1CA", flag: "🇨🇦", label: "+1" },
+];
+
+const ALLOWED_LOGO_TYPES = ".png,.jpg,.jpeg,.pdf";
+const MAX_LOGO_MB = 5;
+const MAX_LOGO_BYTES = MAX_LOGO_MB * 1024 * 1024;
+
+/** Check if the organization has been fully set up (has meaningful data beyond defaults). */
+function isOrgAdded(profile: OrganizationProfileDto): boolean {
+  return !!(
+    profile.industry ||
+    profile.numberOfEmployees ||
+    profile.primaryAddress ||
+    profile.companyOverviewWebsite ||
+    (profile.phoneNumber && profile.phoneNumber !== profile.name)
+  );
 }
 
-const DATE_FORMAT_OPTIONS: { value: string; label: string }[] = [
-  { value: "MMM DD, YYYY", label: "MMM DD, YYYY" },
-  { value: "YYYY-MM-DD", label: "YYYY-MM-DD" },
-  { value: "MM/DD/YYYY", label: "MM/DD/YYYY" },
-  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
-  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" },
-  { value: "MM-DD-YYYY", label: "MM-DD-YYYY" },
-];
-
-const TIME_FORMAT_OPTIONS: { value: string; label: string }[] = [
-  { value: "HH:MM", label: "HH:MM (24h)" },
-  { value: "HH:MM:SS", label: "HH:MM:SS (24h)" },
-  { value: "hh:mm A", label: "hh:mm A (12h)" },
-  { value: "hh:mm:ss A", label: "hh:mm:ss A (12h)" },
-];
-
-const TIME_ZONE_OPTIONS: { value: string; label: string }[] = [
-  { value: "Eastern Time (ET) – UTC −5 / UTC −4 (DST)", label: "Eastern Time (ET) – UTC −5 / UTC −4 (DST)" },
-  { value: "Central Time (CT) – UTC −6 / UTC −5 (DST)", label: "Central Time (CT) – UTC −6 / UTC −5 (DST)" },
-  { value: "Mountain Time (MT) – UTC −7 / UTC −6 (DST)", label: "Mountain Time (MT) – UTC −7 / UTC −6 (DST)" },
-  { value: "Pacific Time (PT) – UTC −8 / UTC −7 (DST)", label: "Pacific Time (PT) – UTC −8 / UTC −7 (DST)" },
-  { value: "UTC", label: "UTC" },
-  { value: "", label: "—" },
-];
-
-function formatDateExample(format: string | null | undefined): string {
-  if (!format) return "—";
-  const d = new Date(2026, 0, 29); // 2026-01-29
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  const mm = m;
-  const dd = day;
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const mmm = monthNames[d.getMonth()];
-  const map: Record<string, string> = {
-    "MMM DD, YYYY": `${mmm} ${dd}, ${y}`,
-    "YYYY-MM-DD": `${y}-${m}-${dd}`,
-    "MM/DD/YYYY": `${mm}/${dd}/${y}`,
-    "DD/MM/YYYY": `${dd}/${mm}/${y}`,
-    "DD-MM-YYYY": `${dd}-${mm}-${y}`,
-    "MM-DD-YYYY": `${mm}-${dd}-${y}`,
-  };
-  return map[format] ?? format;
-}
-
-function formatTimeExample(format: string | null | undefined): string {
-  if (!format) return "—";
-  const d = new Date(2026, 0, 29, 14, 45, 0); // 14:45
-  const h = d.getHours();
-  const m = d.getMinutes();
-  const s = d.getSeconds();
-  const h12 = h % 12 || 12;
-  const ampm = h < 12 ? "AM" : "PM";
-  const hh = String(h).padStart(2, "0");
-  const mm = String(m).padStart(2, "0");
-  const ss = String(s).padStart(2, "0");
-  const hh12 = String(h12).padStart(2, "0");
-  const map: Record<string, string> = {
-    "HH:MM": `${hh}:${mm}`,
-    "HH:MM:SS": `${hh}:${mm}:${ss}`,
-    "hh:mm A": `${hh12}:${mm} ${ampm}`,
-    "hh:mm:ss A": `${hh12}:${mm}:${ss} ${ampm}`,
-  };
-  return map[format] ?? format;
+/** Build a single-line address string from parts. */
+function buildAddress(profile: OrganizationProfileDto): string {
+  const parts = [
+    profile.primaryAddress,
+    profile.city,
+    profile.state ? `${profile.state} ${profile.zipCode ?? ""}`.trim() : profile.zipCode,
+    profile.country,
+  ].filter(Boolean);
+  return parts.join(", ") || "—";
 }
 
 export default function OrganizationPage() {
   const [profile, setProfile] = useState<OrganizationProfileDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editOpen, setEditOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [form, setForm] = useState<UpdateCurrentOrganizationRequest>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const ALLOWED_LOGO_TYPES = ".png,.jpg,.jpeg,.pdf";
-  const MAX_LOGO_MB = 5;
-  const MAX_LOGO_BYTES = MAX_LOGO_MB * 1024 * 1024;
-
-  const [users, setUsers] = useState<UserListItemDto[]>([]);
+  // Phone country code state for org phone
+  const [phoneCountryCode, setPhoneCountryCode] = useState("+1");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  // Phone country code state for admin phone
+  const [adminPhoneCountryCode, setAdminPhoneCountryCode] = useState("+1");
+  const [adminPhoneNumber, setAdminPhoneNumber] = useState("");
 
   const api = organizationsApi();
   const toast = useToast();
@@ -143,19 +120,62 @@ export default function OrganizationPage() {
         setError(err instanceof Error ? err.message : "Failed to load organization")
       )
       .finally(() => setLoading(false));
-    usersApi().getList({ pageSize: 200 }).then((res) => setUsers(res.items)).catch(() => {});
   }, []);
+
+  /** Parse a stored phone string like "+12124567890" into country code and number parts. */
+  const parsePhone = (phone: string | null | undefined): { code: string; number: string } => {
+    if (!phone) return { code: "+1", number: "" };
+    // Try to match known country codes
+    for (const cc of COUNTRY_CODE_OPTIONS) {
+      if (phone.startsWith(cc.code)) {
+        return { code: cc.code, number: phone.slice(cc.code.length) };
+      }
+    }
+    return { code: "+1", number: phone };
+  };
+
+  const openAdd = () => {
+    setIsEditMode(false);
+    setForm({});
+    setLogoFile(null);
+    setLogoPreview(null);
+    setPhoneCountryCode("+1");
+    setPhoneNumber("");
+    setAdminPhoneCountryCode("+1");
+    setAdminPhoneNumber("");
+    setFormError(null);
+    setDrawerOpen(true);
+  };
 
   const openEdit = () => {
     if (!profile) return;
+    setIsEditMode(true);
+
+    const orgPhone = parsePhone(profile.phoneNumber);
+    const admPhone = parsePhone(profile.adminPhone);
+
     setForm({
       name: profile.name,
-      primaryAdministratorUserId: profile.primaryAdministratorUserId ?? undefined,
-      defaultTimeZone: profile.defaultTimeZone ?? undefined,
-      systemDateFormat: profile.systemDateFormat ?? undefined,
-      systemTimeFormat: profile.systemTimeFormat ?? undefined,
+      industry: profile.industry ?? undefined,
+      numberOfEmployees: profile.numberOfEmployees ?? undefined,
+      primaryAddress: profile.primaryAddress ?? undefined,
+      city: profile.city ?? undefined,
+      state: profile.state ?? undefined,
+      zipCode: profile.zipCode ?? undefined,
+      country: profile.country ?? undefined,
+      companyOverviewWebsite: profile.companyOverviewWebsite ?? undefined,
+      adminFirstName: profile.adminFirstName ?? undefined,
+      adminLastName: profile.adminLastName ?? undefined,
+      adminJobTitle: profile.adminJobTitle ?? undefined,
+      adminEmail: profile.adminEmail ?? undefined,
       logoUrl: profile.logoUrl ?? undefined,
     });
+
+    setPhoneCountryCode(orgPhone.code);
+    setPhoneNumber(orgPhone.number);
+    setAdminPhoneCountryCode(admPhone.code);
+    setAdminPhoneNumber(admPhone.number);
+
     setLogoFile(null);
     if (profile.logoUrl) {
       const url = profile.logoUrl.startsWith("http")
@@ -166,7 +186,7 @@ export default function OrganizationPage() {
       setLogoPreview(null);
     }
     setFormError(null);
-    setEditOpen(true);
+    setDrawerOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -175,19 +195,31 @@ export default function OrganizationPage() {
       setFormError(`Logo must be ${MAX_LOGO_MB} MB or less.`);
       return;
     }
+
+    const payload: UpdateCurrentOrganizationRequest = {
+      ...form,
+      phoneNumber: phoneNumber ? `${phoneCountryCode}${phoneNumber}` : undefined,
+      adminPhone: adminPhoneNumber ? `${adminPhoneCountryCode}${adminPhoneNumber}` : undefined,
+    };
+
     setSubmitLoading(true);
     try {
       if (logoFile) {
-        await api.updateCurrentWithForm(form, logoFile);
+        await api.updateCurrentWithForm(payload, logoFile);
       } else {
-        await api.updateCurrent(form);
+        await api.updateCurrent(payload);
       }
       const updated = await api.getCurrent();
       setProfile(updated);
-      setEditOpen(false);
-      toast.success("Organization Updated", "Organization settings have been saved successfully.");
+      setDrawerOpen(false);
+      toast.success(
+        isEditMode ? "Organization Updated" : "Organization Added",
+        isEditMode
+          ? "Organization settings have been saved successfully."
+          : "Organization has been added successfully."
+      );
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Update failed.";
+      const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
       toast.error("Save Failed", msg);
     } finally {
@@ -225,13 +257,15 @@ export default function OrganizationPage() {
     );
   }
 
+  const orgAdded = isOrgAdded(profile);
+
   return (
     <PageShell
       breadcrumbs={[{ label: "Settings & Configurations", href: "/settings" }, { label: "Organization" }]}
       title="Organization"
       titleWrapperClassName="mb-4 px-6"
     >
-      {/* Organization summary card - light grey bg, avatar light blue circle with dark blue initials */}
+      {/* Organization summary card */}
       <Card className="mb-5 overflow-hidden rounded-[5px] border-none bg-[#F8FAFC] shadow-none mx-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-5">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#DBEAFE] text-2xl font-semibold text-[#0066CC]">
@@ -255,7 +289,7 @@ export default function OrganizationPage() {
             <h2 className="font-aileron text-lg font-bold leading-tight text-[#1F2937]">
               {profile.name}
             </h2>
-            {(profile.phoneNumber != null && profile.phoneNumber !== "") && (
+            {orgAdded && profile.phoneNumber && (
               <p className="mt-1.5 flex items-center gap-1.5 text-sm font-normal text-[#6B7280]">
                 <PhoneIcon className="h-4 w-4 shrink-0 text-[#64748B]" />
                 {profile.phoneNumber}
@@ -266,93 +300,144 @@ export default function OrganizationPage() {
       </Card>
 
       {/* Organization Information */}
-      <Card className="overflow-auto border-none  shadow-none mx-6 h-[calc(100vh-385px)]">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center">
+      <Card className="overflow-auto border-none shadow-none mx-6 h-[calc(100vh-385px)]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <OrganizationIcon className="h-5 w-5 text-[#6B7280]" />
+            <h3 className="text-[18px] font-semibold text-[#1F2937]">Organization Information</h3>
           </div>
-          <h3 className="text-[18px] font-semibold text-[#1F2937]">Organization Information</h3>
+          {canUpdate && (
+            orgAdded ? (
+              <Button
+                onClick={openEdit}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8]"
+              >
+                Edit <span aria-hidden>→</span>
+              </Button>
+            ) : (
+              <Button
+                onClick={openAdd}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8]"
+              >
+                Add Organization <span aria-hidden>→</span>
+              </Button>
+            )
+          )}
         </div>
+
         <div className="grid gap-x-10 gap-y-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
               Organization Name
             </dt>
-            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">{profile.name}</dd>
-          </div>
-          <div>
-            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-              Primary Administrator
-            </dt>
-            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black" title={profile.primaryAdministratorUserId ?? undefined}>
-              {(() => {
-                const user = users.find((u) => u.id === profile.primaryAdministratorUserId);
-                return user ? user.userName : formatId(profile.primaryAdministratorUserId);
-              })()}
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
+              {profile.name}
             </dd>
           </div>
           <div>
             <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-              Default Time Zone
+              Industry
             </dt>
             <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
-              {profile.defaultTimeZone ?? "Not set"}
+              {profile.industry || "—"}
             </dd>
           </div>
           <div>
             <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-              System Date Format
+              Number of Employees
             </dt>
             <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
-              {profile.systemDateFormat
-                ? `${profile.systemDateFormat} → ${formatDateExample(profile.systemDateFormat)}`
-                : "Not set"}
+              {profile.numberOfEmployees || "—"}
             </dd>
           </div>
           <div>
             <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-              System Time Format
+              Phone
             </dt>
             <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
-              {profile.systemTimeFormat
-                ? `${profile.systemTimeFormat} → ${formatTimeExample(profile.systemTimeFormat)}`
-                : "Not set"}
+              {profile.phoneNumber || "—"}
             </dd>
           </div>
           <div>
             <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-              Organization Status
+              Address
             </dt>
             <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
-              {profile.isActive ? "Active" : "Inactive"}
+              {orgAdded ? buildAddress(profile) : "—"}
             </dd>
           </div>
         </div>
+        <div className="px-6 pb-6">
+          <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+            Company Overview Website
+          </dt>
+          <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
+            {profile.companyOverviewWebsite || "—"}
+          </dd>
+        </div>
 
-      </Card>
-      {canUpdate && (
-          <div className="px-6 pt-2">
-            <Button
-              onClick={openEdit}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8]"
-            >
-              Edit
-              <span aria-hidden>→</span>
-            </Button>
+        {/* Account Administrator Information */}
+        <div className="border-t border-border mx-6" />
+        <div className="flex items-center gap-2 px-6 pt-6">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#6B7280]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <h3 className="text-[18px] font-semibold text-[#1F2937]">Account Administrator Information</h3>
+        </div>
+        <div className="grid gap-x-10 gap-y-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+              First Name
+            </dt>
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
+              {profile.adminFirstName || "—"}
+            </dd>
           </div>
-        )}
+          <div>
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+              Last Name
+            </dt>
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
+              {profile.adminLastName || "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+              Job Title
+            </dt>
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
+              {profile.adminJobTitle || "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+              Phone
+            </dt>
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
+              {profile.adminPhone || "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+              Work Email
+            </dt>
+            <dd className="mt-1 font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black">
+              {profile.adminEmail || "—"}
+            </dd>
+          </div>
+        </div>
+      </Card>
 
-      {/* Update Organization modal */}
-      <Modal
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        title="Update Organization"
-        size="sm"
-        position="right"
+      {/* Add / Edit Organization drawer */}
+      <DrawerForm
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        title={isEditMode ? "Edit Organization" : "Add Organization"}
         footer={
-          <ModalFooter
-            onCancel={() => setEditOpen(false)}
-            submitLabel="Update"
+          <DrawerFooter
+            onCancel={() => setDrawerOpen(false)}
+            submitLabel={isEditMode ? "Update" : "Add"}
             onSubmit={handleSubmit}
             loading={submitLoading}
           />
@@ -364,125 +449,109 @@ export default function OrganizationPage() {
               {formError}
             </div>
           )}
-          <div className="space-y-5">
+
+          {/* Organization Information Section */}
+          <h4 className="font-aileron text-[16px] font-semibold text-[#1F2937] mb-4">
+            Organization Information
+          </h4>
+          <div className="space-y-4">
+            <Input
+              label="Organization Name"
+              required
+              value={form.name ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              placeholder="e.g., Medical Millennium Billing (MMB)"
+            />
+            <Input
+              label="Industry"
+              required
+              value={form.industry ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))}
+              placeholder="e.g., Medical Billing"
+            />
+            <NativeSelect
+              label="Number of Employees"
+              required
+              options={EMPLOYEE_COUNT_OPTIONS}
+              value={form.numberOfEmployees ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, numberOfEmployees: e.target.value || undefined }))}
+            />
+
+            {/* Phone with country code */}
             <div>
-              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-                Organization Name
-              </label>
-              <input
-                type="text"
-                value={form.name ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
-                placeholder="e.g. PrimeCare Billing Solutions"
+              <Label required>Phone</Label>
+              <div className="mt-1.5 flex h-[39px] overflow-hidden rounded-[5px] border border-[#E2E8F0] bg-background">
+                <select
+                  value={phoneCountryCode}
+                  onChange={(e) => setPhoneCountryCode(e.target.value)}
+                  className="h-full border-r border-[#E2E8F0] bg-transparent px-3 text-[14px] focus:outline-none"
+                >
+                  {COUNTRY_CODE_OPTIONS.map((cc) => (
+                    <option key={cc.code} value={cc.code}>
+                      {cc.flag} {cc.label}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="212 - 456 - 7890"
+                  className="h-full w-full bg-transparent px-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <Input
+              label="Primary Address (Suite #, Apartment #, and Street #)"
+              required
+              value={form.primaryAddress ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, primaryAddress: e.target.value }))}
+              placeholder="e.g., Suite 204, 1827 Willow Creek Dr. San Jose"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="City"
+                required
+                value={form.city ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                placeholder="e.g., New York"
+              />
+              <Input
+                label="State"
+                required
+                value={form.state ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+                placeholder="e.g, CA"
               />
             </div>
-            <div>
-              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-                Primary Administrator
-              </label>
-              <select
-                value={form.primaryAdministratorUserId ?? ""}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    primaryAdministratorUserId: e.target.value || undefined,
-                  }))
-                }
-                className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
-              >
-                <option value="">— Select administrator —</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.userName} ({u.email})
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="Zip Code"
+                required
+                value={form.zipCode ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, zipCode: e.target.value }))}
+                placeholder="e.g., 95125"
+              />
+              <NativeSelect
+                label="Country"
+                required
+                options={COUNTRY_OPTIONS}
+                value={form.country ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, country: e.target.value || undefined }))}
+              />
             </div>
+            <Input
+              label="Company Overview Website"
+              value={form.companyOverviewWebsite ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, companyOverviewWebsite: e.target.value }))}
+              placeholder="www.example.com"
+            />
+
+            {/* Upload Logo */}
             <div>
-              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-                Default Time Zone
-              </label>
-              <select
-                value={form.defaultTimeZone ?? ""}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    defaultTimeZone: e.target.value || undefined,
-                  }))
-                }
-                className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
-              >
-                {TIME_ZONE_OPTIONS.map((opt) => (
-                  <option key={opt.value || "empty"} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-                {form.defaultTimeZone &&
-                  !TIME_ZONE_OPTIONS.some((o) => o.value === form.defaultTimeZone) && (
-                    <option value={form.defaultTimeZone}>{form.defaultTimeZone}</option>
-                  )}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-                System Date Format
-              </label>
-              <div className="flex flex-wrap items-baseline gap-2">
-                <select
-                  value={form.systemDateFormat ?? ""}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      systemDateFormat: e.target.value || undefined,
-                    }))
-                  }
-                  className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
-                >
-                  <option value="">—</option>
-                  {DATE_FORMAT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                {/* <span className="text-sm text-muted-foreground">
-                  → {formatDateExample(form.systemDateFormat)}
-                </span> */}
-              </div>
-            </div>
-            <div>
-              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-                System Time Format
-              </label>
-              <div className="flex flex-wrap items-baseline gap-2">
-                <select
-                  value={form.systemTimeFormat ?? ""}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      systemTimeFormat: e.target.value || undefined,
-                    }))
-                  }
-                  className="input-enterprise font-['Aileron'] text-[16px] font-normal leading-[160%] tracking-normal text-black"
-                >
-                  <option value="">—</option>
-                  {TIME_FORMAT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                {/* <span className="text-sm text-muted-foreground">
-                  → {formatTimeExample(form.systemTimeFormat)}
-                </span> */}
-              </div>
-            </div>
-            <div>
-              <h3 className="mb-1.5 font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
-                Upload Logo
-              </h3>
-              <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <Label>Upload Logo</Label>
+              <div className="mt-1 mb-2 flex items-center gap-2 text-xs text-muted-foreground">
                 <span>Supported Formats (PNG, JPG, PDF)</span>
                 <span className="h-3 w-px bg-border" aria-hidden />
                 <span>Maximum file size: {MAX_LOGO_MB} MB</span>
@@ -529,8 +598,71 @@ export default function OrganizationPage() {
               )}
             </div>
           </div>
+
+          {/* Account Administrator Information Section */}
+          <h4 className="font-aileron text-[16px] font-semibold text-[#1F2937] mt-8 mb-4">
+            Account Administrator Information
+          </h4>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="First Name"
+                required
+                value={form.adminFirstName ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, adminFirstName: e.target.value }))}
+                placeholder="e.g., John"
+              />
+              <Input
+                label="Last Name"
+                required
+                value={form.adminLastName ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, adminLastName: e.target.value }))}
+                placeholder="e.g, Doe"
+              />
+            </div>
+            <Input
+              label="Job Title"
+              required
+              value={form.adminJobTitle ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, adminJobTitle: e.target.value }))}
+              placeholder="e.g., Chief Executive Officer (CEO)"
+            />
+
+            {/* Admin Phone with country code */}
+            <div>
+              <Label required>Phone</Label>
+              <div className="mt-1.5 flex h-[39px] overflow-hidden rounded-[5px] border border-[#E2E8F0] bg-background">
+                <select
+                  value={adminPhoneCountryCode}
+                  onChange={(e) => setAdminPhoneCountryCode(e.target.value)}
+                  className="h-full border-r border-[#E2E8F0] bg-transparent px-3 text-[14px] focus:outline-none"
+                >
+                  {COUNTRY_CODE_OPTIONS.map((cc) => (
+                    <option key={cc.code} value={cc.code}>
+                      {cc.flag} {cc.label}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={adminPhoneNumber}
+                  onChange={(e) => setAdminPhoneNumber(e.target.value)}
+                  placeholder="212 - 456 - 7890"
+                  className="h-full w-full bg-transparent px-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <Input
+              label="Work Email"
+              type="email"
+              value={form.adminEmail ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, adminEmail: e.target.value }))}
+              placeholder="nicolas.rito@example.com"
+            />
+          </div>
         </form>
-      </Modal>
+      </DrawerForm>
     </PageShell>
   );
 }

@@ -618,12 +618,12 @@ export default function UsersPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell>
+                  {/* <TableHeaderCell>
                     <div className="flex items-center gap-2">
                       User ID
                       <SortArrows columnKey="id" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
                     </div>
-                  </TableHeaderCell>
+                  </TableHeaderCell> */}
                   <TableHeaderCell>
                     <div className="flex items-center gap-2">
                       User Name
@@ -636,13 +636,13 @@ export default function UsersPage() {
                       <SortArrows columnKey="email" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
                     </div>
                   </TableHeaderCell>
-                  <TableHeaderCell>
+                  {/* <TableHeaderCell>
                     <div className="flex items-center gap-2">
                       Organization
                       <SortArrows columnKey="organizationName" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
                     </div>
-                  </TableHeaderCell>
-                  <TableHeaderCell>
+                  </TableHeaderCell> */}
+                  <TableHeaderCell className="!min-w-[180px] w-[180px]">
                     <div className="flex items-center gap-2">
                       Role Assignment
                       <SortArrows columnKey="roleName" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
@@ -654,7 +654,7 @@ export default function UsersPage() {
                       <SortArrows columnKey="moduleAccess" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
                     </div>
                   </TableHeaderCell>
-                  <TableHeaderCell>User Status</TableHeaderCell>
+                  <TableHeaderCell className="!min-w-[160px] w-[160px]">User Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[100px]">
                       Actions
@@ -673,18 +673,18 @@ export default function UsersPage() {
                         />
                       </TableCell>
                     )}
-                    <TableCell>
+                    {/* <TableCell>
                       <CellTooltip text={toUserDisplayId(row.id)} />
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       <CellTooltip text={row.userName} />
                     </TableCell>
                     <TableCell>
                       <CellTooltip text={row.email} />
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <CellTooltip text={row.organizationName ?? "—"} />
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       <CellTooltip text={row.roleName ?? "—"} />
                     </TableCell>
@@ -746,7 +746,7 @@ export default function UsersPage() {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editId ? "Edit User" : "Add User"}
+        title={editId ? "Update User" : "Add User"}
         size="md"
         position="right"
         footer={
@@ -833,32 +833,6 @@ export default function UsersPage() {
                 )}
               </>
             )}
-            {editId && (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">New password (optional)</label>
-                <input
-                  type="password"
-                  value={(form as { newPassword?: string }).newPassword ?? ""}
-                  onChange={(e) => setForm((f) => ({ ...f, newPassword: e.target.value }))}
-                  className="input-enterprise"
-                />
-              </div>
-            )}
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Organization</label>
-              <select
-                value={form.organizationId ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, organizationId: e.target.value }))}
-                className="input-enterprise"
-              >
-                <option value="">Select Organization</option>
-                {organizations.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.title}
-                  </option>
-                ))}
-              </select>
-            </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Role Assignment</label>
               <select

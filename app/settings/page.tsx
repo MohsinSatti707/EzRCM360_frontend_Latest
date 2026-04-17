@@ -15,7 +15,7 @@ const configSections = [
       "Define enterprise-level governance, identity, access control, and security enforcement.",
     links: [
       { label: "Organization", href: "/settings/organization" },
-      { label: "Users Access", href: "/settings/users" },
+      { label: "User(s)", href: "/settings/users" },
       { label: "Roles & Permissions", href: "/settings/roles-permissions" },
       { label: "Security Access", href: "/settings/security-access" },
     ],
