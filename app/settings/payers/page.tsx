@@ -92,13 +92,14 @@ export default function PayersPage() {
   const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter, searchField]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
     extraParams: {
       search: debouncedSearch || undefined,
+      searchField: debouncedSearch ? searchField : undefined,
       status: statusFilter === "all" ? undefined : statusFilter === "active" ? 1 : 0,
     },
     fetch: api.getList,

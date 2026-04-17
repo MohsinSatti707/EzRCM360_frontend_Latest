@@ -132,6 +132,7 @@ export default function CategoryFeeSchedulesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -192,8 +193,9 @@ export default function CategoryFeeSchedulesPage() {
       pageSize,
       category: categoryValue,
       status: statusFilter === "all" ? undefined : Number(statusFilter),
+      search: debouncedSearch || undefined,
     }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize, statusFilter, categoryValue]);
+  }, [page, pageSize, statusFilter, categoryValue, debouncedSearch]);
 
   const handleStatusChange = async (row: FeeScheduleDto, statusValue: number) => {
     if (!canUpdate) return;
@@ -231,6 +233,8 @@ export default function CategoryFeeSchedulesPage() {
   useEffect(() => {
     loadList();
   }, [loadList]);
+
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
 
   const searchParams = useSearchParams();
 
@@ -577,13 +581,7 @@ export default function CategoryFeeSchedulesPage() {
     return lookups?.calculationModels?.find((c) => c.value === num)?.name ?? String(n);
   };
 
-  const filteredItems = data?.items.filter((row) => {
-    if (!searchTerm.trim()) return true;
-    const q = searchTerm.toLowerCase();
-    return (row.scheduleCode?.toLowerCase().includes(q)) ||
-      (row.state?.toLowerCase().includes(q)) ||
-      (row.geoCode?.toLowerCase().includes(q));
-  }) ?? [];
+  const filteredItems = data?.items ?? [];
 
   /* ---------------------------------------------------------------- */
   /*  Wizard — 2-step: Configuration + Import Lines                    */
