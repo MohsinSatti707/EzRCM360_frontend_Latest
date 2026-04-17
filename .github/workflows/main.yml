@@ -29,6 +29,7 @@ on:
       - master
       - main
       - document-ui
+      - feature/fee-schedules-and-participation
 
   # 2. Manual trigger with inputs
   workflow_dispatch:
