@@ -63,7 +63,6 @@ export default function RenderingParticipationPage() {
   const [allEntityProviders, setAllEntityProviders] = useState<EntityProviderLookupDto[]>([]);
   const [allPlans, setAllPlans] = useState<PlanLookupDto[]>([]);
   const [selectedEntityId, setSelectedEntityId] = useState("");
-  const [selectedPayerId, setSelectedPayerId] = useState("");
   const [participationStatuses, setParticipationStatuses] = useState<ValueLabelDto[]>([]);
   const [participationSources, setParticipationSources] = useState<ValueLabelDto[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -117,20 +116,9 @@ export default function RenderingParticipationPage() {
     () => selectedEntityId ? allEntityProviders.filter((p) => p.entityId === selectedEntityId) : allEntityProviders,
     [allEntityProviders, selectedEntityId]
   );
-  const selectedPayer = payers.find((p) => p.id === selectedPayerId);
-  const isSelectedPayerCommercialInsurance = selectedPayer != null
-    && resolveEnum(selectedPayer.entityType, ENUMS.PayerEntityType) === ENUMS.PayerEntityType.Insurance
-    && selectedPayer.insuranceSubCategory != null
-    && resolveEnum(selectedPayer.insuranceSubCategory, ENUMS.PlanCategory) === ENUMS.PlanCategory.Commercial;
-  const filteredPlans = useMemo(
-    () => selectedPayerId ? allPlans.filter((p) => p.payerId === selectedPayerId) : allPlans,
-    [allPlans, selectedPayerId]
-  );
-
   const openCreate = () => {
     setEditId(null);
     setSelectedEntityId("");
-    setSelectedPayerId("");
     setForm({
       ...defaultForm,
       participationStatus: participationStatuses[0] ? Number(participationStatuses[0].value) : 0,
@@ -150,7 +138,6 @@ export default function RenderingParticipationPage() {
       setSelectedEntityId(provider?.entityId ?? "");
       // Derive parent payer from detail or fallback to plan's payer
       const payerId = detail.payerId || allPlans.find((p) => p.id === detail.planId)?.payerId || "";
-      setSelectedPayerId(payerId);
       setForm({
         entityProviderId: detail.entityProviderId,
         payerId: payerId,
@@ -169,9 +156,8 @@ export default function RenderingParticipationPage() {
 
   const handleSubmit = async () => {
     setFormError(null);
-    const planRequired = isSelectedPayerCommercialInsurance;
-    if (!selectedEntityId || !form.entityProviderId || !selectedPayerId || (planRequired && !form.planId)) {
-      setFormError(planRequired ? "Entity, provider, payer, and plan are all required." : "Entity, provider, and payer are all required.");
+    if (!form.entityProviderId || !form.planId || !form.payerId) {
+      setFormError("Provider and plan are required.");
       return;
     }
     setSubmitLoading(true);
@@ -537,7 +523,15 @@ export default function RenderingParticipationPage() {
             </div>
             <div className="overflow-hidden">
               <label className="mb-1 block text-sm font-medium text-foreground">Plan</label>
-              <select value={form.planId ?? ""} onChange={(e) => setForm((f) => ({ ...f, planId: e.target.value }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <select
+                value={form.planId ?? ""}
+                onChange={(e) => {
+                  const planId = e.target.value;
+                  const plan = allPlans.find((p) => p.id === planId);
+                  setForm((f) => ({ ...f, planId, payerId: plan?.payerId ?? "" }));
+                }}
+                className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              >
                 <option value="">Select plan</option>
                 {allPlans.map((p) => (
                   <option key={p.id} value={p.id} title={p.displayName}>{p.displayName.length > 60 ? p.displayName.substring(0, 60) + "..." : p.displayName}</option>

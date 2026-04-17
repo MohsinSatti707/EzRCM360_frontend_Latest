@@ -16,6 +16,7 @@ import {
   TableCell,
 } from "@/components/ui/Table";
 import { Loader } from "@/components/ui/Loader";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
@@ -97,6 +98,8 @@ export default function PayerDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [unlinkPlanId, setUnlinkPlanId] = useState<string | null>(null);
+  const [unlinkLoading, setUnlinkLoading] = useState(false);
 
   /* ---- data fetching ---- */
 
@@ -200,6 +203,48 @@ export default function PayerDetailPage() {
       toast.error(msg);
     } finally {
       setStatusUpdating(false);
+    }
+  };
+
+  const handleUnlinkPlan = async () => {
+    if (!payer || !unlinkPlanId) return;
+    setUnlinkLoading(true);
+    try {
+      await payersApi().update(payer.id, {
+        payerName: payer.payerName,
+        aliases: payer.aliases ?? "",
+        entityType: resolveEnum(payer.entityType, ENUMS.PayerEntityType),
+        insuranceSubCategory: payer.insuranceSubCategory != null
+          ? resolveEnum(payer.insuranceSubCategory, ENUMS.PlanCategory)
+          : null,
+        status: resolveEnum(payer.status, ENUMS.PayerStatus),
+        planIdsToRemove: [unlinkPlanId],
+        addresses: payer.addresses?.map((a) => ({
+          addressLine1: a.addressLine1,
+          addressLine2: a.addressLine2,
+          city: a.city,
+          state: a.state,
+          zip: a.zip,
+          label: a.label,
+        })) ?? [],
+        phoneNumbers: payer.phoneNumbers?.map((p) => ({
+          phoneNumber: p.phoneNumber,
+          label: p.label,
+        })) ?? [],
+        emails: payer.emails?.map((e) => ({
+          emailAddress: e.emailAddress,
+          label: e.label,
+        })) ?? [],
+      });
+      setPlans((prev) => prev.filter((p) => p.id !== unlinkPlanId));
+      setPayer((prev) => prev ? { ...prev, planIds: prev.planIds.filter((pid) => pid !== unlinkPlanId) } : prev);
+      setUnlinkPlanId(null);
+      toast.success("Plan unlinked successfully.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to unlink plan.";
+      toast.error(msg);
+    } finally {
+      setUnlinkLoading(false);
     }
   };
 
@@ -418,13 +463,16 @@ export default function PayerDetailPage() {
                         <span className="font-aileron text-[14px] text-[#202830]">{plan.nsaEligible ? "Yes" : "No"}</span>
                       </TableCell>
                       <TableCell>
-                        <button
-                          type="button"
-                          title="Remove plan"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] transition-colors hover:text-[#EF4444]"
-                        >
-                          <XCircle className="h-5 w-5" />
-                        </button>
+                        {canUpdate && (
+                          <button
+                            type="button"
+                            title="Remove plan"
+                            onClick={() => setUnlinkPlanId(plan.id)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] transition-colors hover:text-[#EF4444]"
+                          >
+                            <XCircle className="h-5 w-5" />
+                          </button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -537,6 +585,17 @@ export default function PayerDetailPage() {
           </Card>
         </>
       )}
+
+      <ConfirmDialog
+        open={!!unlinkPlanId}
+        onClose={() => setUnlinkPlanId(null)}
+        onConfirm={handleUnlinkPlan}
+        title="Unlink plan"
+        message="Are you sure you want to remove this plan from the payer?"
+        confirmLabel="Unlink"
+        variant="danger"
+        loading={unlinkLoading}
+      />
     </div>
   );
 }
