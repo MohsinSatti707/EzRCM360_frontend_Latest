@@ -7,6 +7,7 @@ export interface EntityProviderListItemDto {
   entityDisplayName: string;
   providerName: string;
   npi: string;
+  ssn?: string | null;
   providerType: number;
   primarySpecialty?: string | null;
   secondarySpecialty?: string | null;
