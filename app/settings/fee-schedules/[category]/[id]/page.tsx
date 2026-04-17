@@ -43,6 +43,36 @@ import type { ZipGeoMappingDto } from "@/lib/services/geography";
 import type { PaginatedList } from "@/lib/types";
 
 /* ------------------------------------------------------------------ */
+/*  Scrollbar styles injected once                                     */
+/* ------------------------------------------------------------------ */
+
+const scrollbarStyles = `
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E1 #F1F5F9;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #F1F5F9;
+    border-radius: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #CBD5E1;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #94A3B8;
+  }
+  .custom-scrollbar::-webkit-scrollbar-corner {
+    background: #F1F5F9;
+  }
+`;
+
+/* ------------------------------------------------------------------ */
 /*  Category config                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -604,7 +634,7 @@ export default function FeeScheduleDetailPage() {
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3">
-        <h3 className="font-aileron text-[16px] font-semibold text-[#202830]">CPT Fee Lines</h3>
+        <h3 className="font-aileron text-[18px] font-bold text-[#202830]">CPT Fee Lines</h3>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -638,6 +668,7 @@ export default function FeeScheduleDetailPage() {
           )}
         </div>
       </div>
+
       {/* Search */}
       <div className="relative w-full">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
@@ -664,84 +695,89 @@ export default function FeeScheduleDetailPage() {
         </Card>
       ) : (
         <>
+          {/* ↓ scrollable wrapper with custom scrollbar */}
           <Card className="overflow-hidden">
-            <Table className={isUCR ? "min-w-[1200px]" : ""}>
-              <TableHead>
-                <TableRow>
-                  {isUCR && <TableHeaderCell>Zip</TableHeaderCell>}
-                  <TableHeaderCell>CPT</TableHeaderCell>
-                  {!isUCR && <TableHeaderCell>Fee Amount</TableHeaderCell>}
-                  <TableHeaderCell>Modifier</TableHeaderCell>
-                  <TableHeaderCell>RVU</TableHeaderCell>
-                  {isWC && <TableHeaderCell>PC/TC</TableHeaderCell>}
-                  {isUCR && (
-                    <>
-                      <TableHeaderCell>50th FA</TableHeaderCell>
-                      <TableHeaderCell>60th FA</TableHeaderCell>
-                      <TableHeaderCell>70th FA</TableHeaderCell>
-                      <TableHeaderCell>75th FA</TableHeaderCell>
-                      <TableHeaderCell>80th FA</TableHeaderCell>
-                      <TableHeaderCell>85th FA</TableHeaderCell>
-                      <TableHeaderCell>90th FA</TableHeaderCell>
-                      <TableHeaderCell>95th FA</TableHeaderCell>
-                    </>
-                  )}
-                  <TableHeaderCell className="w-[100px] text-right">
-                    Actions
-                  </TableHeaderCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {linesData.items.map((line) => (
-                  <TableRow key={line.id}>
-                    {isUCR && <TableCell>{line.zip ?? "—"}</TableCell>}
-                    <TableCell className="font-medium">
-                      {line.cptHcpcs}
-                    </TableCell>
-                    {!isUCR && (
-                      <TableCell>
-                        ${line.feeAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </TableCell>
-                    )}
-                    <TableCell>{line.modifier ?? "—"}</TableCell>
-                    <TableCell>
-                      {line.rv != null ? line.rv.toFixed(4) : "—"}
-                    </TableCell>
-                    {isWC && (
-                      <TableCell>
-                        {line.pctcIndicator != null
-                          ? ({ 0: "P", 1: "T", 2: "G" } as Record<number, string>)[Number(line.pctcIndicator)] ?? "—"
-                          : "—"}
-                      </TableCell>
-                    )}
+            <div
+              className={`custom-scrollbar overflow-x-auto overflow-y-auto max-h-[480px] ${isUCR ? "min-w-0" : ""}`}
+            >
+              <Table className={isUCR ? "min-w-[1200px]" : ""}>
+                <TableHead className="sticky top-0 z-10 bg-white">
+                  <TableRow>
+                    {isUCR && <TableHeaderCell>Zip</TableHeaderCell>}
+                    <TableHeaderCell>CPT</TableHeaderCell>
+                    {!isUCR && <TableHeaderCell>Fee Amount</TableHeaderCell>}
+                    <TableHeaderCell>Modifier</TableHeaderCell>
+                    <TableHeaderCell>RVU</TableHeaderCell>
+                    {isWC && <TableHeaderCell>PC/TC</TableHeaderCell>}
                     {isUCR && (
                       <>
-                        <TableCell>{line.fee50th?.toFixed(2) ?? "—"}</TableCell>
-                        <TableCell>{line.fee60th?.toFixed(2) ?? "—"}</TableCell>
-                        <TableCell>{line.fee70th?.toFixed(2) ?? "—"}</TableCell>
-                        <TableCell>{line.fee75th?.toFixed(2) ?? "—"}</TableCell>
-                        <TableCell>{line.fee80th?.toFixed(2) ?? "—"}</TableCell>
-                        <TableCell>{line.fee85th?.toFixed(2) ?? "—"}</TableCell>
-                        <TableCell>{line.fee90th?.toFixed(2) ?? "—"}</TableCell>
-                        <TableCell>{line.fee95th?.toFixed(2) ?? "—"}</TableCell>
+                        <TableHeaderCell className="text-xs whitespace-nowrap">50th FA</TableHeaderCell>
+                        <TableHeaderCell className="text-xs whitespace-nowrap">60th FA</TableHeaderCell>
+                        <TableHeaderCell className="text-xs whitespace-nowrap">70th FA</TableHeaderCell>
+                        <TableHeaderCell className="text-xs whitespace-nowrap">75th FA</TableHeaderCell>
+                        <TableHeaderCell className="text-xs whitespace-nowrap">80th FA</TableHeaderCell>
+                        <TableHeaderCell className="text-xs whitespace-nowrap">85th FA</TableHeaderCell>
+                        <TableHeaderCell className="text-xs whitespace-nowrap">90th FA</TableHeaderCell>
+                        <TableHeaderCell className="text-xs whitespace-nowrap">95th FA</TableHeaderCell>
                       </>
                     )}
-                    <TableCell className="text-right">
-                      <TableActionsCell
-                        onEdit={
-                          canUpdate ? () => openEditLine(line) : undefined
-                        }
-                        onDelete={
-                          canDelete ? () => setLineDeleteId(line.id) : undefined
-                        }
-                        canEdit={canUpdate}
-                        canDelete={canDelete}
-                      />
-                    </TableCell>
+                    <TableHeaderCell className="w-[100px] text-right">
+                      Actions
+                    </TableHeaderCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {linesData.items.map((line) => (
+                    <TableRow key={line.id}>
+                      {isUCR && <TableCell>{line.zip ?? "—"}</TableCell>}
+                      <TableCell className="font-medium">
+                        {line.cptHcpcs}
+                      </TableCell>
+                      {!isUCR && (
+                        <TableCell>
+                          ${line.feeAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </TableCell>
+                      )}
+                      <TableCell>{line.modifier ?? "—"}</TableCell>
+                      <TableCell>
+                        {line.rv != null ? line.rv.toFixed(4) : "—"}
+                      </TableCell>
+                      {isWC && (
+                        <TableCell>
+                          {line.pctcIndicator != null
+                            ? ({ 0: "P", 1: "T", 2: "G" } as Record<number, string>)[Number(line.pctcIndicator)] ?? "—"
+                            : "—"}
+                        </TableCell>
+                      )}
+                      {isUCR && (
+                        <>
+                          <TableCell>{line.fee50th?.toFixed(2) ?? "—"}</TableCell>
+                          <TableCell>{line.fee60th?.toFixed(2) ?? "—"}</TableCell>
+                          <TableCell>{line.fee70th?.toFixed(2) ?? "—"}</TableCell>
+                          <TableCell>{line.fee75th?.toFixed(2) ?? "—"}</TableCell>
+                          <TableCell>{line.fee80th?.toFixed(2) ?? "—"}</TableCell>
+                          <TableCell>{line.fee85th?.toFixed(2) ?? "—"}</TableCell>
+                          <TableCell>{line.fee90th?.toFixed(2) ?? "—"}</TableCell>
+                          <TableCell>{line.fee95th?.toFixed(2) ?? "—"}</TableCell>
+                        </>
+                      )}
+                      <TableCell className="text-right">
+                        <TableActionsCell
+                          onEdit={
+                            canUpdate ? () => openEditLine(line) : undefined
+                          }
+                          onDelete={
+                            canDelete ? () => setLineDeleteId(line.id) : undefined
+                          }
+                          canEdit={canUpdate}
+                          canDelete={canDelete}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </Card>
 
           <Pagination
@@ -768,7 +804,7 @@ export default function FeeScheduleDetailPage() {
     <div className="space-y-4">
       {/* Header row: title + actions */}
       <div className="flex items-center justify-between">
-        <h3 className="font-aileron text-[16px] font-semibold text-[#202830]">
+        <h3 className="font-aileron text-[18px] font-bold text-[#202830]">
           ZIP Geography Mapping
         </h3>
         <div className="flex items-center gap-2">
@@ -800,11 +836,11 @@ export default function FeeScheduleDetailPage() {
       </div>
 
       {/* Search */}
-      <div className="relative max-w-md">
+      <div className="relative max-w-full ">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
         <input
           type="text"
-          placeholder="Search by ZIP code..."
+          placeholder="Search "
           value={zipSearch}
           onChange={(e) => { setZipSearch(e.target.value); setZipPage(1); }}
           className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -818,7 +854,7 @@ export default function FeeScheduleDetailPage() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Empty state */}
       {!zipLoading && zipData && zipData.items.length === 0 && (
         <Card className="p-8">
           <div className="flex flex-col items-center justify-center gap-2 text-center">
@@ -829,41 +865,44 @@ export default function FeeScheduleDetailPage() {
         </Card>
       )}
 
+      {/* ↓ scrollable wrapper with custom scrollbar */}
       {!zipLoading && zipData && zipData.items.length > 0 && (
         <>
-          <Card className="overflow-x-auto overflow-y-auto rounded-[5px]">
-            <Table className="min-w-full table-fixed">
-              <TableHead className="sticky top-0 z-20">
-                <TableRow>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">State</TableHeaderCell>
-                  <TableHeaderCell className="w-[140px] min-w-[140px]">ZIP Code</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Geography Code</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">Year</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">Quarter</TableHeaderCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {zipData.items.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="w-[120px] min-w-[120px]">
-                      <CellTooltip text={row.state ?? "\u2014"} />
-                    </TableCell>
-                    <TableCell className="w-[140px] min-w-[140px]">
-                      <CellTooltip text={row.zip ?? "\u2014"} />
-                    </TableCell>
-                    <TableCell className="w-[160px] min-w-[160px]">
-                      <CellTooltip text={row.geoCode ?? "\u2014"} />
-                    </TableCell>
-                    <TableCell className="w-[120px] min-w-[120px]">
-                      {row.year}
-                    </TableCell>
-                    <TableCell className="w-[120px] min-w-[120px]">
-                      {quarterLabel(row.quarter)}
-                    </TableCell>
+          <Card className="overflow-hidden">
+            <div className="custom-scrollbar overflow-x-auto overflow-y-auto max-h-[480px]">
+              <Table className="min-w-full table-fixed">
+                <TableHead className="sticky top-0 z-20 bg-white">
+                  <TableRow>
+                    <TableHeaderCell className="w-[120px] min-w-[120px]">State</TableHeaderCell>
+                    <TableHeaderCell className="w-[140px] min-w-[140px]">ZIP Code</TableHeaderCell>
+                    <TableHeaderCell className="w-[160px] min-w-[160px]">Geography Code</TableHeaderCell>
+                    <TableHeaderCell className="w-[120px] min-w-[120px]">Year</TableHeaderCell>
+                    <TableHeaderCell className="w-[120px] min-w-[120px]">Quarter</TableHeaderCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {zipData.items.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell className="w-[120px] min-w-[120px]">
+                        <CellTooltip text={row.state ?? "\u2014"} />
+                      </TableCell>
+                      <TableCell className="w-[140px] min-w-[140px]">
+                        <CellTooltip text={row.zip ?? "\u2014"} />
+                      </TableCell>
+                      <TableCell className="w-[160px] min-w-[160px]">
+                        <CellTooltip text={row.geoCode ?? "\u2014"} />
+                      </TableCell>
+                      <TableCell className="w-[120px] min-w-[120px]">
+                        {row.year}
+                      </TableCell>
+                      <TableCell className="w-[120px] min-w-[120px]">
+                        {quarterLabel(row.quarter)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </Card>
 
           <Pagination
@@ -986,267 +1025,272 @@ export default function FeeScheduleDetailPage() {
   /* ---------------------------------------------------------------- */
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col px-6">
-      {/* Breadcrumb */}
-      <div className="mb-5">
-        <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          <Link
-            href="/settings"
-            className="transition-colors hover:text-foreground"
-          >
-            Settings &amp; Configurations
-          </Link>
-          <span aria-hidden>/</span>
-          <Link
-            href="/settings/fee-schedules"
-            className="transition-colors hover:text-foreground"
-          >
-            Fee Schedules
-          </Link>
-          <span aria-hidden>/</span>
-          <Link
-            href={`/settings/fee-schedules/${categorySlug}`}
-            className="transition-colors hover:text-foreground"
-          >
-            {categoryConfig.label} Fee Schedules
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="text-foreground">{scheduleCode}</span>
-        </nav>
-        <h1 className="font-aileron text-[22px] font-bold text-[#202830]">
-          {categoryConfig.label} Fee Schedule Details
-        </h1>
-      </div>
+    <>
+      {/* Inject scrollbar styles once */}
+      <style>{scrollbarStyles}</style>
 
-      {/* Header Card */}
-      <Card className="mb-6 p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="font-aileron text-[24px] font-bold leading-none tracking-tight text-[#202830]">
-                {scheduleCode}
-              </h1>
-              <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${
-                  isActive
-                    ? "bg-[#DCFCE7] text-[#16A34A]"
-                    : "bg-[#FEE2E2] text-[#EF4444]"
-                }`}
-              >
-                {isActive ? "Active" : "Inactive"}
-              </span>
-            </div>
-            <p className="mt-1.5 font-aileron text-[14px] text-[#64748B]">
-              {categoryLabel(detail.category)} &bull; {stateName} &bull; {yearsDisplay}
-            </p>
-          </div>
-          {canUpdate && (
-            <Button
-              variant="outline"
-              onClick={() =>
-                router.push(`/settings/fee-schedules/${categorySlug}?edit=${scheduleId}`)
-              }
-              className="h-10 rounded-[5px] px-[18px] border-[#E2E8F0] font-aileron text-[14px] text-[#2A2C33]"
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        {/* Breadcrumb */}
+        <div className="mb-5">
+          <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <Link
+              href="/settings"
+              className="transition-colors hover:text-foreground"
             >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-          )}
+              Settings &amp; Configurations
+            </Link>
+            <span aria-hidden>/</span>
+            <Link
+              href="/settings/fee-schedules"
+              className="transition-colors hover:text-foreground "
+            >
+              Fee Schedules
+            </Link>
+            <span aria-hidden>/</span>
+            <Link
+              href={`/settings/fee-schedules/${categorySlug}`}
+              className="transition-colors hover:text-foreground"
+            >
+              {categoryConfig.label} Fee Schedules
+            </Link>
+            <span aria-hidden>/</span>
+            <span className="text-foreground">{scheduleCode}</span>
+          </nav>
+          <h1 className="font-aileron text-[22px] font-bold text-[#202830] ">
+            {categoryConfig.label} Fee Schedule Details
+          </h1>
         </div>
-      </Card>
 
-      {/* General Information */}
-      <div className="mb-6 px-0">
-        <div className="mb-4 flex items-center gap-2">
-          <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
-          <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
-            General Information
-          </h2>
+        {/* Header Card */}
+        <Card className="mb-6 p-6  bg-[#F7F8F9]">
+          <div className="flex items-start justify-between ">
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="font-aileron text-[24px] font-bold leading-none tracking-tight text-[#202830]">
+                  {scheduleCode}
+                </h1>
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${
+                    isActive
+                      ? "bg-[#DCFCE7] text-[#16A34A]"
+                      : "bg-[#FEE2E2] text-[#EF4444]"
+                  }`}
+                >
+                  {isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <p className="mt-1.5 font-aileron text-[14px] text-[#64748B]">
+                {categoryLabel(detail.category)} &bull; {stateName} &bull; {yearsDisplay}
+              </p>
+            </div>
+            {canUpdate && (
+              <Button
+                variant="outline"
+                onClick={() =>
+                  router.push(`/settings/fee-schedules/${categorySlug}?edit=${scheduleId}`)
+                }
+                className="h-10 rounded-[5px] px-[18px] border-[#E2E8F0] font-aileron text-[14px] text-[#2A2C33]"
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            )}
+          </div>
+        </Card>
+
+        {/* General Information */}
+        <div className="mb-6 px-0">
+          <div className="mb-4 flex items-center gap-2">
+            <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
+            <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
+              General Information
+            </h2>
+          </div>
+          <div className="grid grid-cols-3 gap-x-8 gap-y-5 px-6">
+            {/* Medicare / UCR layout */}
+            {(categorySlug === "medicare" || categorySlug === "ucr") && (
+              <>
+                <InfoField label="Fee Schedule ID" value={scheduleCode} />
+                <InfoField label="Category" value={categoryLabel(detail.category)} />
+                <InfoField label="State" value={stateName} />
+                <InfoField label="Geography Type" value={geoTypeLabel(detail.geoType)} />
+                <InfoField label="Geography Code" value={detail.geoCode ?? "\u2014"} />
+                <InfoField label="Geography Name" value={detail.geoName ?? "\u2014"} />
+                <InfoField label="Billing Type" value={billingTypeLabel(detail.billingType)} />
+                <InfoField label="Effective Year (From - To)" value={yearsDisplay} />
+                <InfoField label="Quarter" value={quartersDisplay} />
+              </>
+            )}
+            {/* MVA / WC layout */}
+            {(categorySlug === "mva" || categorySlug === "wc") && (
+              <>
+                <InfoField label="Category" value={categoryLabel(detail.category)} />
+                <InfoField label="State" value={stateName} />
+                <InfoField label="Geography Type" value={geoTypeLabel(detail.geoType)} />
+                <InfoField label="Geography Code" value={detail.geoCode ?? "\u2014"} />
+                <InfoField label="Geography Name" value={detail.geoName ?? "\u2014"} />
+                <InfoField label="Effective Year" value={yearsDisplay} />
+                <InfoField label="Calculation" value={calculationModelLabel(detail.calculationModel)} />
+                <InfoField label="Created At" value={formatDate(detail.createdAt)} />
+              </>
+            )}
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-x-8 gap-y-5">
-          {/* Medicare / UCR layout */}
-          {(categorySlug === "medicare" || categorySlug === "ucr") && (
-            <>
-              <InfoField label="Fee Schedule ID" value={scheduleCode} />
-              <InfoField label="Category" value={categoryLabel(detail.category)} />
-              <InfoField label="State" value={stateName} />
-              <InfoField label="Geography Type" value={geoTypeLabel(detail.geoType)} />
-              <InfoField label="Geography Code" value={detail.geoCode ?? "\u2014"} />
-              <InfoField label="Geography Name" value={detail.geoName ?? "\u2014"} />
-              <InfoField label="Billing Type" value={billingTypeLabel(detail.billingType)} />
-              <InfoField label="Effective Year (From - To)" value={yearsDisplay} />
-              <InfoField label="Quarter" value={quartersDisplay} />
-            </>
-          )}
-          {/* MVA / WC layout */}
-          {(categorySlug === "mva" || categorySlug === "wc") && (
-            <>
-              <InfoField label="Category" value={categoryLabel(detail.category)} />
-              <InfoField label="State" value={stateName} />
-              <InfoField label="Geography Type" value={geoTypeLabel(detail.geoType)} />
-              <InfoField label="Geography Code" value={detail.geoCode ?? "\u2014"} />
-              <InfoField label="Geography Name" value={detail.geoName ?? "\u2014"} />
-              <InfoField label="Effective Year" value={yearsDisplay} />
-              <InfoField label="Calculation" value={calculationModelLabel(detail.calculationModel)} />
-              <InfoField label="Created At" value={formatDate(detail.createdAt)} />
-            </>
-          )}
+
+        {/* Tabs */}
+        <div className="mb-4 flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-1 w-full">
+          {(isUCR
+            ? [
+                { key: "lines" as const, label: "CPT Fee Lines" },
+                { key: "fallback" as const, label: "Fallback Configuration" },
+              ]
+            : [
+                { key: "lines" as const, label: "CPT Fee Lines" },
+                { key: "zip" as const, label: "ZIP Geography Mapping" },
+                { key: "fallback" as const, label: "Fallback Configuration" },
+              ]
+          ).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 rounded-md px-4 py-2 font-aileron text-[14px] font-medium transition-colors ${
+                activeTab === tab.key
+                  ? "bg-white text-[#202830] shadow-sm"
+                  : "text-[#64748B] hover:text-[#202830]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
+
+        {/* Tab Content */}
+        <div className="flex-1 pb-6">
+          {activeTab === "lines" && renderCptFeeLinesTab()}
+          {activeTab === "zip" && renderZipGeoTab()}
+          {activeTab === "fallback" && renderFallbackTab()}
+        </div>
+
+        {/* -------------------------------------------------------------- */}
+        {/*  Add / Edit Line Modal                                          */}
+        {/* -------------------------------------------------------------- */}
+        <Modal
+          open={lineModalOpen}
+          onClose={() => setLineModalOpen(false)}
+          title={lineEditId ? "Edit Fee Schedule Line" : "Add Fee Schedule Line"}
+          footer={
+            <ModalFooter
+              onCancel={() => setLineModalOpen(false)}
+              onSubmit={handleLineSave}
+              submitLabel={lineEditId ? "Update" : "Add Line"}
+              loading={lineSubmitLoading}
+            />
+          }
+        >
+          <div className="space-y-4">
+            {/* CPT/HCPCS */}
+            <div>
+              <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
+                CPT/HCPCS <span className="text-[#EF4444]">*</span>
+              </label>
+              <input
+                type="text"
+                value={lineForm.cptHcpcs}
+                onChange={(e) =>
+                  setLineForm((prev) => ({ ...prev, cptHcpcs: e.target.value }))
+                }
+                placeholder="e.g. 99213"
+                className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
+              />
+            </div>
+
+            {/* Fee Amount */}
+            <div>
+              <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
+                Fee Amount <span className="text-[#EF4444]">*</span>
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={lineForm.feeAmount}
+                onChange={(e) =>
+                  setLineForm((prev) => ({
+                    ...prev,
+                    feeAmount: parseFloat(e.target.value) || 0,
+                  }))
+                }
+                placeholder="0.00"
+                className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
+              />
+            </div>
+
+            {/* Modifier */}
+            <div>
+              <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
+                Modifier
+              </label>
+              <input
+                type="text"
+                value={lineForm.modifier ?? ""}
+                onChange={(e) =>
+                  setLineForm((prev) => ({ ...prev, modifier: e.target.value }))
+                }
+                placeholder="e.g. 26, TC"
+                className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
+              />
+            </div>
+
+            {/* RVU */}
+            <div>
+              <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
+                RVU
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                value={lineForm.rv ?? ""}
+                onChange={(e) =>
+                  setLineForm((prev) => ({
+                    ...prev,
+                    rv: e.target.value ? parseFloat(e.target.value) : null,
+                  }))
+                }
+                placeholder="0.0000"
+                className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
+              />
+            </div>
+
+            {/* ZIP (optional) */}
+            <div>
+              <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
+                ZIP
+              </label>
+              <input
+                type="text"
+                value={lineForm.zip ?? ""}
+                onChange={(e) =>
+                  setLineForm((prev) => ({ ...prev, zip: e.target.value }))
+                }
+                placeholder="e.g. 10001"
+                className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
+              />
+            </div>
+          </div>
+        </Modal>
+
+        {/* -------------------------------------------------------------- */}
+        {/*  Delete Line Confirmation                                       */}
+        {/* -------------------------------------------------------------- */}
+        <ConfirmDialog
+          open={!!lineDeleteId}
+          onClose={() => setLineDeleteId(null)}
+          onConfirm={handleLineDelete}
+          title="Delete Fee Schedule Line"
+          message="Are you sure you want to delete this fee schedule line? This action cannot be undone."
+          confirmLabel="Delete"
+          loading={lineDeleteLoading}
+        />
       </div>
-
-      {/* Tabs */}
-      <div className="mb-4 flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-[#F7F8F9] p-1 w-full">
-        {(isUCR
-          ? [
-              { key: "lines" as const, label: "CPT Fee Lines" },
-              { key: "fallback" as const, label: "Fallback Configuration" },
-            ]
-          : [
-              { key: "lines" as const, label: "CPT Fee Lines" },
-              { key: "zip" as const, label: "ZIP Geography Mapping" },
-              { key: "fallback" as const, label: "Fallback Configuration" },
-            ]
-        ).map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 rounded-md px-4 py-2 font-aileron text-[14px] font-medium transition-colors ${
-              activeTab === tab.key
-                ? "bg-white text-[#202830] shadow-sm"
-                : "text-[#64748B] hover:text-[#202830]"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      <div className="flex-1 pb-6">
-        {activeTab === "lines" && renderCptFeeLinesTab()}
-        {activeTab === "zip" && renderZipGeoTab()}
-        {activeTab === "fallback" && renderFallbackTab()}
-      </div>
-
-      {/* -------------------------------------------------------------- */}
-      {/*  Add / Edit Line Modal                                          */}
-      {/* -------------------------------------------------------------- */}
-      <Modal
-        open={lineModalOpen}
-        onClose={() => setLineModalOpen(false)}
-        title={lineEditId ? "Edit Fee Schedule Line" : "Add Fee Schedule Line"}
-        footer={
-          <ModalFooter
-            onCancel={() => setLineModalOpen(false)}
-            onSubmit={handleLineSave}
-            submitLabel={lineEditId ? "Update" : "Add Line"}
-            loading={lineSubmitLoading}
-          />
-        }
-      >
-        <div className="space-y-4">
-          {/* CPT/HCPCS */}
-          <div>
-            <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
-              CPT/HCPCS <span className="text-[#EF4444]">*</span>
-            </label>
-            <input
-              type="text"
-              value={lineForm.cptHcpcs}
-              onChange={(e) =>
-                setLineForm((prev) => ({ ...prev, cptHcpcs: e.target.value }))
-              }
-              placeholder="e.g. 99213"
-              className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
-            />
-          </div>
-
-          {/* Fee Amount */}
-          <div>
-            <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
-              Fee Amount <span className="text-[#EF4444]">*</span>
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={lineForm.feeAmount}
-              onChange={(e) =>
-                setLineForm((prev) => ({
-                  ...prev,
-                  feeAmount: parseFloat(e.target.value) || 0,
-                }))
-              }
-              placeholder="0.00"
-              className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
-            />
-          </div>
-
-          {/* Modifier */}
-          <div>
-            <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
-              Modifier
-            </label>
-            <input
-              type="text"
-              value={lineForm.modifier ?? ""}
-              onChange={(e) =>
-                setLineForm((prev) => ({ ...prev, modifier: e.target.value }))
-              }
-              placeholder="e.g. 26, TC"
-              className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
-            />
-          </div>
-
-          {/* RVU */}
-          <div>
-            <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
-              RVU
-            </label>
-            <input
-              type="number"
-              step="0.0001"
-              value={lineForm.rv ?? ""}
-              onChange={(e) =>
-                setLineForm((prev) => ({
-                  ...prev,
-                  rv: e.target.value ? parseFloat(e.target.value) : null,
-                }))
-              }
-              placeholder="0.0000"
-              className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
-            />
-          </div>
-
-          {/* ZIP (optional) */}
-          <div>
-            <label className="mb-1.5 block font-aileron text-[13px] font-medium text-[#202830]">
-              ZIP
-            </label>
-            <input
-              type="text"
-              value={lineForm.zip ?? ""}
-              onChange={(e) =>
-                setLineForm((prev) => ({ ...prev, zip: e.target.value }))
-              }
-              placeholder="e.g. 10001"
-              className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background px-3 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#0066CC]"
-            />
-          </div>
-        </div>
-      </Modal>
-
-      {/* -------------------------------------------------------------- */}
-      {/*  Delete Line Confirmation                                       */}
-      {/* -------------------------------------------------------------- */}
-      <ConfirmDialog
-        open={!!lineDeleteId}
-        onClose={() => setLineDeleteId(null)}
-        onConfirm={handleLineDelete}
-        title="Delete Fee Schedule Line"
-        message="Are you sure you want to delete this fee schedule line? This action cannot be undone."
-        confirmLabel="Delete"
-        loading={lineDeleteLoading}
-      />
-    </div>
+    </>
   );
 }

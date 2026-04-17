@@ -276,7 +276,7 @@ export default function FacilitiesPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -342,14 +342,14 @@ export default function FacilitiesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[180px] min-w-[180px]">Facility Name</TableHeaderCell>
-                  <TableHeaderCell className="w-[150px] min-w-[150px]">Facility Type</TableHeaderCell>
-                  <TableHeaderCell className="w-[220px] min-w-[220px]">Physical Address</TableHeaderCell>
-                  <TableHeaderCell className="w-[180px] min-w-[180px]">Linked Entity</TableHeaderCell>
-                  <TableHeaderCell className="w-[100px] min-w-[100px]">POS Code</TableHeaderCell>
-                  <TableHeaderCell className="w-[120px] min-w-[120px]">Status</TableHeaderCell>
+                  <TableHeaderCell className="w-[180px] min-w-[180px] text-xs">Facility Name</TableHeaderCell>
+                  <TableHeaderCell className="w-[150px] min-w-[150px] text-xs">Facility Type</TableHeaderCell>
+                  <TableHeaderCell className="w-[220px] min-w-[220px] text-xs">Physical Address</TableHeaderCell>
+                  <TableHeaderCell className="w-[180px] min-w-[180px] text-xs">Linked Entity</TableHeaderCell>
+                  <TableHeaderCell className="w-[100px] min-w-[100px] text-xs">POS Code</TableHeaderCell>
+                  <TableHeaderCell className="w-[120px] min-w-[120px] text-xs">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
+                    <TableHeaderCell className="!w-[120px] min-w-[120px] text-xs">Actions</TableHeaderCell>
                   )}
                 </TableRow>
               </TableHead>

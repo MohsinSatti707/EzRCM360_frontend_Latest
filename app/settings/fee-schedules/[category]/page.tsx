@@ -672,7 +672,7 @@ export default function CategoryFeeSchedulesPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -735,17 +735,17 @@ export default function CategoryFeeSchedulesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">FEE SCHEDULE ID</TableHeaderCell>
-                  <TableHeaderCell className="w-[100px] min-w-[100px] whitespace-nowrap">STATE</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY TYPE</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY CODE</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">Fee Schedule Id </TableHeaderCell>
+                  <TableHeaderCell className="w-[100px] min-w-[100px] whitespace-nowrap">State</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">Geography Type</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">Geography Code</TableHeaderCell>
                   {(categorySlug === "medicare") && (
-                    <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY NAME</TableHeaderCell>
+                    <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">Geography Name</TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[140px] min-w-[140px] whitespace-nowrap">BILLING TYPE</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">{isUCR ? "YEAR" : "EFFECTIVE YEAR"}</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px] whitespace-nowrap">Billing Type</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">{isUCR ? "Year" : "Effective Year"}</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <TableHeaderCell className="!w-[120px] min-w-[120px] whitespace-nowrap">ACTIONS</TableHeaderCell>
+                    <TableHeaderCell className="!w-[120px] min-w-[120px] whitespace-nowrap">Actions</TableHeaderCell>
                   )}
                 </TableRow>
               </TableHead>
