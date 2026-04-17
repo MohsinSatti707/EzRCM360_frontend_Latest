@@ -404,7 +404,7 @@ export default function EntityLocationsPage() {
                       <TableCell>
                         <Link
                           href={`/settings/entity-locations/${row.id}`}
-                          className={`font-aileron text-[14px] hover:underline cursor-pointer ${cellColor}`}
+                          className="font-aileron text-[14px] font-medium text-[#0066CC] hover:underline cursor-pointer"
                         >
                           {row.locationName}
                         </Link>
