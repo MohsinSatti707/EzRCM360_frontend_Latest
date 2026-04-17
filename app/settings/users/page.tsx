@@ -38,7 +38,7 @@ const MAX_USER_NAME_LENGTH = 100;
 const MAX_EMAIL_LENGTH = 256;
 
 const STATUS_OPTIONS = [
-  { value: 0, name: "Pending" },
+  // { value: 0, name: "Pending" },
   { value: 1, name: "Active" },
   { value: 2, name: "Suspended" },
   { value: 3, name: "Terminated" },
@@ -217,6 +217,7 @@ export default function UsersPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [searchField, setSearchField] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [searchDebounced, setSearchDebounced] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -488,14 +489,27 @@ export default function UsersPage() {
 
   const displayItems = useMemo(() => {
     if (!data?.items) return [];
-    if (!sortBy || !sortOrder) return data.items;
-    return [...data.items].sort((a, b) => {
+    let items = data.items;
+    if (search.trim() && searchField !== "all") {
+      const q = search.trim().toLowerCase();
+      items = items.filter((r) => {
+        switch (searchField) {
+          case "userName": return (r.userName ?? "").toLowerCase().includes(q);
+          case "email": return (r.email ?? "").toLowerCase().includes(q);
+          case "roleName": return (r.roleName ?? "").toLowerCase().includes(q);
+          case "moduleAccess": return moduleNames(r.moduleIds ?? []).toLowerCase().includes(q);
+          default: return true;
+        }
+      });
+    }
+    if (!sortBy || !sortOrder) return items;
+    return [...items].sort((a, b) => {
       const va = getSortValue(a, sortBy);
       const vb = getSortValue(b, sortBy);
       const cmp = va.localeCompare(vb, undefined, { sensitivity: "base" });
       return sortOrder === "asc" ? cmp : -cmp;
     });
-  }, [data?.items, sortBy, sortOrder, getSortValue]);
+  }, [data?.items, sortBy, sortOrder, getSortValue, search, searchField]);
 
   const handleSort = useCallback((key: string, order: "asc" | "desc" | null) => {
     setSortBy(order === null ? null : key);
@@ -524,66 +538,66 @@ export default function UsersPage() {
       titleWrapperClassName="px-6"
     >
       <TooltipProvider delayDuration={300} skipDelayDuration={0}>
-      {/* Toolbar: search + add button */}
-      <div className="mb-3 flex items-center justify-between gap-3 mx-6 mt-3">
-        <div className="flex flex-1 min-w-0 items-center gap-0">
-          <select
-            id="status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 min-w-[130px] rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            {[
-              { value: "", name: "All Status" },
-              ...STATUS_OPTIONS,
-            ].map((o) => (
-              <option key={o.value === "" ? "_all" : o.value} value={o.value === "" ? "" : String(o.value)}>
-                {o.name}
-              </option>
-            ))}
-          </select>
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-10 w-full min-w-0 rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus-visible:outline-none focus-visible:ring-0"
-            />
-          </div>
-          {/* <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="input-enterprise w-auto min-w-[10rem] rounded-l-[5px] rounded-r-0"
-          >
-            <option value="">All Status</option>
-            {statusOptions.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select> */}
+      {/* Toolbar: filters + search + add button */}
+      <div className="mb-3 flex items-center gap-3 mx-6 mt-3">
+        {/* Left: Search field selector */}
+        <select
+          value={searchField}
+          onChange={(e) => setSearchField(e.target.value)}
+          className="h-10 min-w-[140px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">All</option>
+          <option value="userName">User Name</option>
+          <option value="email">Email</option>
+          <option value="roleName">Role Assignment</option>
+          <option value="moduleAccess">Module Access</option>
+        </select>
+
+        {/* Middle: Search bar */}
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-10 w-full min-w-0 rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+          />
         </div>
-        <div className="flex items-center gap-2">
-          {canDelete && selectedIds.size > 0 && (
-            <Button
-              onClick={() => setBulkDeleteConfirm(true)}
-              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
-            >
-              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
-            </Button>
-          )}
-          {canCreate && (
-            <Button
-              onClick={openCreate}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-            >
-              Add User
-              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
-            </Button>
-          )}
-        </div>
+
+        {/* Right: Status filter + bulk delete + add button */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="h-10 min-w-[120px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          {[
+            { value: "", name: "All Status" },
+            ...STATUS_OPTIONS,
+          ].map((o) => (
+            <option key={o.value === "" ? "_all" : o.value} value={o.value === "" ? "" : String(o.value)}>
+              {o.name}
+            </option>
+          ))}
+        </select>
+
+        {canDelete && selectedIds.size > 0 && (
+          <Button
+            onClick={() => setBulkDeleteConfirm(true)}
+            className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+          >
+            <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+          </Button>
+        )}
+        {canCreate && (
+          <Button
+            onClick={openCreate}
+            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
+          >
+            Add New User
+            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+          </Button>
+        )}
       </div>
 
       {error && (
@@ -856,7 +870,7 @@ export default function UsersPage() {
                 onChange={(ids) => setForm((f) => ({ ...f, moduleIds: ids }))}
               />
             </div>
-            {editId && (
+            {/* {editId && (
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">User Status</label>
                 <select
@@ -871,7 +885,7 @@ export default function UsersPage() {
                   ))}
                 </select>
               </div>
-            )}
+            )} */}
           </div>
         </form>
       </Modal>

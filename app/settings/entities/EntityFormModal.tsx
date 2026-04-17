@@ -32,7 +32,7 @@ export function EntityFormModal({
     <DrawerForm
       open={open}
       onOpenChange={(v) => !v && onClose()}
-      title={editId ? "Edit Entity" : "Add Entity"}
+      title={editId ? "Update Entity" : "Add Entity"}
       footer={
         <div className="flex flex-1 justify-start gap-3">
           <Button

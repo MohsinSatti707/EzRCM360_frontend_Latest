@@ -20,6 +20,7 @@ export interface EntityDetailDto {
   taxId: string;
   status: number;
   organizationId: string;
+  createdAt?: string | null;
 }
 
 export interface CreateEntityRequest {

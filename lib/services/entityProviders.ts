@@ -16,6 +16,7 @@ export interface EntityProviderListItemDto {
 export interface EntityProviderDetailDto {
   id: string;
   entityId: string;
+  entityDisplayName?: string | null;
   providerName: string;
   npi: string;
   ssn?: string | null;
@@ -23,6 +24,7 @@ export interface EntityProviderDetailDto {
   primarySpecialty?: string | null;
   secondarySpecialty?: string | null;
   isActive: boolean;
+  createdAt?: string | null;
 }
 
 export interface CreateEntityProviderRequest {
