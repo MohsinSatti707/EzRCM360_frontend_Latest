@@ -326,7 +326,8 @@ export default function EntitiesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[250px] min-w-[250px]"> Legal / Display name</TableHeaderCell>
+                  <TableHeaderCell className="w-[220px] min-w-[220px]">Entity Legal Name</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Entity Display Name</TableHeaderCell>
                   <TableHeaderCell className="w-[200px] min-w-[200px]">Organization</TableHeaderCell>
                   <TableHeaderCell className="w-[200px] min-w-[200px]">Group NPI</TableHeaderCell>
                   <TableHeaderCell className="w-[200px] min-w-[200px]">Tax ID</TableHeaderCell>
@@ -349,9 +350,12 @@ export default function EntitiesPage() {
                     )}
                     <TableCell>
                       <div className="max-w-xs truncate">
-                        <CellTooltip text={`${row.legalName} / ${row.displayName}`}>
-                          {row.legalName} / {row.displayName}
-                        </CellTooltip>
+                        <CellTooltip text={row.legalName} />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-xs truncate">
+                        <CellTooltip text={row.displayName} />
                       </div>
                     </TableCell>
                     <TableCell>
