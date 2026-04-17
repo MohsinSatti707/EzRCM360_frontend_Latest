@@ -22,6 +22,7 @@ export interface EntityLocationDetailDto {
   posCode?: string | null;
   isActive: boolean;
   createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface CreateEntityLocationRequest {

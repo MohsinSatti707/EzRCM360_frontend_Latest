@@ -26,6 +26,7 @@ export interface EntityProviderDetailDto {
   secondarySpecialty?: string | null;
   isActive: boolean;
   createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface CreateEntityProviderRequest {
