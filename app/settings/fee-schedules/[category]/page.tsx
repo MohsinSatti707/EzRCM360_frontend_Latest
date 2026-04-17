@@ -735,17 +735,17 @@ export default function CategoryFeeSchedulesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">FEE SCHEDULE ID</TableHeaderCell>
-                  <TableHeaderCell className="w-[100px] min-w-[100px] whitespace-nowrap">STATE</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY TYPE</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY CODE</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">Fee Schedule Id </TableHeaderCell>
+                  <TableHeaderCell className="w-[100px] min-w-[100px] whitespace-nowrap">State</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">Geography Type</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">Geography Code</TableHeaderCell>
                   {(categorySlug === "medicare") && (
-                    <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">GEOGRAPHY NAME</TableHeaderCell>
+                    <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">Geography Name</TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[140px] min-w-[140px] whitespace-nowrap">BILLING TYPE</TableHeaderCell>
-                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">{isUCR ? "YEAR" : "EFFECTIVE YEAR"}</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px] whitespace-nowrap">Billing Type</TableHeaderCell>
+                  <TableHeaderCell className="w-[160px] min-w-[160px] whitespace-nowrap">{isUCR ? "Year" : "Effective Year"}</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <TableHeaderCell className="!w-[120px] min-w-[120px] whitespace-nowrap">ACTIONS</TableHeaderCell>
+                    <TableHeaderCell className="!w-[120px] min-w-[120px] whitespace-nowrap">Actions</TableHeaderCell>
                   )}
                 </TableRow>
               </TableHead>
