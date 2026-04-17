@@ -45,7 +45,7 @@ export default function PlansPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchField, setSearchField] = useState<string>("planName");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreatePlanRequest>({
@@ -100,14 +100,14 @@ export default function PlansPage() {
   const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission(MODULE_NAME);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, searchField]);
 
   const { data, error, loading, reload } = usePaginatedList({
     pageNumber: page,
     pageSize,
     extraParams: {
       search: debouncedSearch || undefined,
-      status: statusFilter === "all" ? undefined : statusFilter === "active" ? 1 : 0,
+      searchField: debouncedSearch ? searchField : undefined,
     },
     fetch: api.getList,
   });
@@ -411,13 +411,14 @@ export default function PlansPage() {
       {/* Toolbar */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All Status" />
+          <Select value={searchField} onValueChange={(v) => setSearchField(v)}>
+            <SelectTrigger className="w-[180px] h-10 border-[#E2E8F0] rounded-l-[5px] rounded-r-none border-r-0 font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <SelectValue placeholder="Plan Name" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="category">Category</SelectItem>
+              <SelectItem value="planName">Plan Name</SelectItem>
+              <SelectItem value="planCategory">Plan Category</SelectItem>
+              <SelectItem value="planType">Plan Type</SelectItem>
               <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>

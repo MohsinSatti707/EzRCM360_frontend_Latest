@@ -71,6 +71,7 @@ export function plansApi() {
       payerId?: string;
       status?: number;
       search?: string;
+      searchField?: string;
       organizationId?: string;
       pageNumber?: number;
       pageSize?: number;
@@ -79,6 +80,7 @@ export function plansApi() {
       if (params?.payerId) q.set("payerId", params.payerId);
       if (params?.status != null) q.set("status", String(params.status));
       if (params?.search) q.set("search", params.search ?? "");
+      if (params?.searchField) q.set("searchField", params.searchField);
       if (params?.organizationId) q.set("OrganizationId", params.organizationId);
       if (params?.pageNumber != null) q.set("pageNumber", String(params.pageNumber));
       if (params?.pageSize != null) q.set("pageSize", String(params.pageSize));
