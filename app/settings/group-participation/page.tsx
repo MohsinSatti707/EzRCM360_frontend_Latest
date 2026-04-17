@@ -270,6 +270,11 @@ export default function GroupParticipationPage() {
   };
 
   const statusLabel = (n: number) => participationStatuses.find((o) => Number(o.value) === n)?.label ?? String(n);
+  const providerNameById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of allEntityProviders) m.set(p.id, p.displayName);
+    return m;
+  }, [allEntityProviders]);
   const payerNameById = useMemo(() => {
     const m = new Map<string, string>();
     for (const p of payers) m.set(p.id, p.payerName);
@@ -413,7 +418,7 @@ export default function GroupParticipationPage() {
                     )}
                     <TableCell className="w-[200px] min-w-[200px]">
                       <div className="max-w-xs truncate">
-                        <CellTooltip text={row.entityProviderDisplayName ?? "—"} />
+                        <CellTooltip text={row.providerName ?? providerNameById.get(row.entityProviderId) ?? "—"} />
                       </div>
                     </TableCell>
                     <TableCell className="w-[200px] min-w-[200px]">
