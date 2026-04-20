@@ -260,6 +260,8 @@ export default function UsersPage() {
     return () => clearTimeout(t);
   }, [search]);
 
+  useEffect(() => { setPage(1); }, [searchDebounced, searchField, statusFilter]);
+
   const loadList = useCallback(() => {
     setError(null);
     const statusParam = statusFilter === "" ? undefined : Number(statusFilter);
@@ -269,10 +271,11 @@ export default function UsersPage() {
         pageSize,
         status: statusParam,
         search: searchDebounced || undefined,
+        searchField: searchDebounced && searchField !== "all" ? searchField : undefined,
       })
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize, statusFilter, searchDebounced]);
+  }, [page, pageSize, statusFilter, searchDebounced, searchField]);
 
   useEffect(() => {
     loadList();
@@ -489,27 +492,15 @@ export default function UsersPage() {
 
   const displayItems = useMemo(() => {
     if (!data?.items) return [];
-    let items = data.items;
-    if (search.trim() && searchField !== "all") {
-      const q = search.trim().toLowerCase();
-      items = items.filter((r) => {
-        switch (searchField) {
-          case "userName": return (r.userName ?? "").toLowerCase().includes(q);
-          case "email": return (r.email ?? "").toLowerCase().includes(q);
-          case "roleName": return (r.roleName ?? "").toLowerCase().includes(q);
-          case "moduleAccess": return moduleNames(r.moduleIds ?? []).toLowerCase().includes(q);
-          default: return true;
-        }
-      });
-    }
-    if (!sortBy || !sortOrder) return items;
-    return [...items].sort((a, b) => {
+    // Backend handles search + searchField; only client-side sort remains here.
+    if (!sortBy || !sortOrder) return data.items;
+    return [...data.items].sort((a, b) => {
       const va = getSortValue(a, sortBy);
       const vb = getSortValue(b, sortBy);
       const cmp = va.localeCompare(vb, undefined, { sensitivity: "base" });
       return sortOrder === "asc" ? cmp : -cmp;
     });
-  }, [data?.items, sortBy, sortOrder, getSortValue, search, searchField]);
+  }, [data?.items, sortBy, sortOrder, getSortValue]);
 
   const handleSort = useCallback((key: string, order: "asc" | "desc" | null) => {
     setSortBy(order === null ? null : key);
