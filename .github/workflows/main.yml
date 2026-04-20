@@ -181,7 +181,7 @@ jobs:
           /usr/bin/zip -r "${BACKUP_DIR}/${BACKUP_PREFIX}$(date +%Y%m%d%H%M%S).zip" "${{ env.SERVER_PATH }}" > /dev/null
           echo 'Cleaning up old backups...'
           find "${BACKUP_DIR}" -maxdepth 1 -name "${BACKUP_PREFIX}*.zip" -type f | \
-            sort -r | tail -n +2 | xargs -r rm
+            sort -r | tail -n +11 | xargs -r rm
         else
           echo "Warning: SERVER_PATH directory does not exist yet. Skipping backup."
         fi
