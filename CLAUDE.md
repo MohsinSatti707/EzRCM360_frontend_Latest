@@ -140,3 +140,23 @@ Always unwrap via `.data` when consuming API responses.
 - Section labels / sub-headers: `text-[12px] font-['Aileron'] font-semibold text-muted-foreground uppercase tracking-wide`
 - Use `text-muted-foreground` for secondary labels
 - Grid layouts: `grid grid-cols-2 gap-x-8 gap-y-2` for category/metric lists
+
+## Personal / Org Memory (lives outside this repo)
+
+Ali Ahmad's identity, the virtual engineering org, cross-job patterns, and personal
+policies live in the **private `ALIAHMEDRAJPUT/personal-memory` repo**. Clone it
+locally and add the folder to your workspace so those memories auto-load:
+
+```bash
+git clone https://github.com/ALIAHMEDRAJPUT/personal-memory.git C:/AliAhmad/personal-memory
+```
+
+Contains:
+- `identity/ali_ahmad.md` — user identity, git signals, privacy rules
+- `virtual-org/roster.md` — 8 product teams, 38 simulated archetypes
+- `policies/` — branching, deploy, memory conventions
+- `patterns/` — cross-job technical lessons (EF, CI, UI, migrations, etc.)
+- `companies/signupsol/` — per-product state across SignupSol products
+
+Anything about Ali, virtual team, or cross-job patterns belongs THERE — not here.
+This repo holds only codebase-specific memory.
