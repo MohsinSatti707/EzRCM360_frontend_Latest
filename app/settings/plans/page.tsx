@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search, ArrowRight, Trash2, ChevronUp, Pencil, Trash } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -45,7 +44,7 @@ export default function PlansPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchField, setSearchField] = useState<string>("planName");
+  const [searchField, setSearchField] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreatePlanRequest>({
@@ -409,58 +408,42 @@ export default function PlansPage() {
       <PageHeader title="Plan Configurations" description="Centralized plan registry." />
 
       {/* Toolbar */}
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex flex-1 items-center">
-          <Select value={searchField} onValueChange={(v) => setSearchField(v)}>
-            <SelectTrigger className="w-[180px] h-10 border-[#E2E8F0] rounded-l-[5px] rounded-r-none border-r-0 font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="Plan Name" />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="planName">Plan Name</SelectItem>
-              <SelectItem value="planCategory">Plan Category</SelectItem>
-              <SelectItem value="planType">Plan Type</SelectItem>
-              <SelectItem value="status">Status</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-            />
-          </div>
+      <div className="mb-3 flex items-center gap-3">
+        <select
+          value={searchField}
+          onChange={(e) => setSearchField(e.target.value)}
+          className="h-10 min-w-[140px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">All Status</option>
+          <option value="planCategory">Category</option>
+          <option value="status">Status</option>
+        </select>
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+          />
         </div>
-        <div className="flex items-center gap-3">
-          {canDelete && selectedIds.size > 0 && (
-            <Button
-              onClick={() => setBulkDeleteConfirm(true)}
-              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
-            >
-              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
-            </Button>
-          )}
-          {canCreate && (
-            <>
-              {/* Bulk import commented out per Figma
-              <BulkImportActions
-                apiBase="/api/Plans"
-                templateFileName="Plans_Import_Template.xlsx"
-                onImportSuccess={reload}
-                onLoadingChange={setOverlayLoading}
-              />
-              */}
-              <Button
-                onClick={() => openCreate()}
-                className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-              >
-                <>Add Plan <ArrowRight className="ml-1 h-4 w-4" /></>
-              </Button>
-            </>
-          )}
-        </div>
+        {canDelete && selectedIds.size > 0 && (
+          <Button
+            onClick={() => setBulkDeleteConfirm(true)}
+            className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+          >
+            <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+          </Button>
+        )}
+        {canCreate && (
+          <Button
+            onClick={() => openCreate()}
+            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
+          >
+            <>Add Plan <ArrowRight className="ml-1 h-4 w-4" /></>
+          </Button>
+        )}
       </div>
 
       {error && (

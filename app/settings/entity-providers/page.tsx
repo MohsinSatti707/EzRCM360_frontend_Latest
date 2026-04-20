@@ -357,7 +357,6 @@ export default function EntityProvidersPage() {
           <option value="providerName">Provider Name</option>
           <option value="npi">Provider NPI</option>
           <option value="ssn">Provider SSN</option>
-          <option value="providerType">Provider Type</option>
           <option value="primarySpecialty">Primary Specialty</option>
           <option value="secondarySpecialty">Secondary Specialty</option>
           <option value="entity">Linked Entity</option>
