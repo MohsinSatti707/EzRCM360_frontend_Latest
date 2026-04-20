@@ -92,7 +92,6 @@ export default function OrganizationPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [form, setForm] = useState<UpdateCurrentOrganizationRequest>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -134,22 +133,8 @@ export default function OrganizationPage() {
     return { code: "+1", number: phone };
   };
 
-  const openAdd = () => {
-    setIsEditMode(false);
-    setForm({});
-    setLogoFile(null);
-    setLogoPreview(null);
-    setPhoneCountryCode("+1");
-    setPhoneNumber("");
-    setAdminPhoneCountryCode("+1");
-    setAdminPhoneNumber("");
-    setFormError(null);
-    setDrawerOpen(true);
-  };
-
   const openEdit = () => {
     if (!profile) return;
-    setIsEditMode(true);
 
     const orgPhone = parsePhone(profile.phoneNumber);
     const admPhone = parsePhone(profile.adminPhone);
@@ -212,12 +197,7 @@ export default function OrganizationPage() {
       const updated = await api.getCurrent();
       setProfile(updated);
       setDrawerOpen(false);
-      toast.success(
-        isEditMode ? "Organization Updated" : "Organization Added",
-        isEditMode
-          ? "Organization settings have been saved successfully."
-          : "Organization has been added successfully."
-      );
+      toast.success("Organization Updated", "Organization settings have been saved successfully.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed.";
       setFormError(msg);
@@ -301,27 +281,18 @@ export default function OrganizationPage() {
 
       {/* Organization Information */}
       <Card className="overflow-auto border-none shadow-none mx-6 h-[calc(100vh-385px)]">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pr-4">
           <div className="flex items-center gap-2">
             <OrganizationIcon className="h-5 w-5 text-[#6B7280]" />
-            <h3 className="text-[18px] font-semibold text-[#1F2937]">Organization Information</h3>
+            <h3 className="text-[18px] font-bold text-[#1F2937]">Organization Information</h3>
           </div>
           {canUpdate && (
-            orgAdded ? (
-              <Button
-                onClick={openEdit}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8]"
-              >
-                Edit <span aria-hidden>→</span>
-              </Button>
-            ) : (
-              <Button
-                onClick={openAdd}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8]"
-              >
-                Add Organization <span aria-hidden>→</span>
-              </Button>
-            )
+            <Button
+              onClick={openEdit}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1d4ed8]"
+            >
+              Edit <span aria-hidden>→</span>
+            </Button>
           )}
         </div>
 
@@ -383,7 +354,7 @@ export default function OrganizationPage() {
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
-          <h3 className="text-[18px] font-semibold text-[#1F2937]">Account Administrator Information</h3>
+          <h3 className="text-[18px] font-bold text-[#1F2937]">Account Administrator Information</h3>
         </div>
         <div className="grid gap-x-10 gap-y-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
           <div>
@@ -433,13 +404,14 @@ export default function OrganizationPage() {
       <DrawerForm
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
-        title={isEditMode ? "Edit Organization" : "Add Organization"}
+        title="Edit Organization"
         footer={
           <DrawerFooter
             onCancel={() => setDrawerOpen(false)}
-            submitLabel={isEditMode ? "Update" : "Add"}
+            submitLabel="Update"
             onSubmit={handleSubmit}
             loading={submitLoading}
+            className="px-0 py-0"
           />
         }
       >
@@ -451,7 +423,7 @@ export default function OrganizationPage() {
           )}
 
           {/* Organization Information Section */}
-          <h4 className="font-aileron text-[16px] font-semibold text-[#1F2937] mb-4">
+          <h4 className="font-aileron text-[16px] font-bold text-[#1F2937] mb-3">
             Organization Information
           </h4>
           <div className="space-y-4">
@@ -600,7 +572,7 @@ export default function OrganizationPage() {
           </div>
 
           {/* Account Administrator Information Section */}
-          <h4 className="font-aileron text-[16px] font-semibold text-[#1F2937] mt-8 mb-4">
+          <h4 className="font-aileron text-[16px] font-bold text-[#1F2937] mt-6 mb-3">
             Account Administrator Information
           </h4>
           <div className="space-y-4">
@@ -623,6 +595,7 @@ export default function OrganizationPage() {
             <Input
               label="Job Title"
               required
+              disabled
               value={form.adminJobTitle ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, adminJobTitle: e.target.value }))}
               placeholder="e.g., Chief Executive Officer (CEO)"
@@ -656,6 +629,7 @@ export default function OrganizationPage() {
             <Input
               label="Work Email"
               type="email"
+              disabled
               value={form.adminEmail ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, adminEmail: e.target.value }))}
               placeholder="nicolas.rito@example.com"

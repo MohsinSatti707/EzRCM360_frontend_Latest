@@ -224,18 +224,34 @@ export default function RolesPermissionsPage() {
   const permissionsClient = permissionsApi();
   const toast = useToast();
 
-  const loadRoles = useCallback(() => {
+  const loadRoles = useCallback((preselectFirst = false) => {
     setError(null);
     setRolesLoading(true);
     rolesClient
       .getList({ pageNumber: 1, pageSize: 100 })
-      .then((data: PaginatedList<RoleDto>) => setRoles(data.items))
+      .then((data: PaginatedList<RoleDto>) => {
+        setRoles(data.items);
+        if (preselectFirst && data.items.length > 0) {
+          const first = data.items[0];
+          setSelectedRole({ id: first.id, name: first.name, description: first.description ?? null, permissions: [] });
+          setPermissionsLoading(true);
+          permissionsClient
+            .getByRoleId(first.id)
+            .then((perms) => {
+              setSelectedRole((prev) => (prev ? { ...prev, permissions: perms } : null));
+              setPermissions(perms);
+              setPermissionDirty(false);
+            })
+            .catch(() => setPermissions([]))
+            .finally(() => setPermissionsLoading(false));
+        }
+      })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load roles"))
       .finally(() => setRolesLoading(false));
   }, []);
 
   useEffect(() => {
-    loadRoles();
+    loadRoles(true);
   }, [loadRoles]);
 
   useEffect(() => {
@@ -479,7 +495,7 @@ export default function RolesPermissionsPage() {
           <div className="border-b border-[#E2E8F0] px-6 py-4 ">
             <h2 className="font-aileron text-[16px] font-bold leading-none text-[#2A2C33]">Permissions</h2>
           </div>
-          <div className="py-4">
+          <div className="pt-4 pb-2">
             {!selectedRole ? (
             <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/50 py-16">
               <p className="text-center text-sm font-medium text-muted-foreground">Select a role to view and edit permissions</p>
@@ -515,7 +531,7 @@ export default function RolesPermissionsPage() {
                 )}
               </div>
 
-              <div className="overflow-x-auto h-[calc(100vh-422px)] overflow-y-auto custom-scrollbar">
+              <div className="overflow-x-auto h-[calc(100vh-411px)] overflow-y-auto custom-scrollbar">
                 <table className="w-full table-fixed border-collapse">
                   <colgroup>
                     <col className="w-auto max-w-[240px]" />
@@ -688,6 +704,7 @@ export default function RolesPermissionsPage() {
             }
             onSubmit={handleSubmitRole}
             loading={submitLoading}
+            className="border-t border-[#E2E8F0] px-6 py-4"
           />
         }
       >
@@ -705,7 +722,7 @@ export default function RolesPermissionsPage() {
           )}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#2A2C33]">
                 Role Name
               </label>
               <input
@@ -717,7 +734,7 @@ export default function RolesPermissionsPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#64748B]">
+              <label className="mb-1 block font-['Aileron'] text-[14px] font-normal leading-[160%] tracking-normal text-[#2A2C33]">
                 Description
               </label>
               <textarea

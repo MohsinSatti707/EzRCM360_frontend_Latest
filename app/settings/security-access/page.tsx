@@ -229,8 +229,8 @@ export default function SecurityAccessPage() {
       title="Security Access"
       titleWrapperClassName="px-6"
       description={
-        <span className="font-['Aileron'] text-[15px] font-normal  tracking-normal text-[#64748B]">
-          Manage how users authenticate and how long sessions remain active. These controls help protect your organization while maintaining usability.
+        <span className="font-['Aileron'] text-[15px] font-normal  tracking-normal text-[#64748B] w-full">
+          Security settings control how users authenticate and how long sessions remain active.<br></br>These controls help protect your organization from unauthorized access while maintaining usability for daily operations.
         </span>
       }
     >
@@ -248,7 +248,7 @@ export default function SecurityAccessPage() {
             <h2 className="mb-3 font-['Aileron'] text-[20px] font-bold leading-[100%] tracking-normal text-[#202830]">
               Multi-Factor Authentication (MFA)
             </h2>
-            <div className="grid gap-6 lg:grid-cols-2 items-start">
+            <div className="grid gap-6 lg:grid-cols-2 items-stretch">
               {/* Left column: MFA for Account Administrator + MFA Frequency */}
               <div className="flex flex-col gap-6">
                 <Card className="p-6">
@@ -266,7 +266,7 @@ export default function SecurityAccessPage() {
                   </p>
                 </Card>
 
-                <Card className="p-6 pb-[131px]">
+                <Card className="p-6 pb-[155px]">
                   <h3 className="font-['Aileron'] text-[18px] font-bold leading-[100%] tracking-normal text-[#202830]">
                     MFA Frequency
                   </h3>
@@ -311,12 +311,11 @@ export default function SecurityAccessPage() {
                 </p>
                 <p className="font-['Aileron'] text-[15px] font-normal leading-[150%] tracking-normal text-[#202830]">
                   You may enable MFA for all users or selectively enforce it for specific users
-                  based on your organization&apos;s security needs. Account Administrators are
+                  based on your organization&apos;s security needs.<br></br> Account Administrators are
                   always protected by MFA and are not affected by this setting.
                 </p>
                 <div className="mt-4 flex items-center gap-3">
-                  <span className="text-sm font-medium text-foreground">Enable MFA for all users</span>
-                  <Toggle
+                                    <Toggle
                     checked={form.mfaRequiredForAllUsers}
                     onChange={() =>
                       setForm((f) =>
@@ -326,6 +325,7 @@ export default function SecurityAccessPage() {
                     disabled={!canUpdate}
                     aria-label="Enable MFA for all users"
                   />
+                  <span className="text-sm font-medium text-foreground">Enable MFA for all users</span>
                 </div>
                 <div className="mt-4">
                   <div className="relative max-w-xs">

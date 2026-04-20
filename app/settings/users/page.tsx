@@ -539,19 +539,22 @@ export default function UsersPage() {
     >
       <TooltipProvider delayDuration={300} skipDelayDuration={0}>
       {/* Toolbar: filters + search + add button */}
-      <div className="mb-3 flex items-center gap-3 mx-6 mt-3">
+      <div className="mb-3 flex items-center mx-6 mt-3">
         {/* Left: Search field selector */}
-        <select
-          value={searchField}
-          onChange={(e) => setSearchField(e.target.value)}
-          className="h-10 min-w-[140px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">All</option>
-          <option value="userName">User Name</option>
-          <option value="email">Email</option>
-          <option value="roleName">Role Assignment</option>
-          <option value="moduleAccess">Module Access</option>
-        </select>
+        <div className="relative">
+          <select
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value)}
+            className="h-10 min-w-[140px] appearance-none rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="userName">User Name</option>
+            <option value="email">Email</option>
+            <option value="roleName">Role Assignment</option>
+            <option value="moduleAccess">Module Access</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
+        </div>
 
         {/* Middle: Search bar */}
         <div className="relative flex-1 min-w-0">
@@ -561,30 +564,33 @@ export default function UsersPage() {
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full min-w-0 rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+            className="h-10 w-full min-w-0  border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus-visible:outline-none focus-visible:ring-0"
           />
         </div>
 
         {/* Right: Status filter + bulk delete + add button */}
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 min-w-[120px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          {[
-            { value: "", name: "All Status" },
-            ...STATUS_OPTIONS,
-          ].map((o) => (
-            <option key={o.value === "" ? "_all" : o.value} value={o.value === "" ? "" : String(o.value)}>
-              {o.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 min-w-[120px] appearance-none rounded-r-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            {[
+              { value: "", name: "All Status" },
+              ...STATUS_OPTIONS,
+            ].map((o) => (
+              <option key={o.value === "" ? "_all" : o.value} value={o.value === "" ? "" : String(o.value)}>
+                {o.name}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
+        </div>
 
         {canDelete && selectedIds.size > 0 && (
           <Button
             onClick={() => setBulkDeleteConfirm(true)}
-            className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+            className="h-10 rounded-[5px] ml-3 px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
           >
             <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
           </Button>
@@ -592,7 +598,7 @@ export default function UsersPage() {
         {canCreate && (
           <Button
             onClick={openCreate}
-            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
+            className="inline-flex h-10 ml-3 items-center justify-center gap-1.5 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
           >
             Add New User
             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
