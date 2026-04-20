@@ -63,6 +63,8 @@ export default function GroupParticipationPage() {
   const [selectedEntityId, setSelectedEntityId] = useState("");
   const [payers, setPayers] = useState<PayerLookupDto[]>([]);
   const [allPlans, setAllPlans] = useState<PlanLookupDto[]>([]);
+  const [searchBy, setSearchBy] = useState<string>("all");
+  const [participationStatusFilter, setParticipationStatusFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [participationStatuses, setParticipationStatuses] = useState<ValueLabelDto[]>([]);
   const [participationSources, setParticipationSources] = useState<ValueLabelDto[]>([]);
@@ -87,13 +89,18 @@ export default function GroupParticipationPage() {
   const { canView, canCreate, canUpdate, canDelete, loading: permLoading } = useModulePermission("Group Provider Plan Participations");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter, searchBy, participationStatusFilter]);
 
   const loadList = useCallback(() => {
     setError(null);
     const isActive = statusFilter === "active" ? true : statusFilter === "inactive" ? false : undefined;
-    api.getList({ pageNumber: page, pageSize, search: debouncedSearch || undefined, isActive }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize, debouncedSearch, statusFilter]);
+    api.getList({
+      pageNumber: page,
+      pageSize,
+      search: debouncedSearch || undefined,
+      isActive,
+    }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
+  }, [page, pageSize, debouncedSearch, statusFilter, searchBy, participationStatusFilter]);
 
   useEffect(() => {
     loadList();
@@ -257,7 +264,7 @@ export default function GroupParticipationPage() {
         participationStatus: detail.participationStatus,
         effectiveFrom: detail.effectiveFrom ?? null,
         effectiveTo: detail.effectiveTo ?? null,
-        source: detail.source,
+        source: resolveEnum(detail.source, ENUMS.ParticipationSource),
         isActive: isActiveValue === 1,
       });
       await loadList();
@@ -294,7 +301,7 @@ export default function GroupParticipationPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
-        <PageHeader title="Group Provider-Plan Participation" description="Network participation status." />
+        <PageHeader title="Provider-Plan Participation" description="Network participation status." />
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -305,7 +312,7 @@ export default function GroupParticipationPage() {
   if (!canView) {
     return (
       <div>
-        <PageHeader title="Group Provider-Plan Participation" description="Network participation status." />
+        <PageHeader title="Provider-Plan Participation" description="Network participation status." />
         <Card>
           <AccessRestrictedContent sectionName="Group Participation" />
         </Card>
@@ -315,30 +322,55 @@ export default function GroupParticipationPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      <PageHeader title="Group Provider-Plan Participation" description="Network participation status." />
+      <PageHeader title="Provider-Plan Participation" description="Network participation status." />
       {/* Toolbar: search + add button */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All Status" />
+          <Select value={searchBy} onValueChange={setSearchBy}>
+            <SelectTrigger className="w-[70px] h-10 border-[#E2E8F0] border-r-0 rounded-l-[5px] rounded-r-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="provider">Provider</SelectItem>
+              <SelectItem value="plan">Plan</SelectItem>
+              <SelectItem value="participationStatus">Participation Status</SelectItem>
+              <SelectItem value="source">Source</SelectItem>
             </SelectContent>
           </Select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full rounded-none border border-[#E2E8F0] border-r-0 bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
+          <Select value={participationStatusFilter} onValueChange={setParticipationStatusFilter}>
+            <SelectTrigger className="w-[120px] h-10 border-[#E2E8F0] border-r-0 rounded-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent className="bg-white z-50">
+              <SelectItem value="all">All</SelectItem>
+              {participationStatuses.map((s) => (
+                <SelectItem key={s.value} value={String(s.value)}>
+                  {s.label.replace(/\s*\/\s*Not Verified/i, "")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[120px] h-10 border-[#E2E8F0] rounded-r-[5px] rounded-l-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <SelectValue placeholder="All (Status)" />
+            </SelectTrigger>
+            <SelectContent className="bg-white z-50">
+              <SelectItem value="all">All (Status)</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex items-center gap-3">
           {canDelete && selectedIds.size > 0 && (
@@ -384,7 +416,7 @@ export default function GroupParticipationPage() {
       {data && data.items.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-            <Table className="min-w-[1200px] table-fixed">
+            <Table className="min-w-[1500px] table-fixed">
               <TableHead className="sticky top-0 z-20">
                 <TableRow>
                   {canDelete && (
@@ -400,13 +432,17 @@ export default function GroupParticipationPage() {
                   <TableHeaderCell className="w-[160px] min-w-[160px]">Participation Status</TableHeaderCell>
                   <TableHeaderCell className="w-[140px] min-w-[140px]">Effective From</TableHeaderCell>
                   <TableHeaderCell className="w-[140px] min-w-[140px]">Effective To</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Source</TableHeaderCell>
+                  <TableHeaderCell className="w-[140px] min-w-[140px]">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
                   )}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.items.map((row) => (
+                {data.items.filter((row) =>
+                  participationStatusFilter === "all" || String(row.participationStatus) === participationStatusFilter
+                ).map((row) => (
                   <TableRow key={row.id}>
                     {canDelete && (
                       <TableCell>
@@ -439,6 +475,25 @@ export default function GroupParticipationPage() {
                     <TableCell className="w-[140px] min-w-[140px]">
                       <div className="max-w-[120px] truncate">
                         <CellTooltip text={row.effectiveTo ? toDateInput(row.effectiveTo) : "—"} />
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[140px] min-w-[140px]">
+                      <div className="max-w-[120px] truncate">
+                        <CellTooltip text={participationSources.find((s) => Number(s.value) === resolveEnum(row.source, ENUMS.ParticipationSource))?.label ?? "—"} />
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[140px] min-w-[140px]">
+                      <div className="flex justify-center">
+                        <select
+                          value={row.isActive ? 1 : 0}
+                          onChange={(e) => handleStatusChange(row, Number(e.target.value))}
+                          disabled={!canUpdate || statusUpdatingId === row.id}
+                          className="input-enterprise w-[120px] rounded-[5px] px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                        >
+                          {ACTIVE_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>{o.name}</option>
+                          ))}
+                        </select>
                       </div>
                     </TableCell>
                     {(canUpdate || canDelete) && (
@@ -545,9 +600,9 @@ export default function GroupParticipationPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground">Source</label>
-              <select value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: Number(e.target.value) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <select value={String(form.source)} onChange={(e) => setForm((f) => ({ ...f, source: resolveEnum(e.target.value, ENUMS.ParticipationSource) }))} className="w-full rounded-[5px] border border-input px-3 py-2 text-sm focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                 {participationSources.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={String(resolveEnum(o.value, ENUMS.ParticipationSource))}>{o.label}</option>
                 ))}
               </select>
             </div>

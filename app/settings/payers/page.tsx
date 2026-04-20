@@ -391,26 +391,28 @@ export default function PayersPage() {
 
       {/* Toolbar: search field selector + search + add button */}
       <div className="mb-3 flex items-center gap-3">
-        <select
-          value={searchField}
-          onChange={(e) => setSearchField(e.target.value)}
-          className="h-10 min-w-[140px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">All Status</option>
-          <option value="payerName">Payer Name</option>
-          <option value="payerAliases">Payer Aliases</option>
-          <option value="payerEntityType">Payer Entity Type</option>
-          <option value="status">Status</option>
-        </select>
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-          />
+        <div className="flex flex-1 items-center">
+          <select
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value)}
+            className="h-10 w-[115px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All Status</option>
+            <option value="payerName">Payer Name</option>
+            <option value="payerAliases">Payer Aliases</option>
+            <option value="payerEntityType">Payer Entity Type</option>
+            <option value="status">Status</option>
+          </select>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-10 w-full rounded-l-none rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+            />
+          </div>
         </div>
         {canDelete && selectedIds.size > 0 && (
           <Button

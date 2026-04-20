@@ -305,41 +305,38 @@ export default function EntitiesPage() {
 
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
-        {/* Left: Search field selector */}
-        <select
-          value={searchField}
-          onChange={(e) => setSearchField(e.target.value)}
-          className="h-10 min-w-[90px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">All</option>
-          <option value="legalName">Entity Legal Name</option>
-          <option value="displayName">Entity Display Name</option>
-          <option value="groupNpi">Entity Group NPI</option>
-          <option value="taxId">Entity Tax ID</option>
-        </select>
-
-        {/* Middle: Search bar */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-          />
+        <div className="flex flex-1 items-center">
+          <select
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value)}
+            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="legalName">Entity Legal Name</option>
+            <option value="displayName">Entity Display Name</option>
+            <option value="groupNpi">Entity Group NPI</option>
+            <option value="taxId">Entity Tax ID</option>
+          </select>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 w-[90px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
-
-        {/* Right: Status filter */}
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 min-w-[90px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
 
         {canDelete && selectedIds.size > 0 && (
           <Button

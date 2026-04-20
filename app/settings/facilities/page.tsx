@@ -68,6 +68,7 @@ export default function FacilitiesPage() {
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [searchBy, setSearchBy] = useState("all");
 
   const api = facilitiesApi();
   const toast = useToast();
@@ -262,14 +263,16 @@ export default function FacilitiesPage() {
       {/* Toolbar: search + add button */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All Status" />
+          <Select value={searchBy} onValueChange={setSearchBy}>
+            <SelectTrigger className="w-[70px] h-10 border-[#E2E8F0] border-r-0 rounded-l-[5px] rounded-r-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="facilityName">Facility Name</SelectItem>
+              <SelectItem value="facilityType">Facility Type</SelectItem>
+              <SelectItem value="physicalAddress">Physical Address</SelectItem>
+              <SelectItem value="linkedEntity">Linked Entity</SelectItem>
             </SelectContent>
           </Select>
           <div className="relative flex-1">
@@ -279,9 +282,19 @@ export default function FacilitiesPage() {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[70px] h-10 border-[#E2E8F0] rounded-r-[5px] rounded-l-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent className="bg-white z-50">
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex items-center gap-3">
           {canDelete && selectedIds.size > 0 && (
@@ -293,20 +306,12 @@ export default function FacilitiesPage() {
             </Button>
           )}
           {canCreate && (
-            <>
-              <BulkImportActions
-                apiBase="/api/Facilities"
-                templateFileName="Facilities_Import_Template.xlsx"
-                onImportSuccess={reload}
-                onLoadingChange={setOverlayLoading}
-              />
-              <Button
-                onClick={openCreate}
-                className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-              >
-                <>Add Facility <ArrowRight className="ml-1 h-4 w-4" /></>
-              </Button>
-            </>
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              <>Add Facility <ArrowRight className="ml-1 h-4 w-4" /></>
+            </Button>
           )}
         </div>
       </div>
@@ -395,11 +400,12 @@ export default function FacilitiesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="w-[160px] min-w-[160px]">
+                      <div className="flex justify-center">
                       <select
                         value={row.isActive ? 1 : 0}
                         onChange={(e) => handleStatusChange(row, Number(e.target.value))}
                         disabled={!canUpdate || statusUpdatingId === row.id}
-                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                        className="input-enterprise w-[120px] rounded-[5px] px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                       >
                         {ACTIVE_OPTIONS.map((o) => (
                           <option key={o.value} value={o.value}>
@@ -407,6 +413,7 @@ export default function FacilitiesPage() {
                           </option>
                         ))}
                       </select>
+                      </div>
                     </TableCell>
                     {(canUpdate || canDelete) && (
                       <TableCell className="!w-[120px] min-w-[120px]">

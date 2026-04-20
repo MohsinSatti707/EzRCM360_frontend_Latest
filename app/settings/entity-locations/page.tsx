@@ -294,41 +294,38 @@ export default function EntityLocationsPage() {
 
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
-        {/* Search field selector */}
-        <select
-          value={searchField}
-          onChange={(e) => setSearchField(e.target.value)}
-          className="h-10 min-w-[90px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">All</option>
-          <option value="locationName">Location Name</option>
-          <option value="locationType">Location Type</option>
-          <option value="physicalAddress">Physical Address</option>
-          <option value="entity">Linked Entity</option>
-        </select>
-
-        {/* Search bar */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-          />
+        <div className="flex flex-1 items-center">
+          <select
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value)}
+            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="locationName">Location Name</option>
+            <option value="locationType">Location Type</option>
+            <option value="physicalAddress">Physical Address</option>
+            <option value="entity">Linked Entity</option>
+          </select>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            className="h-10 w-[90px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
-
-        {/* Status filter */}
-        <select
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="h-10 min-w-[90px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
 
         {canDelete && selectedIds.size > 0 && (
           <Button onClick={() => setBulkDeleteConfirm(true)} className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]">
@@ -419,16 +416,18 @@ export default function EntityLocationsPage() {
                         <CellTooltip text={row.entityDisplayName ?? "—"} />
                       </TableCell>
                       <TableCell>
-                        <select
-                          value={row.isActive ? "1" : "0"}
-                          onChange={(e) => handleStatusChange(row, e.target.value === "1")}
-                          disabled={!canUpdate || statusUpdatingId === row.id}
-                          className="h-9 w-[130px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                        >
-                          {STATUS_OPTIONS.map((o) => (
-                            <option key={String(o.value)} value={o.value ? "1" : "0"}>{o.name}</option>
-                          ))}
-                        </select>
+                        <div className="flex justify-center">
+                          <select
+                            value={row.isActive ? "1" : "0"}
+                            onChange={(e) => handleStatusChange(row, e.target.value === "1")}
+                            disabled={!canUpdate || statusUpdatingId === row.id}
+                            className="h-9 w-[120px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                          >
+                            {STATUS_OPTIONS.map((o) => (
+                              <option key={String(o.value)} value={o.value ? "1" : "0"}>{o.name}</option>
+                            ))}
+                          </select>
+                        </div>
                       </TableCell>
                       {(canUpdate || canDelete) && (
                         <TableCell className="!w-[100px]">
