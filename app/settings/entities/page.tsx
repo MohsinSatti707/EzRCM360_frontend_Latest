@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Search, ArrowRight, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Search, ArrowRight, Trash2, Play } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { PageHeader } from "@/components/settings/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -40,6 +40,31 @@ const STATUS_OPTIONS: { value: number; name: string }[] = [
   { value: 1, name: "Active" },
 ];
 
+function SortArrows({
+  columnKey,
+  sortBy,
+  sortOrder,
+  onSort,
+}: {
+  columnKey: string;
+  sortBy: string | null;
+  sortOrder: "asc" | "desc" | null;
+  onSort: (key: string, order: "asc" | "desc" | null) => void;
+}) {
+  const isAsc = sortBy === columnKey && sortOrder === "asc";
+  const isDesc = sortBy === columnKey && sortOrder === "desc";
+  return (
+    <span className="inline-flex flex-col gap-0" role="group" aria-label="Sort">
+      <button type="button" onClick={(e) => { e.stopPropagation(); onSort(columnKey, isAsc ? null : "asc"); }} className="p-0 border-0 bg-transparent cursor-pointer rounded leading-none hover:opacity-80 focus:outline-none" aria-label="Sort ascending">
+        <Play className={`h-2 w-2 shrink-0 -rotate-90 ${isAsc ? "fill-[#0066CC] text-[#0066CC]" : "fill-[#E2E8F0] text-[#E2E8F0]"}`} />
+      </button>
+      <button type="button" onClick={(e) => { e.stopPropagation(); onSort(columnKey, isDesc ? null : "desc"); }} className="p-0 border-0 bg-transparent cursor-pointer rounded leading-none hover:opacity-80 focus:outline-none" aria-label="Sort descending">
+        <Play className={`h-2 w-2 shrink-0 rotate-90 ${isDesc ? "fill-[#0066CC] text-[#0066CC]" : "fill-[#E2E8F0] text-[#E2E8F0]"}`} />
+      </button>
+    </span>
+  );
+}
+
 const defaultForm: CreateEntityRequest = {
   legalName: "",
   displayName: "",
@@ -53,6 +78,9 @@ export default function EntitiesPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchField, setSearchField] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<CreateEntityRequest>(defaultForm);
@@ -215,6 +243,40 @@ export default function EntitiesPage() {
 
   const statusLabel = (n: number) => STATUS_OPTIONS.find((o) => o.value === n)?.name ?? String(n);
 
+  const handleSort = useCallback((key: string, order: "asc" | "desc" | null) => {
+    setSortBy(order === null ? null : key);
+    setSortOrder(order);
+  }, []);
+
+  const sortedItems = useMemo(() => {
+    if (!data?.items) return [];
+    let items = data.items;
+    if (searchTerm.trim() && searchField !== "all") {
+      const q = searchTerm.trim().toLowerCase();
+      items = items.filter((r) => {
+        switch (searchField) {
+          case "legalName": return (r.legalName ?? "").toLowerCase().includes(q);
+          case "displayName": return (r.displayName ?? "").toLowerCase().includes(q);
+          case "groupNpi": return (r.groupNpi ?? "").toLowerCase().includes(q);
+          case "taxId": return (r.taxId ?? "").toLowerCase().includes(q);
+          default: return true;
+        }
+      });
+    }
+    if (!sortBy || !sortOrder) return items;
+    return [...items].sort((a, b) => {
+      let va = "", vb = "";
+      switch (sortBy) {
+        case "legalName": va = a.legalName ?? ""; vb = b.legalName ?? ""; break;
+        case "displayName": va = a.displayName ?? ""; vb = b.displayName ?? ""; break;
+        case "groupNpi": va = a.groupNpi ?? ""; vb = b.groupNpi ?? ""; break;
+        case "taxId": va = a.taxId ?? ""; vb = b.taxId ?? ""; break;
+      }
+      const cmp = va.localeCompare(vb, undefined, { sensitivity: "base" });
+      return sortOrder === "asc" ? cmp : -cmp;
+    });
+  }, [data?.items, sortBy, sortOrder, searchField, searchTerm]);
+
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
@@ -241,56 +303,68 @@ export default function EntitiesPage() {
     <div className="flex min-h-0 flex-1 flex-col px-6">
       <PageHeader title="Entity Information" description="Define entity identity and structure." />
 
-      {/* Toolbar: search + add button */}
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex flex-1 items-center">
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-            <input
-              type="text"
-              placeholder="Search entities..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-            />
-          </div>
+      {/* Toolbar */}
+      <div className="mb-3 flex items-center gap-3">
+        {/* Left: Search field selector */}
+        <select
+          value={searchField}
+          onChange={(e) => setSearchField(e.target.value)}
+          className="h-10 min-w-[90px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">All</option>
+          <option value="legalName">Entity Legal Name</option>
+          <option value="displayName">Entity Display Name</option>
+          <option value="groupNpi">Entity Group NPI</option>
+          <option value="taxId">Entity Tax ID</option>
+        </select>
+
+        {/* Middle: Search bar */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="h-10 w-full rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+          />
         </div>
-        <div className="flex items-center gap-3">
-          {canDelete && selectedIds.size > 0 && (
+
+        {/* Right: Status filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="h-10 min-w-[90px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        {canDelete && selectedIds.size > 0 && (
+          <Button
+            onClick={() => setBulkDeleteConfirm(true)}
+            className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+          >
+            <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+          </Button>
+        )}
+        {canCreate && (
+          <>
+            {/* <BulkImportActions
+              apiBase="/api/Entities"
+              templateFileName="Entities_Import_Template.xlsx"
+              onImportSuccess={reload}
+              onLoadingChange={setOverlayLoading}
+            /> */}
             <Button
-              onClick={() => setBulkDeleteConfirm(true)}
-              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
             >
-              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+              <>Add New Entity <ArrowRight className="ml-1 h-4 w-4" /></>
             </Button>
-          )}
-          {canCreate && (
-            <>
-              <BulkImportActions
-                apiBase="/api/Entities"
-                templateFileName="Entities_Import_Template.xlsx"
-                onImportSuccess={reload}
-                onLoadingChange={setOverlayLoading}
-              />
-              <Button
-                onClick={openCreate}
-                className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-              >
-                <>Add Entity <ArrowRight className="ml-1 h-4 w-4" /></>
-              </Button>
-            </>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {error && (
@@ -315,7 +389,7 @@ export default function EntitiesPage() {
       {data && data.items.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="max-h-[calc(100vh-316px)] min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-[5px]">
-            <Table className="min-w-[1200px] table-fixed">
+            <Table className="min-w-[1100px] table-fixed">
               <TableHead className="sticky top-0 z-20">
                 <TableRow>
                   {canDelete && (
@@ -333,12 +407,16 @@ export default function EntitiesPage() {
                   <TableHeaderCell className="w-[200px] min-w-[200px]">Tax ID</TableHeaderCell>
                   <TableHeaderCell className="w-[190px] min-w-[190px]">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
-                    <TableHeaderCell className="!w-[120px] min-w-[120px]">Actions</TableHeaderCell>
+                    <TableHeaderCell className="!w-[100px] min-w-[100px]">Actions</TableHeaderCell>
                   )}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.items.map((row) => (
+                {sortedItems.map((row) => {
+                  const statusNum = resolveEnum(row.status, ENUMS.EntityStatus);
+                  const isInactive = statusNum === 0;
+                  const cellColor = isInactive ? "text-[#93C5FD]" : "text-[#202830]";
+                  return (
                   <TableRow key={row.id}>
                     {canDelete && (
                       <TableCell>
@@ -353,35 +431,23 @@ export default function EntitiesPage() {
                         <CellTooltip text={row.legalName} />
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={cellColor}>
                       <div className="max-w-xs truncate">
                         <CellTooltip text={row.displayName} />
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="max-w-xs truncate">
-                        <CellTooltip text={row.organizationName ?? "—"} />
-
-                      </div>
+                    <TableCell className={cellColor}>
+                      <CellTooltip text={row.groupNpi} />
                     </TableCell>
-                    <TableCell>
-                      <div className="max-w-[140px] truncate">
-                        <CellTooltip text={row.groupNpi} />
-                        
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-[140px] truncate">
-                        <CellTooltip text={row.taxId} />
-                        
-                      </div>
+                    <TableCell className={cellColor}>
+                      <CellTooltip text={row.taxId} />
                     </TableCell>
                     <TableCell>
                       <select
-                        value={resolveEnum(row.status, ENUMS.EntityStatus)}
+                        value={statusNum}
                         onChange={(e) => handleStatusChange(row, Number(e.target.value))}
                         disabled={!canUpdate || statusUpdatingId === row.id}
-                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                        className="h-9 w-[130px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                       >
                         {STATUS_OPTIONS.map((o) => (
                           <option key={o.value} value={o.value}>
@@ -391,7 +457,7 @@ export default function EntitiesPage() {
                       </select>
                     </TableCell>
                     {(canUpdate || canDelete) && (
-                      <TableCell className="!w-[120px]">
+                      <TableCell className="!w-[100px]">
                         <TableActionsCell
                           canEdit={canUpdate}
                           canDelete={canDelete}
@@ -401,7 +467,8 @@ export default function EntitiesPage() {
                       </TableCell>
                     )}
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

@@ -15,11 +15,14 @@ export interface EntityLocationListItemDto {
 export interface EntityLocationDetailDto {
   id: string;
   entityId: string;
+  entityDisplayName?: string | null;
   locationName: string;
   locationType: string;
   physicalAddress?: string | null;
   posCode?: string | null;
   isActive: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface CreateEntityLocationRequest {
