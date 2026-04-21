@@ -1,5 +1,8 @@
 # EzRCM360 Frontend — Claude Code Memory
 
+## Policies (org-wide)
+- [memory/token_efficiency.md](memory/token_efficiency.md) — **ways to reduce token usage: surgical Reads, grep head_limit, sed for mass edits, subagents for exploration, /compact after PR merges, /clear between unrelated tasks, fast mode for mechanical work, terse responses, self-audit checklist. Never at cost of correctness.**
+
 ## Quick Reference
 - **Stack:** Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui
 - **Font:** `font-['Aileron']` throughout
