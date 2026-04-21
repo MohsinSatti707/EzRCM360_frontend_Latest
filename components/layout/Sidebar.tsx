@@ -250,10 +250,10 @@ export function Sidebar() {
           </Link>
           {!collapsed && (
             <>
-              <div className="text-center">
+              <Link href="/profile/edit" className="text-center hover:opacity-80 transition-opacity cursor-pointer">
                 <p className="font-semibold text-base text-foreground">{userName ?? "User"}</p>
                 <p className="text-sm text-muted-foreground">{userEmail ?? "—"}</p>
-              </div>
+              </Link>
               <LogoutButton className="w-full py-2 px-4 rounded-lg bg-[hsl(210,40%,96%)] text-primary font-medium text-base hover:bg-[hsl(210,40%,92%)] transition-colors" />
             </>
           )}

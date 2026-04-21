@@ -134,6 +134,8 @@ export default function CategoryFeeSchedulesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [yearFilter, setYearFilter] = useState<string>("all");
+  const [searchField, setSearchField] = useState<string>("all");
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [zipRangeMode, setZipRangeMode] = useState<"single" | "dual">("single");
@@ -193,9 +195,11 @@ export default function CategoryFeeSchedulesPage() {
       pageSize,
       category: categoryValue,
       status: statusFilter === "all" ? undefined : Number(statusFilter),
+      year: yearFilter === "all" ? undefined : Number(yearFilter),
       search: debouncedSearch || undefined,
+      searchField: debouncedSearch && searchField !== "all" ? searchField : undefined,
     }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize, statusFilter, categoryValue, debouncedSearch]);
+  }, [page, pageSize, statusFilter, yearFilter, searchField, categoryValue, debouncedSearch]);
 
   const handleStatusChange = async (row: FeeScheduleDto, statusValue: number) => {
     if (!canUpdate) return;
@@ -656,16 +660,21 @@ export default function CategoryFeeSchedulesPage() {
       {/* Toolbar */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center">
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-[130px] h-10 border-[#E2E8F0] rounded-l-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="0">Active</SelectItem>
-              <SelectItem value="1">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Search field selector */}
+          <select
+            value={searchField}
+            onChange={(e) => { setSearchField(e.target.value); setPage(1); }}
+            className="h-10 min-w-[160px] rounded-l-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="scheduleCode">Fee Schedule Id</option>
+            <option value="state">State</option>
+            <option value="geoType">Geography Type</option>
+            <option value="geoCode">Geography Code</option>
+            {categorySlug === "medicare" && <option value="geoName">Geography Name</option>}
+            <option value="billingType">Billing Type</option>
+          </select>
+          {/* Search input */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
@@ -673,7 +682,7 @@ export default function CategoryFeeSchedulesPage() {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full rounded-r-[5px] border border-l-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
         </div>
