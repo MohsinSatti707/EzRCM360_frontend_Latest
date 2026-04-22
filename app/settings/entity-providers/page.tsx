@@ -343,7 +343,20 @@ export default function EntityProvidersPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      <PageHeader title="Entity Providers" description="Manage entity providers." />
+      <PageHeader
+        title="Entity Providers"
+        description="Manage entity providers."
+        actions={
+          canCreate ? (
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
+            >
+              Add New Provider <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
@@ -368,28 +381,38 @@ export default function EntityProvidersPage() {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
-          <select
-            value={providerTypeFilter}
-            onChange={(e) => { setProviderTypeFilter(e.target.value); setPage(1); }}
-            className="h-10 w-[110px] rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">All</option>
-            <option value="0">Physician</option>
-            <option value="1">Non-Physician</option>
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="h-10 w-[90px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
         </div>
+
+        <select
+          value={providerTypeFilter}
+          onChange={(e) => { setProviderTypeFilter(e.target.value); setPage(1); }}
+          className="h-10 min-w-[190px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">Filter by Provider Type</option>
+          <option value="0">Physician</option>
+          <option value="1">Non-Physician</option>
+        </select>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="h-10 min-w-[160px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">Filter by Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        <button
+          type="button"
+          onClick={() => { setProviderTypeFilter("all"); setStatusFilter("all"); setSearchTerm(""); setSearchField("all"); setPage(1); }}
+          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
+        >
+          Clear
+        </button>
 
         {canDelete && selectedIds.size > 0 && (
           <Button
@@ -397,14 +420,6 @@ export default function EntityProvidersPage() {
             className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
           >
             <Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})
-          </Button>
-        )}
-        {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
-          >
-            Add New Provider <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         )}
       </div>
