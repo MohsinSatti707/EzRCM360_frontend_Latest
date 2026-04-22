@@ -31,6 +31,7 @@ import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedConte
 import type { FacilityListItemDto, CreateFacilityRequest, UpdateFacilityRequest } from "@/lib/services/facilities";
 import type { EntityLookupDto } from "@/lib/services/lookups";
 import { CellTooltip } from "@/components/ui/CellTooltip";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/Select";
 
 const MODULE_NAME = "Facilities";
 const ACTIVE_OPTIONS = [
@@ -276,17 +277,18 @@ export default function FacilitiesPage() {
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
         <div className="flex flex-1 items-center">
-          <select
-            value={searchBy}
-            onChange={(e) => setSearchBy(e.target.value)}
-            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">All</option>
-            <option value="facilityName">Facility Name</option>
-            <option value="facilityType">Facility Type</option>
-            <option value="physicalAddress">Physical Address</option>
-            <option value="linkedEntity">Linked Entity</option>
-          </select>
+          <Select value={searchBy} onValueChange={setSearchBy}>
+            <SelectTrigger className="h-10 w-[110px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background font-aileron text-[14px] text-[#202830] focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="facilityName">Facility Name</SelectItem>
+              <SelectItem value="facilityType">Facility Type</SelectItem>
+              <SelectItem value="physicalAddress">Physical Address</SelectItem>
+              <SelectItem value="linkedEntity">Linked Entity</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input

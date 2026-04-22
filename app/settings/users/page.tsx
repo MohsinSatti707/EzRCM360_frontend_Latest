@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/Table";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { CellTooltip } from "@/components/ui/CellTooltip";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/Select";
 import { TooltipProvider } from "@/components/ui/Tooltip";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { Checkbox } from "@/components/ui/Checkbox";
@@ -549,17 +550,18 @@ export default function UsersPage() {
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
         <div className="flex flex-1 items-center">
-          <select
-            value={searchField}
-            onChange={(e) => setSearchField(e.target.value)}
-            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">All</option>
-            <option value="userName">User Name</option>
-            <option value="email">Email</option>
-            <option value="roleName">Role Assignment</option>
-            <option value="moduleAccess">Module Access</option>
-          </select>
+          <Select value={searchField} onValueChange={setSearchField}>
+            <SelectTrigger className="h-10 w-[110px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background font-aileron text-[14px] text-[#202830] focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="userName">User Name</SelectItem>
+              <SelectItem value="email">Email</SelectItem>
+              <SelectItem value="roleName">Role Assignment</SelectItem>
+              <SelectItem value="moduleAccess">Module Access</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input

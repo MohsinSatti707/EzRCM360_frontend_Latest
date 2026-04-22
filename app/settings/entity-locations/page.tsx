@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search, ArrowRight, Trash2, Play } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import {
@@ -306,17 +307,18 @@ export default function EntityLocationsPage() {
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
         <div className="flex flex-1 items-center">
-          <select
-            value={searchField}
-            onChange={(e) => setSearchField(e.target.value)}
-            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">All</option>
-            <option value="locationName">Location Name</option>
-            <option value="locationType">Location Type</option>
-            <option value="physicalAddress">Physical Address</option>
-            <option value="entity">Linked Entity</option>
-          </select>
+          <Select value={searchField} onValueChange={setSearchField}>
+            <SelectTrigger className="h-10 w-[110px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background font-aileron text-[14px] text-[#202830] focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="locationName">Location Name</SelectItem>
+              <SelectItem value="locationType">Location Type</SelectItem>
+              <SelectItem value="physicalAddress">Physical Address</SelectItem>
+              <SelectItem value="entity">Linked Entity</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input

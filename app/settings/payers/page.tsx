@@ -18,6 +18,7 @@ import {
 import { Pagination } from "@/components/ui/Pagination";
 import { TableActionsCell } from "@/components/ui/TableActionsCell";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/Select";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Loader } from "@/components/ui/Loader";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
@@ -404,17 +405,18 @@ export default function PayersPage() {
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
         <div className="flex flex-1 items-center">
-          <select
-            value={searchField}
-            onChange={(e) => setSearchField(e.target.value)}
-            className="h-10 w-[115px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">All Status</option>
-            <option value="payerName">Payer Name</option>
-            <option value="payerAliases">Payer Aliases</option>
-            <option value="payerEntityType">Payer Entity Type</option>
-            <option value="status">Status</option>
-          </select>
+          <Select value={searchField} onValueChange={setSearchField}>
+            <SelectTrigger className="h-10 w-[115px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background font-aileron text-[14px] text-[#202830] focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="payerName">Payer Name</SelectItem>
+              <SelectItem value="payerAliases">Payer Aliases</SelectItem>
+              <SelectItem value="payerEntityType">Payer Entity Type</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input

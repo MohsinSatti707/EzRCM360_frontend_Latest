@@ -23,6 +23,7 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { Loader } from "@/components/ui/Loader";
 import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/Select";
 import { feeSchedulesApi } from "@/lib/services/feeSchedules";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useDebounce } from "@/lib/hooks/useDebounce";
@@ -666,19 +667,20 @@ export default function CategoryFeeSchedulesPage() {
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
         <div className="flex flex-1 items-center">
-          <select
-            value={searchBy}
-            onChange={(e) => setSearchBy(e.target.value)}
-            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">All</option>
-            <option value="scheduleId">Fee Schedule ID</option>
-            <option value="state">State</option>
-            <option value="geoType">Geography Type</option>
-            <option value="geoCode">Geography Code</option>
-            {categorySlug === "medicare" && <option value="geoName">Geography Name</option>}
-            <option value="billingType">Billing Type</option>
-          </select>
+          <Select value={searchBy} onValueChange={setSearchBy}>
+            <SelectTrigger className="h-10 w-[110px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background font-aileron text-[14px] text-[#202830] focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="scheduleId">Fee Schedule ID</SelectItem>
+              <SelectItem value="state">State</SelectItem>
+              <SelectItem value="geoType">Geography Type</SelectItem>
+              <SelectItem value="geoCode">Geography Code</SelectItem>
+              {categorySlug === "medicare" && <SelectItem value="geoName">Geography Name</SelectItem>}
+              <SelectItem value="billingType">Billing Type</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
