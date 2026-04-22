@@ -5,9 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search, ArrowRight, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { PageHeader } from "@/components/settings/PageHeader";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import {
@@ -237,7 +234,6 @@ export default function FacilitiesPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
-        <PageHeader title="Facility Configuration" description="Independent service locations." />
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -247,34 +243,50 @@ export default function FacilitiesPage() {
 
   if (!canView) {
     return (
-      <div>
-        <PageHeader title="Facility Configuration" description="Independent service locations." />
-        <Card>
-          <AccessRestrictedContent sectionName="Facility Configuration" />
-        </Card>
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <AccessRestrictedContent sectionName="Facility Configuration" />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      <PageHeader title="Facility Configuration" description="Independent service locations." />
+      {/* Breadcrumb */}
+      <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <Link href="/settings" className="transition-colors hover:text-foreground">Settings &amp; Configurations</Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground">Facility Configuration</span>
+      </nav>
 
-      {/* Toolbar: search + add button */}
-      <div className="mb-3 flex items-center justify-between gap-3">
+      {/* Title row */}
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">Facility Configuration</h1>
+        <div className="flex items-center gap-3">
+          {canCreate && (
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+            >
+              Add Facility <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Toolbar */}
+      <div className="mb-3 flex items-center gap-3">
         <div className="flex flex-1 items-center">
-          <Select value={searchBy} onValueChange={setSearchBy}>
-            <SelectTrigger className="w-[70px] h-10 border-[#E2E8F0] border-r-0 rounded-l-[5px] rounded-r-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="facilityName">Facility Name</SelectItem>
-              <SelectItem value="facilityType">Facility Type</SelectItem>
-              <SelectItem value="physicalAddress">Physical Address</SelectItem>
-              <SelectItem value="linkedEntity">Linked Entity</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            value={searchBy}
+            onChange={(e) => setSearchBy(e.target.value)}
+            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="facilityName">Facility Name</option>
+            <option value="facilityType">Facility Type</option>
+            <option value="physicalAddress">Physical Address</option>
+            <option value="linkedEntity">Linked Entity</option>
+          </select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
             <input
@@ -285,35 +297,33 @@ export default function FacilitiesPage() {
               className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[70px] h-10 border-[#E2E8F0] rounded-r-[5px] rounded-l-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            className="h-10 min-w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">Filter by Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
-        <div className="flex items-center gap-3">
-          {canDelete && selectedIds.size > 0 && (
-            <Button
-              onClick={() => setBulkDeleteConfirm(true)}
-              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
-            >
-              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
-            </Button>
-          )}
-          {canCreate && (
-            <Button
-              onClick={openCreate}
-              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-            >
-              <>Add Facility <ArrowRight className="ml-1 h-4 w-4" /></>
-            </Button>
-          )}
-        </div>
+
+        <button
+          type="button"
+          onClick={() => { setSearchBy("all"); setSearchTerm(""); setStatusFilter("all"); setPage(1); }}
+          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
+        >
+          Clear
+        </button>
+
+        {canDelete && selectedIds.size > 0 && (
+          <Button
+            onClick={() => setBulkDeleteConfirm(true)}
+            className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+          >
+            <Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})
+          </Button>
+        )}
       </div>
 
       {error && (

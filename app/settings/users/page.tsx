@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Search, ArrowRight, Play, ChevronDown, Trash2 } from "lucide-react";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Pagination } from "@/components/ui/Pagination";
 import {
@@ -27,8 +27,7 @@ import { usersApi } from "@/lib/services/users";
 import { lookupsApi } from "@/lib/services/lookups";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
-import { AccessDenied } from "@/components/auth/AccessDenied";
-import { PageShell } from "@/components/layout/PageShell";
+import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
 import type { UserListItemDto, CreateUserRequest, UpdateUserRequest } from "@/lib/services/users";
 import { USER_STATUS_NAMES } from "@/lib/services/users";
 import type { LookupDto, ModuleLookupDto, ValueLabelDto } from "@/lib/services/lookups";
@@ -509,84 +508,94 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <PageShell title="Users Access">
+      <div className="flex min-h-0 flex-1 flex-col px-6">
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
-      </PageShell>
+      </div>
     );
   }
   if (!canView) {
-    return <AccessDenied moduleName="Users Access" />;
+    return (
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <AccessRestrictedContent sectionName="Users Access" />
+      </div>
+    );
   }
 
   return (
-    <PageShell
-      breadcrumbs={[{ label: "Settings & Configurations", href: "/settings" }, { label: "Users Access" }]}
-      title="Users Access"
-      description="Manage user accounts, roles, and module access."
-      className="flex min-h-0 flex-1 flex-col overflow-hidden"
-      titleWrapperClassName="px-6"
-    >
-      <TooltipProvider delayDuration={300} skipDelayDuration={0}>
-      {/* Toolbar: filters + search + add button */}
-      <div className="mb-3 flex items-center gap-3 mx-6 mt-3">
-        {/* Left: Search field selector */}
-        <select
-          value={searchField}
-          onChange={(e) => setSearchField(e.target.value)}
-          className="h-10 min-w-[140px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">All</option>
-          <option value="userName">User Name</option>
-          <option value="email">Email</option>
-          <option value="roleName">Role Assignment</option>
-          <option value="moduleAccess">Module Access</option>
-        </select>
+    <div className="flex min-h-0 flex-1 flex-col px-6">
+      {/* Breadcrumb */}
+      <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <Link href="/settings" className="transition-colors hover:text-foreground">Settings &amp; Configurations</Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground">Users Access</span>
+      </nav>
 
-        {/* Middle: Search bar */}
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-          <input
-            type="text"
-            placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full min-w-0 rounded-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus-visible:outline-none focus-visible:ring-0"
-          />
+      {/* Title row */}
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">Users Access</h1>
+        {canCreate && (
+          <Button
+            onClick={openCreate}
+            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
+          >
+            Add New User <ArrowRight className="ml-1 h-4 w-4 shrink-0" aria-hidden />
+          </Button>
+        )}
+      </div>
+
+      <TooltipProvider delayDuration={300} skipDelayDuration={0}>
+      {/* Toolbar */}
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex flex-1 items-center">
+          <select
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value)}
+            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="userName">User Name</option>
+            <option value="email">Email</option>
+            <option value="roleName">Role Assignment</option>
+            <option value="moduleAccess">Module Access</option>
+          </select>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 min-w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="">Filter by Status</option>
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value} value={String(o.value)}>{o.name}</option>
+            ))}
+          </select>
         </div>
 
-        {/* Right: Status filter + bulk delete + add button */}
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 min-w-[120px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        <button
+          type="button"
+          onClick={() => { setSearchField("all"); setSearch(""); setStatusFilter(""); setPage(1); }}
+          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
         >
-          {[
-            { value: "", name: "All Status" },
-            ...STATUS_OPTIONS,
-          ].map((o) => (
-            <option key={o.value === "" ? "_all" : o.value} value={o.value === "" ? "" : String(o.value)}>
-              {o.name}
-            </option>
-          ))}
-        </select>
+          Clear
+        </button>
 
         {canDelete && selectedIds.size > 0 && (
           <Button
             onClick={() => setBulkDeleteConfirm(true)}
             className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
           >
-            <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
-          </Button>
-        )}
-        {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
-          >
-            Add New User
-            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+            <Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})
           </Button>
         )}
       </div>
@@ -610,8 +619,8 @@ export default function UsersPage() {
         </div>
       )}
       {data && data.items.length > 0 && (
-        <div className="flex flex-1 flex-col min-h-0 mx-6">
-        <div className="max-h-[calc(100vh-341px)] flex-1 min-h-0 overflow-x-auto overflow-y-auto rounded-[5px]">
+        <div className="flex flex-1 flex-col min-h-0">
+        <div className="max-h-[calc(100vh-316px)] flex-1 min-h-0 overflow-x-auto overflow-y-auto rounded-[5px]">
           <Table className="min-w-[1500px]">
               <TableHead className="sticky top-0 z-20">
                 <TableRow >
@@ -903,6 +912,6 @@ export default function UsersPage() {
       />
       <OverlayLoader visible={overlayLoading} />
       </TooltipProvider>
-    </PageShell>
+    </div>
   );
 }

@@ -5,8 +5,6 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, ArrowRight, Trash2 } from "lucide-react";
-import { PageHeader } from "@/components/settings/PageHeader";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import {
@@ -366,7 +364,6 @@ export default function PayersPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
-        <PageHeader title="Payer Configuration" description="Centralized payer registry." />
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -376,20 +373,35 @@ export default function PayersPage() {
 
   if (!canView) {
     return (
-      <div>
-        <PageHeader title="Payer Configuration" description="Centralized payer registry." />
-        <Card>
-          <AccessRestrictedContent sectionName="Payer Configuration" />
-        </Card>
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <AccessRestrictedContent sectionName="Payer Configuration" />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      <PageHeader title="Payer Configuration" description="Centralized payer registry." />
+      {/* Breadcrumb */}
+      <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <Link href="/settings" className="transition-colors hover:text-foreground">Settings &amp; Configurations</Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground">Payers Configurations</span>
+      </nav>
 
-      {/* Toolbar: search field selector + search + add button */}
+      {/* Title row */}
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">Payers Configurations</h1>
+        {canCreate && (
+          <Button
+            onClick={openCreate}
+            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
+          >
+            Add New Payer <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
         <div className="flex flex-1 items-center">
           <select
@@ -410,24 +422,34 @@ export default function PayersPage() {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-l-none rounded-r-[5px] border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            className="h-10 min-w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">Filter by Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
+
+        <button
+          type="button"
+          onClick={() => { setStatusFilter("all"); setSearchTerm(""); setSearchField("all"); setPage(1); }}
+          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
+        >
+          Clear
+        </button>
+
         {canDelete && selectedIds.size > 0 && (
           <Button
             onClick={() => setBulkDeleteConfirm(true)}
             className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
           >
-            <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
-          </Button>
-        )}
-        {canCreate && (
-          <Button
-            onClick={openCreate}
-            className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
-          >
-            <>Add New Payer <ArrowRight className="ml-1 h-4 w-4" /></>
+            <Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})
           </Button>
         )}
       </div>
@@ -508,7 +530,7 @@ export default function PayersPage() {
                         value={typeof row.status === "string" ? (row.status === "Active" ? "1" : "0") : String(row.status ?? 0)}
                         onChange={(e) => handleStatusChange(row, Number(e.target.value))}
                         disabled={!canUpdate || statusUpdatingId === row.id}
-                        className="input-enterprise w-[140px] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                        className="h-9 w-[130px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                       >
                         {STATUS_OPTIONS.map((o) => (
                           <option key={o.value} value={o.value}>

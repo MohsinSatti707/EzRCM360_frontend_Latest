@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Search, ArrowRight, Trash2 } from "lucide-react";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
-import { PageHeader } from "@/components/settings/PageHeader";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
   Table,
@@ -309,7 +307,6 @@ export default function RenderingParticipationPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
-        <PageHeader title="Provider-Plan Participation" description="Network participation status." />
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -319,75 +316,25 @@ export default function RenderingParticipationPage() {
 
   if (!canView) {
     return (
-      <div>
-        <PageHeader title="Provider-Plan Participation" description="Network participation status." />
-        <Card>
-          <AccessRestrictedContent sectionName="Rendering Participation" />
-        </Card>
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <AccessRestrictedContent sectionName="Rendering Participation" />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      <PageHeader title="Provider-Plan Participation" description="Network participation status." />
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex flex-1 items-center">
-          <Select value={searchBy} onValueChange={setSearchBy}>
-            <SelectTrigger className="w-[70px] h-10 border-[#E2E8F0] border-r-0 rounded-l-[5px] rounded-r-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="provider">Provider</SelectItem>
-              <SelectItem value="plan">Plan</SelectItem>
-              <SelectItem value="participationStatus">Participation Status</SelectItem>
-              <SelectItem value="source">Source</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-none border border-[#E2E8F0] border-r-0 bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-            />
-          </div>
-          <Select value={participationStatusFilter} onValueChange={setParticipationStatusFilter}>
-            <SelectTrigger className="w-[120px] h-10 border-[#E2E8F0] border-r-0 rounded-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All</SelectItem>
-              {participationStatuses.map((s) => (
-                <SelectItem key={s.value} value={String(s.value)}>
-                  {s.label.replace(/\s*\/\s*Not Verified/i, "")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[120px] h-10 border-[#E2E8F0] rounded-r-[5px] rounded-l-none font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-              <SelectValue placeholder="All (Status)" />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="all">All (Status)</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Breadcrumb */}
+      <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <Link href="/settings" className="transition-colors hover:text-foreground">Settings &amp; Configurations</Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground">Provider-Plan Participation</span>
+      </nav>
+
+      {/* Title row */}
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">Provider-Plan Participation</h1>
         <div className="flex items-center gap-3">
-          {canDelete && selectedIds.size > 0 && (
-            <Button
-              onClick={() => setBulkDeleteConfirm(true)}
-              className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
-            >
-              <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
-            </Button>
-          )}
           {canCreate && (
             <BulkImportActions
               apiBase="/api/RenderingProviderPlanParticipations"
@@ -401,10 +348,78 @@ export default function RenderingParticipationPage() {
               onClick={openCreate}
               className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
             >
-              <>Add Rendering Participation <ArrowRight className="ml-1 h-4 w-4" /></>
+              Add Provider-Plan <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           )}
         </div>
+      </div>
+
+      {/* Toolbar */}
+      <div className="mb-3 flex items-center gap-3">
+        {/* Search group — stretches */}
+        <div className="flex flex-1 items-center">
+          <select
+            value={searchBy}
+            onChange={(e) => setSearchBy(e.target.value)}
+            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="provider">Provider</option>
+            <option value="plan">Plan</option>
+            <option value="participationStatus">Participation Status</option>
+            <option value="source">Source</option>
+          </select>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-10 w-full rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+            />
+          </div>
+        </div>
+
+        {/* Standalone filter dropdowns */}
+        <select
+          value={participationStatusFilter}
+          onChange={(e) => { setParticipationStatusFilter(e.target.value); setPage(1); }}
+          className="h-10 min-w-[210px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">Filter by Participation Status</option>
+          {participationStatuses.map((s) => (
+            <option key={s.value} value={String(s.value)}>
+              {s.label.replace(/\s*\/\s*Not Verified/i, "")}
+            </option>
+          ))}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="h-10 min-w-[160px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">Filter by Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        <button
+          type="button"
+          onClick={() => { setSearchBy("all"); setSearchTerm(""); setParticipationStatusFilter("all"); setStatusFilter("all"); setPage(1); }}
+          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
+        >
+          Clear
+        </button>
+
+        {canDelete && selectedIds.size > 0 && (
+          <Button
+            onClick={() => setBulkDeleteConfirm(true)}
+            className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+          >
+            <Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})
+          </Button>
+        )}
       </div>
 
       {error && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}

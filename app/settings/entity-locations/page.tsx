@@ -28,8 +28,6 @@ import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { useModulePermission } from "@/lib/contexts/PermissionsContext";
 import { AccessRestrictedContent } from "@/components/auth/AccessRestrictedContent";
-import { PageHeader } from "@/components/settings/PageHeader";
-import { Card } from "@/components/ui/Card";
 import type {
   EntityLocationListItemDto,
   CreateEntityLocationRequest,
@@ -271,7 +269,6 @@ export default function EntityLocationsPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
-        <PageHeader title="Entity Locations" description="Manage entity locations." />
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -281,16 +278,30 @@ export default function EntityLocationsPage() {
 
   if (!canView) {
     return (
-      <div>
-        <PageHeader title="Entity Locations" description="Manage entity locations." />
-        <Card><AccessRestrictedContent sectionName="Entity Locations" /></Card>
+      <div className="flex min-h-0 flex-1 flex-col px-6">
+        <AccessRestrictedContent sectionName="Entity Locations" />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      <PageHeader title="Entity Locations" description="Manage entity locations." />
+      {/* Breadcrumb */}
+      <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <Link href="/settings" className="transition-colors hover:text-foreground">Settings &amp; Configurations</Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground">Entity Locations</span>
+      </nav>
+
+      {/* Title row */}
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">Entity Locations</h1>
+        {canCreate && (
+          <Button onClick={openCreate} className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap">
+            Add New Location <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        )}
+      </div>
 
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
@@ -319,22 +330,25 @@ export default function EntityLocationsPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="h-10 w-[90px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+            className="h-10 min-w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
           >
-            <option value="all">All</option>
+            <option value="all">Filter by Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
         </div>
 
+        <button
+          type="button"
+          onClick={() => { setStatusFilter("all"); setSearchTerm(""); setSearchField("all"); setPage(1); }}
+          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
+        >
+          Clear
+        </button>
+
         {canDelete && selectedIds.size > 0 && (
           <Button onClick={() => setBulkDeleteConfirm(true)} className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]">
-            <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
-          </Button>
-        )}
-        {canCreate && (
-          <Button onClick={openCreate} className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap">
-            <>Add New Location <ArrowRight className="ml-1 h-4 w-4" /></>
+            <Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})
           </Button>
         )}
       </div>
