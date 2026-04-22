@@ -301,7 +301,20 @@ export default function EntitiesPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      <PageHeader title="Entity Information" description="Define entity identity and structure." />
+      <PageHeader
+        title="Entity Information"
+        description="Define entity identity and structure."
+        actions={
+          canCreate ? (
+            <Button
+              onClick={openCreate}
+              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
+            >
+              Add New Entity <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
@@ -309,7 +322,7 @@ export default function EntitiesPage() {
           <select
             value={searchField}
             onChange={(e) => setSearchField(e.target.value)}
-            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+            className="h-10 w-[90px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-2 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
           >
             <option value="all">All</option>
             <option value="legalName">Entity Legal Name</option>
@@ -324,43 +337,36 @@ export default function EntitiesPage() {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 w-[90px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
         </div>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="h-10 min-w-[160px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+        >
+          <option value="all">Filter by Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        <button
+          type="button"
+          onClick={() => { setStatusFilter("all"); setSearchTerm(""); setSearchField("all"); setPage(1); }}
+          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
+        >
+          Clear
+        </button>
 
         {canDelete && selectedIds.size > 0 && (
           <Button
             onClick={() => setBulkDeleteConfirm(true)}
             className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
           >
-            <><Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})</>
+            <Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})
           </Button>
-        )}
-        {canCreate && (
-          <>
-            {/* <BulkImportActions
-              apiBase="/api/Entities"
-              templateFileName="Entities_Import_Template.xlsx"
-              onImportSuccess={reload}
-              onLoadingChange={setOverlayLoading}
-            /> */}
-            <Button
-              onClick={openCreate}
-              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px] whitespace-nowrap"
-            >
-              <>Add New Entity <ArrowRight className="ml-1 h-4 w-4" /></>
-            </Button>
-          </>
         )}
       </div>
 

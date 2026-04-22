@@ -132,6 +132,8 @@ export default function CategoryFeeSchedulesPage() {
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchBy, setSearchBy] = useState("all");
+  const [yearFilter, setYearFilter] = useState<string>("all");
+  const [searchField, setSearchField] = useState<string>("all");
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [zipRangeMode, setZipRangeMode] = useState<"single" | "dual">("single");
@@ -191,9 +193,11 @@ export default function CategoryFeeSchedulesPage() {
       pageSize,
       category: categoryValue,
       status: statusFilter === "all" ? undefined : Number(statusFilter),
+      year: yearFilter === "all" ? undefined : Number(yearFilter),
       search: debouncedSearch || undefined,
+      searchField: debouncedSearch && searchField !== "all" ? searchField : undefined,
     }).then(setData).catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
-  }, [page, pageSize, statusFilter, categoryValue, debouncedSearch]);
+  }, [page, pageSize, statusFilter, yearFilter, searchField, categoryValue, debouncedSearch]);
 
   const handleStatusChange = async (row: FeeScheduleDto, statusValue: number) => {
     if (!canUpdate) return;
@@ -672,6 +676,8 @@ export default function CategoryFeeSchedulesPage() {
             <option value="state">State</option>
             <option value="geoType">Geography Type</option>
             <option value="geoCode">Geography Code</option>
+            {categorySlug === "medicare" && <option value="geoName">Geography Name</option>}
+            <option value="billingType">Billing Type</option>
           </select>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />

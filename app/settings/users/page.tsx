@@ -710,7 +710,7 @@ export default function UsersPage() {
                         value={toStatusNumber(row.status)}
                         onChange={(e) => handleStatusChange(row, Number(e.target.value))}
                         disabled={!canUpdate || statusUpdatingId === row.id}
-                        className="input-enterprise w-auto min-w-[7rem] rounded-l-[5px] rounded-r-0 px-2 py-1.5 text-sm disabled:opacity-50"
+                        className="h-9 w-[130px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] disabled:opacity-50 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                       >
                         {STATUS_OPTIONS.map((o) => (
                           <option key={o.value} value={o.value}>

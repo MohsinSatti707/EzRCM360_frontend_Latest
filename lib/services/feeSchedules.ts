@@ -113,6 +113,7 @@ export function feeSchedulesApi() {
       status?: number;
       year?: number;
       search?: string;
+      searchField?: string;
       pageNumber?: number;
       pageSize?: number;
     }) => {
@@ -122,6 +123,7 @@ export function feeSchedulesApi() {
       if (params?.status != null) q.set("status", String(params.status));
       if (params?.year != null) q.set("year", String(params.year));
       if (params?.search) q.set("search", params.search);
+      if (params?.search && params?.searchField) q.set("searchField", params.searchField);
       if (params?.pageNumber != null) q.set("pageNumber", String(params.pageNumber));
       if (params?.pageSize != null) q.set("pageSize", String(params.pageSize));
       return apiRequest<PaginatedList<FeeScheduleDto>>(`/api/FeeSchedules?${q}`);
