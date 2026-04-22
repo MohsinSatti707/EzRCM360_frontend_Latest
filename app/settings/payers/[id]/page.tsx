@@ -149,7 +149,7 @@ export default function PayerDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [id, toast]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchPayer();
@@ -292,7 +292,7 @@ export default function PayerDetailPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
       {/* Breadcrumb */}
-      <div className="mb-5">
+      <div className="">
         <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           <Link href="/settings" className="transition-colors hover:text-foreground">
             Settings &amp; Configurations
@@ -371,7 +371,8 @@ export default function PayerDetailPage() {
         </div>
       </Card>
 
-      {/* General Information */}
+   <div className="h-[calc(100vh-350px)] overflow-auto">
+          {/* General Information */}
       <Card className="mb-6 p-6">
         <div className="mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-[#64748B]" />
@@ -481,6 +482,7 @@ export default function PayerDetailPage() {
             </div>
           )}
         </Card>
+   </div>
 
       {/* Contact info — only for non-insurance payers */}
       {!isInsurance && (

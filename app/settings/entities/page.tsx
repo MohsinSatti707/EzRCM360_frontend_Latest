@@ -405,20 +405,12 @@ export default function EntitiesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  {[
-                    { key: "legalName", label: "Entity Legal Name", width: "w-[220px] min-w-[220px]" },
-                    { key: "displayName", label: "Entity Display Name", width: "w-[200px] min-w-[200px]" },
-                    { key: "groupNpi", label: "Entity Group NPI", width: "w-[160px] min-w-[160px]" },
-                    { key: "taxId", label: "Entity Tax ID", width: "w-[160px] min-w-[160px]" },
-                  ].map(({ key, label, width }) => (
-                    <TableHeaderCell key={key} className={width}>
-                      <div className="flex items-center gap-2">
-                        {label}
-                        <SortArrows columnKey={key} sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
-                      </div>
-                    </TableHeaderCell>
-                  ))}
-                  <TableHeaderCell className="w-[160px] min-w-[160px]">Entity Status</TableHeaderCell>
+                  <TableHeaderCell className="w-[220px] min-w-[220px]">Entity Legal Name</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Entity Display Name</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Organization</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Group NPI</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Tax ID</TableHeaderCell>
+                  <TableHeaderCell className="w-[190px] min-w-[190px]">Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[100px] min-w-[100px]">Actions</TableHeaderCell>
                   )}
@@ -440,15 +432,14 @@ export default function EntitiesPage() {
                       </TableCell>
                     )}
                     <TableCell>
-                      <Link
-                        href={`/settings/entities/${row.id}`}
-                        className="font-aileron text-[14px] font-medium text-[#0066CC] hover:underline cursor-pointer"
-                      >
-                        {row.legalName}
-                      </Link>
+                      <div className="max-w-xs truncate">
+                        <CellTooltip text={row.legalName} />
+                      </div>
                     </TableCell>
                     <TableCell className={cellColor}>
-                      <CellTooltip text={row.displayName} />
+                      <div className="max-w-xs truncate">
+                        <CellTooltip text={row.displayName} />
+                      </div>
                     </TableCell>
                     <TableCell className={cellColor}>
                       <CellTooltip text={row.groupNpi} />

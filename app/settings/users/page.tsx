@@ -595,7 +595,7 @@ export default function UsersPage() {
         {canDelete && selectedIds.size > 0 && (
           <Button
             onClick={() => setBulkDeleteConfirm(true)}
-            className="h-10 rounded-[5px] px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
+            className="h-10 rounded-[5px] ml-3 px-[18px] bg-[#EF4444] hover:bg-[#EF4444]/90 text-white font-aileron text-[14px]"
           >
             <Trash2 className="mr-1 h-4 w-4" /> Delete ({selectedIds.size})
           </Button>
