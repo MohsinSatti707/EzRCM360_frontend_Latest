@@ -405,12 +405,16 @@ export default function EntitiesPage() {
                       />
                     </TableHeaderCell>
                   )}
-                  <TableHeaderCell className="w-[220px] min-w-[220px]">Entity Legal Name</TableHeaderCell>
+                  <TableHeaderCell className="w-[240px] min-w-[240px]">
+                    <div className="flex items-center gap-2">
+                      Entity Legal Name
+                      <SortArrows columnKey="legalName" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
+                    </div>
+                  </TableHeaderCell>
                   <TableHeaderCell className="w-[200px] min-w-[200px]">Entity Display Name</TableHeaderCell>
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Organization</TableHeaderCell>
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Group NPI</TableHeaderCell>
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Tax ID</TableHeaderCell>
-                  <TableHeaderCell className="w-[190px] min-w-[190px]">Status</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">Entity Group NPI</TableHeaderCell>
+                  <TableHeaderCell className="w-[180px] min-w-[180px]">Entity Tax ID</TableHeaderCell>
+                  <TableHeaderCell className="w-[180px] min-w-[180px]">Entity Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[100px] min-w-[100px]">Actions</TableHeaderCell>
                   )}
@@ -431,7 +435,7 @@ export default function EntitiesPage() {
                         />
                       </TableCell>
                     )}
-                    <TableCell>
+                    <TableCell className={cellColor}>
                       <div className="max-w-xs truncate">
                         <CellTooltip text={row.legalName} />
                       </div>
