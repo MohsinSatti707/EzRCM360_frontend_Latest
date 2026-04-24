@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowRight, MapPin, Building2, X } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, User, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Loader } from "@/components/ui/Loader";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
@@ -178,11 +179,11 @@ export default function EntityLocationDetailPage() {
               <h2 className="font-aileron text-[20px] font-bold leading-tight text-[#202830]">{location.locationName}</h2>
               <div className="mt-1 flex items-center gap-4">
                 <div className="flex items-center gap-1.5 text-[13px] text-[#64748B] font-aileron">
-                  <MapPin className="h-4 w-4" />
+                  <User className="h-4 w-4" />
                   <span>{location.locationType || "-"}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[13px] text-[#64748B] font-aileron">
-                  <Building2 className="h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                   <span>{entityName}</span>
                 </div>
               </div>
@@ -203,7 +204,7 @@ export default function EntityLocationDetailPage() {
       {/* General Information */}
       <div className="mb-6">
         <div className="mb-4 flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-[#64748B]" />
+          <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
           <h2 className="font-aileron text-[16px] font-bold text-[#202830]">General Information</h2>
         </div>
         <div className="grid grid-cols-3 gap-x-8 gap-y-6">

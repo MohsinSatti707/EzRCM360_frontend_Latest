@@ -15,9 +15,9 @@ export function PageHeader({
   actions,
 }: PageHeaderProps) {
   return (
-    <div className="mb-5">
+    <div className="mb-3">
       {/* Breadcrumb bar - P2 pattern */}
-      <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <nav className="-mx-6 mb-3 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         <Link href={backHref} className="transition-colors hover:text-foreground">
           Settings &amp; Configurations
         </Link>

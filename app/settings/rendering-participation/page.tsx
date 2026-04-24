@@ -28,6 +28,8 @@ import { Loader } from "@/components/ui/Loader";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { CellTooltip } from "@/components/ui/CellTooltip";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/Select";
+import { PageHeader } from "@/components/settings/PageHeader";
+import { Card } from "@/components/ui/Card";
 import type {
   RenderingProviderPlanParticipationListItemDto,
   CreateRenderingProviderPlanParticipationRequest,
@@ -308,6 +310,7 @@ export default function RenderingParticipationPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
+        <PageHeader title="Provider-Plan Participation" />
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -317,47 +320,41 @@ export default function RenderingParticipationPage() {
 
   if (!canView) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col px-6">
-        <AccessRestrictedContent sectionName="Rendering Participation" />
+      <div>
+        <PageHeader title="Provider-Plan Participation" />
+        <Card>
+          <AccessRestrictedContent sectionName="Rendering Participation" />
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6">
-      {/* Breadcrumb */}
-      <nav className="-mx-6 mb-4 flex items-center gap-2 bg-[#F7F8F9] px-6 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        <Link href="/settings" className="transition-colors hover:text-foreground">Settings &amp; Configurations</Link>
-        <span aria-hidden>/</span>
-        <span className="text-foreground">Provider-Plan Participation</span>
-      </nav>
-
-      {/* Title row */}
-      <div className="mb-5 flex items-center justify-between">
-        <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">Provider-Plan Participation</h1>
-        <div className="flex items-center gap-3">
-          {canCreate && (
-            <BulkImportActions
-              apiBase="/api/RenderingProviderPlanParticipations"
-              templateFileName="RenderingParticipation_Import_Template.xlsx"
-              onImportSuccess={loadList}
-              onLoadingChange={setOverlayLoading}
-            />
-          )}
-          {canCreate && (
-            <Button
-              onClick={openCreate}
-              className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
-            >
-              Add Provider-Plan <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Provider-Plan Participation"
+        actions={
+          canCreate ? (
+            <div className="flex items-center gap-3">
+              <BulkImportActions
+                apiBase="/api/RenderingProviderPlanParticipations"
+                templateFileName="RenderingParticipation_Import_Template.xlsx"
+                onImportSuccess={loadList}
+                onLoadingChange={setOverlayLoading}
+              />
+              <Button
+                onClick={openCreate}
+                className="h-10 rounded-[5px] px-[18px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
+              >
+                Add Provider-Plan <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          ) : undefined
+        }
+      />
 
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
-        {/* Search group — stretches */}
         <div className="flex flex-1 items-center">
           <Select value={searchBy} onValueChange={setSearchBy}>
             <SelectTrigger className="h-10 w-[110px] rounded-l-[5px] rounded-r-none border border-r-0 border-[#E2E8F0] bg-background font-aileron text-[14px] text-[#202830] focus:ring-0 focus:ring-offset-0">
@@ -378,33 +375,31 @@ export default function RenderingParticipationPage() {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
+          <select
+            value={participationStatusFilter}
+            onChange={(e) => { setParticipationStatusFilter(e.target.value); setPage(1); }}
+            className="h-10 min-w-[210px] rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">Filter by Participation Status</option>
+            {participationStatuses.map((s) => (
+              <option key={s.value} value={String(s.value)}>
+                {s.label.replace(/\s*\/\s*Not Verified/i, "")}
+              </option>
+            ))}
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            className="h-10 min-w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">Filter by Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
-
-        {/* Standalone filter dropdowns */}
-        <select
-          value={participationStatusFilter}
-          onChange={(e) => { setParticipationStatusFilter(e.target.value); setPage(1); }}
-          className="h-10 min-w-[210px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">Filter by Participation Status</option>
-          {participationStatuses.map((s) => (
-            <option key={s.value} value={String(s.value)}>
-              {s.label.replace(/\s*\/\s*Not Verified/i, "")}
-            </option>
-          ))}
-        </select>
-        <select
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="h-10 min-w-[160px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">Filter by Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
 
         <button
           type="button"
@@ -478,7 +473,9 @@ export default function RenderingParticipationPage() {
                     )}
                     <TableCell className="w-[200px] min-w-[200px]">
                       <div className="max-w-xs truncate">
-                        <CellTooltip text={row.providerName ?? providerNameById.get(row.entityProviderId) ?? "—"} />
+                        <Link href={`/settings/rendering-participation/${row.id}`} className="font-aileron text-[14px] font-medium text-[#0066CC] hover:underline">
+                          <CellTooltip text={row.providerName ?? providerNameById.get(row.entityProviderId) ?? "—"} />
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell className="w-[200px] min-w-[200px]">

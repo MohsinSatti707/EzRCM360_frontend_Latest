@@ -323,7 +323,7 @@ export default function EntityProvidersPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
-        <PageHeader title="Entity Providers" description="Manage entity providers." />
+        <PageHeader title="Entity Providers" />
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -334,7 +334,7 @@ export default function EntityProvidersPage() {
   if (!canView) {
     return (
       <div>
-        <PageHeader title="Entity Providers" description="Manage entity providers." />
+        <PageHeader title="Entity Providers" />
         <Card>
           <AccessRestrictedContent sectionName="Entity Providers" />
         </Card>
@@ -346,7 +346,6 @@ export default function EntityProvidersPage() {
     <div className="flex min-h-0 flex-1 flex-col px-6">
       <PageHeader
         title="Entity Providers"
-        description="Manage entity providers."
         actions={
           canCreate ? (
             <Button

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { ArrowRight, FileText, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Loader } from "@/components/ui/Loader";
@@ -203,7 +204,7 @@ export default function EntityDetailPage() {
       {/* General Information */}
       <div className="mb-6">
         <div className="mb-4 flex items-center gap-2">
-          <Users className="h-5 w-5 text-[#64748B]" />
+          <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
           <h2 className="font-aileron text-[16px] font-bold text-[#202830]">General Information</h2>
         </div>
         <div className="grid grid-cols-3 gap-x-8 gap-y-6">

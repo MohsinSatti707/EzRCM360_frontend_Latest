@@ -25,7 +25,6 @@ import { Loader } from "@/components/ui/Loader";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
 import { EntityFormModal } from "./EntityFormModal";
 import { entitiesApi } from "@/lib/services/entities";
-import { BulkImportActions } from "@/components/settings/BulkImportActions";
 import { usePaginatedList, useDebounce } from "@/lib/hooks";
 import { resolveEnum, ENUMS } from "@/lib/utils";
 import { useToast } from "@/lib/contexts/ToastContext";
@@ -242,8 +241,6 @@ export default function EntitiesPage() {
     }
   };
 
-  const statusLabel = (n: number) => STATUS_OPTIONS.find((o) => o.value === n)?.name ?? String(n);
-
   const handleSort = useCallback((key: string, order: "asc" | "desc" | null) => {
     setSortBy(order === null ? null : key);
     setSortOrder(order);
@@ -281,7 +278,7 @@ export default function EntitiesPage() {
   if (permLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col px-6">
-        <PageHeader title="Entity Information" description="Define entity identity and structure." />
+        <PageHeader title="Entity Information" />
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <Loader variant="inline" label="Loading" />
         </div>
@@ -292,7 +289,7 @@ export default function EntitiesPage() {
   if (!canView) {
     return (
       <div>
-        <PageHeader title="Entity Information" description="Define entity identity and structure." />
+        <PageHeader title="Entity Information" />
         <Card>
           <AccessRestrictedContent sectionName="Entity Information" />
         </Card>
@@ -304,7 +301,6 @@ export default function EntitiesPage() {
     <div className="flex min-h-0 flex-1 flex-col px-6">
       <PageHeader
         title="Entity Information"
-        description="Define entity identity and structure."
         actions={
           canCreate ? (
             <Button
@@ -339,20 +335,19 @@ export default function EntitiesPage() {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+              className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            className="h-10 min-w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          >
+            <option value="all">Filter by Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
-
-        <select
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="h-10 min-w-[160px] rounded-[5px] border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-        >
-          <option value="all">Filter by Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
 
         <button
           type="button"
@@ -411,9 +406,24 @@ export default function EntitiesPage() {
                       <SortArrows columnKey="legalName" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
                     </div>
                   </TableHeaderCell>
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Entity Display Name</TableHeaderCell>
-                  <TableHeaderCell className="w-[200px] min-w-[200px]">Entity Group NPI</TableHeaderCell>
-                  <TableHeaderCell className="w-[180px] min-w-[180px]">Entity Tax ID</TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">
+                    <div className="flex items-center gap-2">
+                      Entity Display Name
+                      <SortArrows columnKey="displayName" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
+                    </div>
+                  </TableHeaderCell>
+                  <TableHeaderCell className="w-[200px] min-w-[200px]">
+                    <div className="flex items-center gap-2">
+                      Entity Group NPI
+                      <SortArrows columnKey="groupNpi" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
+                    </div>
+                  </TableHeaderCell>
+                  <TableHeaderCell className="w-[180px] min-w-[180px]">
+                    <div className="flex items-center gap-2">
+                      Entity Tax ID
+                      <SortArrows columnKey="taxId" sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
+                    </div>
+                  </TableHeaderCell>
                   <TableHeaderCell className="w-[180px] min-w-[180px]">Entity Status</TableHeaderCell>
                   {(canUpdate || canDelete) && (
                     <TableHeaderCell className="!w-[100px] min-w-[100px]">Actions</TableHeaderCell>
@@ -437,7 +447,9 @@ export default function EntitiesPage() {
                     )}
                     <TableCell className={cellColor}>
                       <div className="max-w-xs truncate">
-                        <CellTooltip text={row.legalName} />
+                        <Link href={`/settings/entities/${row.id}`} className="text-[#0066CC] hover:underline font-medium">
+                          <CellTooltip text={row.legalName} />
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell className={cellColor}>

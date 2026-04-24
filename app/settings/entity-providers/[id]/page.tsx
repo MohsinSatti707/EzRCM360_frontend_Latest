@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowRight, Stethoscope, Building2, X } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, User, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Loader } from "@/components/ui/Loader";
 import { OverlayLoader } from "@/components/ui/OverlayLoader";
@@ -195,12 +196,12 @@ export default function EntityProviderDetailPage() {
               <h2 className="font-aileron text-[20px] font-bold leading-tight text-[#202830]">{provider.providerName}</h2>
               <div className="mt-1 flex items-center gap-4">
                 <div className="flex items-center gap-1.5 text-[13px] text-[#64748B] font-aileron">
-                  <Stethoscope className="h-4 w-4" />
+                  <User className="h-4 w-4" />
                   <span>{providerTypeLabel}</span>
                 </div>
                 {provider.primarySpecialty && (
                   <div className="flex items-center gap-1.5 text-[13px] text-[#64748B] font-aileron">
-                    <Building2 className="h-4 w-4" />
+                    <FileText className="h-4 w-4" />
                     <span>{provider.primarySpecialty}</span>
                   </div>
                 )}
@@ -222,10 +223,10 @@ export default function EntityProviderDetailPage() {
       {/* General Information */}
       <div className="mb-6">
         <div className="mb-4 flex items-center gap-2">
-          <Stethoscope className="h-5 w-5 text-[#64748B]" />
+          <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
           <h2 className="font-aileron text-[16px] font-bold text-[#202830]">General Information</h2>
         </div>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+        <div className="grid grid-cols-3 gap-x-8 gap-y-6">
           <div>
             <p className="text-[12px] font-aileron font-medium text-[#64748B] tracking-wide">Provider Name</p>
             <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{provider.providerName || "-"}</p>
@@ -235,12 +236,20 @@ export default function EntityProviderDetailPage() {
             <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{provider.npi || "-"}</p>
           </div>
           <div>
+            <p className="text-[12px] font-aileron font-medium text-[#64748B] tracking-wide">Provider SSN</p>
+            <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{provider.ssn || "-"}</p>
+          </div>
+          <div>
             <p className="text-[12px] font-aileron font-medium text-[#64748B] tracking-wide">Provider Type</p>
             <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{providerTypeLabel}</p>
           </div>
           <div>
             <p className="text-[12px] font-aileron font-medium text-[#64748B] tracking-wide">Primary Specialty</p>
             <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{provider.primarySpecialty || "-"}</p>
+          </div>
+          <div>
+            <p className="text-[12px] font-aileron font-medium text-[#64748B] tracking-wide">Secondary Specialty</p>
+            <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{provider.secondarySpecialty || "-"}</p>
           </div>
           <div>
             <p className="text-[12px] font-aileron font-medium text-[#64748B] tracking-wide">Linked Entity</p>

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowRight, Building2, Layers } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, User, FileText } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -244,11 +245,11 @@ export default function FacilityDetailPage() {
               </h2>
               <div className="mt-1 flex items-center gap-3">
                 <div className="flex items-center gap-1.5 text-[13px] text-[#64748B] font-aileron">
-                  <Building2 className="h-4 w-4" />
+                  <User className="h-4 w-4" />
                   <span>{facility.facilityType || "-"}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[13px] text-[#64748B] font-aileron">
-                  <Layers className="h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                   <span>{entityDisplayName}</span>
                 </div>
               </div>
@@ -290,7 +291,7 @@ export default function FacilityDetailPage() {
       {/* General Information */}
       <Card className="mb-6 p-6">
         <div className="mb-4 flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-[#64748B]" />
+          <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
           <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
             General Information
           </h2>

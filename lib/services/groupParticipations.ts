@@ -26,6 +26,7 @@ export interface GroupProviderPlanParticipationDetailDto {
   effectiveTo?: string | null;
   source: number;
   isActive: boolean;
+  createdAt?: string | null;
 }
 
 export interface CreateGroupProviderPlanParticipationRequest {

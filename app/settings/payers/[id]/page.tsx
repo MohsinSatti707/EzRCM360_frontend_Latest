@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { ArrowRight, XCircle, Link2, Users } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Card } from "@/components/ui/Card";
@@ -375,7 +376,7 @@ export default function PayerDetailPage() {
           {/* General Information */}
       <Card className="mb-6 p-6">
         <div className="mb-4 flex items-center gap-2">
-          <Users className="h-5 w-5 text-[#64748B]" />
+          <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
           <h2 className="font-aileron text-[16px] font-bold text-[#202830]">
             General Information
           </h2>
