@@ -217,7 +217,7 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchField, setSearchField] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [searchDebounced, setSearchDebounced] = useState("");
@@ -263,7 +263,7 @@ export default function UsersPage() {
 
   const loadList = useCallback(() => {
     setError(null);
-    const statusParam = statusFilter === "" ? undefined : Number(statusFilter);
+    const statusParam = statusFilter === "all" ? undefined : Number(statusFilter);
     api
       .getList({
         pageNumber: page,
@@ -568,23 +568,19 @@ export default function UsersPage() {
         </div>
 
         {/* Right: Status filter + bulk delete + add button */}
-        <div className="relative">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 min-w-[120px] appearance-none rounded-r-[5px] border border-[#E2E8F0] bg-background pl-3 pr-8 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            {[
-              { value: "", name: "All Status" },
-              ...STATUS_OPTIONS,
-            ].map((o) => (
-              <option key={o.value === "" ? "_all" : o.value} value={o.value === "" ? "" : String(o.value)}>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-10 w-[140px] rounded-[5px] border border-[#E2E8F0] bg-background font-aileron text-[14px] text-[#202830] focus:ring-0 focus:ring-offset-0">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            {STATUS_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={String(o.value)}>
                 {o.name}
-              </option>
+              </SelectItem>
             ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
-        </div>
+          </SelectContent>
+        </Select>
 
         {canDelete && selectedIds.size > 0 && (
           <Button

@@ -427,15 +427,16 @@ export default function PayersPage() {
               className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="h-10 min-w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
-          >
-            <option value="all">Filter by Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+            <SelectTrigger className="h-10 w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background font-aileron text-[14px] text-[#202830] focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Filter by Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <button

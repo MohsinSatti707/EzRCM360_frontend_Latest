@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams, notFound } from "next/navigation";
-import { Search, ArrowRight, Upload, Download, FileSpreadsheet, Trash2, Pencil, Plus } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, Upload, Download, FileSpreadsheet, Trash2, Pencil, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -82,6 +82,32 @@ function resolveCategoryStr(category: number | string): string {
     "3": "WC", "WC": "WC",
   };
   return catMap[catStr] ?? "Medicare";
+}
+
+/* ------------------------------------------------------------------ */
+/*  Date-range picker helpers                                          */
+/* ------------------------------------------------------------------ */
+
+const DP_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DP_SHORT  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function dpFmt(d: Date) {
+  return `${DP_SHORT[d.getMonth()]} ${String(d.getDate()).padStart(2,"0")}, ${d.getFullYear()}`;
+}
+
+function dpDays(year: number, month: number): { d: Date; cur: boolean }[] {
+  const first = new Date(year, month, 1);
+  const last  = new Date(year, month + 1, 0);
+  let dow = first.getDay() - 1; if (dow < 0) dow = 6;
+  const cells: { d: Date; cur: boolean }[] = [];
+  for (let i = dow; i > 0; i--) cells.push({ d: new Date(year, month, 1 - i), cur: false });
+  for (let d = 1; d <= last.getDate(); d++) cells.push({ d: new Date(year, month, d), cur: true });
+  let n = 1; while (cells.length < 42) cells.push({ d: new Date(year, month + 1, n++), cur: false });
+  return cells;
+}
+
+function dpSame(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
 /* ------------------------------------------------------------------ */
@@ -178,6 +204,18 @@ export default function CategoryFeeSchedulesPage() {
   const [lineSelectedIds, setLineSelectedIds] = useState<Set<string>>(new Set());
   const [lineBulkDeleteConfirm, setLineBulkDeleteConfirm] = useState(false);
   const [lineBulkDeleteLoading, setLineBulkDeleteLoading] = useState(false);
+
+  // Date-range picker
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [dpLY, setDpLY] = useState(() => new Date().getFullYear() - 1);
+  const [dpLM, setDpLM] = useState(() => new Date().getMonth());
+  const [dpRY, setDpRY] = useState(() => new Date().getFullYear());
+  const [dpRM, setDpRM] = useState(() => new Date().getMonth());
+  const [dpStart, setDpStart] = useState<Date | null>(null);
+  const [dpEnd,   setDpEnd]   = useState<Date | null>(null);
+  const [dpApplied, setDpApplied] = useState<{ start: Date; end: Date } | null>(null);
+  const [dpHover,  setDpHover]  = useState<Date | null>(null);
+  const dpRef = useRef<HTMLDivElement>(null);
 
   const api = feeSchedulesApi();
   const toast = useToast();
@@ -563,6 +601,85 @@ export default function CategoryFeeSchedulesPage() {
   };
 
   /* ---------------------------------------------------------------- */
+  /*  Date-range picker logic                                          */
+  /* ---------------------------------------------------------------- */
+
+  useEffect(() => {
+    if (!datePickerOpen) return;
+    const h = (e: MouseEvent) => { if (dpRef.current && !dpRef.current.contains(e.target as Node)) setDatePickerOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [datePickerOpen]);
+
+  const dpClick = (d: Date) => {
+    if (!dpStart || dpEnd) { setDpStart(d); setDpEnd(null); }
+    else if (d.getTime() < dpStart.getTime()) { setDpEnd(dpStart); setDpStart(d); }
+    else setDpEnd(d);
+  };
+
+  const dpNav = (side: "L" | "R", dir: number) => {
+    if (side === "L") {
+      let m = dpLM + dir, y = dpLY;
+      if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; }
+      setDpLM(m); setDpLY(y);
+    } else {
+      let m = dpRM + dir, y = dpRY;
+      if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; }
+      setDpRM(m); setDpRY(y);
+    }
+  };
+
+  const dpCal = (year: number, month: number, side: "L" | "R") => {
+    const cells = dpDays(year, month);
+    const rawEnd = dpEnd ?? dpHover;
+    const rS = dpStart && rawEnd ? (dpStart.getTime() <= rawEnd.getTime() ? dpStart : rawEnd) : dpStart;
+    const rE = dpStart && rawEnd ? (dpStart.getTime() <= rawEnd.getTime() ? rawEnd : dpStart) : rawEnd;
+    return (
+      <div className="w-[260px] select-none">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex gap-0.5">
+            <button type="button" onClick={() => side === "L" ? setDpLY(y => y - 1) : setDpRY(y => y - 1)} className="h-7 w-7 flex items-center justify-center rounded text-[#64748B] hover:bg-[#F1F5F9] text-[12px] font-bold">«</button>
+            <button type="button" onClick={() => dpNav(side, -1)} className="h-7 w-7 flex items-center justify-center rounded text-[#64748B] hover:bg-[#F1F5F9] text-[18px] leading-none">‹</button>
+          </div>
+          <span className="font-aileron font-semibold text-[14px] text-[#202830]">{DP_MONTHS[month]} {year}</span>
+          <div className="flex gap-0.5">
+            <button type="button" onClick={() => dpNav(side, 1)} className="h-7 w-7 flex items-center justify-center rounded text-[#64748B] hover:bg-[#F1F5F9] text-[18px] leading-none">›</button>
+            <button type="button" onClick={() => side === "L" ? setDpLY(y => y + 1) : setDpRY(y => y + 1)} className="h-7 w-7 flex items-center justify-center rounded text-[#64748B] hover:bg-[#F1F5F9] text-[12px] font-bold">»</button>
+          </div>
+        </div>
+        <div className="grid grid-cols-7 mb-1">
+          {["MON","TUE","WED","THU","FRI","SAT","SUN"].map(w => (
+            <div key={w} className="text-center font-aileron text-[10px] font-semibold text-[#94A3B8] py-1">{w}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7">
+          {cells.map(({ d, cur }, i) => {
+            const t = d.getTime();
+            const sT = rS?.getTime(), eT = rE?.getTime();
+            const isS = rS ? dpSame(d, rS) : false;
+            const isE = rE ? dpSame(d, rE) : false;
+            const inR = sT != null && eT != null && t >= sT && t <= eT;
+            const same = isS && isE;
+            return (
+              <div key={i} className={["relative flex h-9 items-center justify-center", inR ? "bg-[#EBF4FF]" : "", inR && isS && !same ? "rounded-l-full" : "", inR && isE && !same ? "rounded-r-full" : "", same ? "rounded-full" : ""].filter(Boolean).join(" ")}>
+                <button
+                  type="button"
+                  onClick={() => dpClick(d)}
+                  onMouseEnter={() => { if (dpStart && !dpEnd) setDpHover(d); }}
+                  onMouseLeave={() => setDpHover(null)}
+                  className={["flex h-8 w-8 items-center justify-center rounded-full font-aileron text-[13px] transition-colors focus:outline-none", isS || isE ? "bg-[#0066CC] text-white font-semibold" : cur ? "text-[#202830] hover:bg-[#D1E9FF]" : "text-[#CBD5E1] hover:bg-[#F1F5F9]"].join(" ")}
+                >
+                  {d.getDate()}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  /* ---------------------------------------------------------------- */
   /*  Display helpers                                                  */
   /* ---------------------------------------------------------------- */
 
@@ -584,7 +701,13 @@ export default function CategoryFeeSchedulesPage() {
     return lookups?.calculationModels?.find((c) => c.value === num)?.name ?? String(n);
   };
 
-  const filteredItems = data?.items ?? [];
+  const filteredItems = useMemo(() => {
+    if (!data?.items) return [];
+    if (!dpApplied) return data.items;
+    const sY = dpApplied.start.getFullYear();
+    const eY = dpApplied.end.getFullYear();
+    return data.items.filter(row => (row.years ?? []).some(y => y >= sY && y <= eY));
+  }, [data?.items, dpApplied]);
 
   /* ---------------------------------------------------------------- */
   /*  Wizard — 2-step: Configuration + Import Lines                    */
@@ -691,24 +814,48 @@ export default function CategoryFeeSchedulesPage() {
               className="h-10 w-full rounded-none border border-r-0 border-[#E2E8F0] bg-background pl-9 pr-4 font-aileron text-[14px] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="h-10 min-w-[160px] rounded-r-[5px] rounded-l-none border border-[#E2E8F0] bg-background pl-3 pr-6 font-aileron text-[14px] text-[#202830] focus:outline-none focus-visible:outline-none"
+          {/* Date range picker */}
+          <div className="relative" ref={dpRef}>
+          <button
+            type="button"
+            onClick={() => setDatePickerOpen(o => !o)}
+            className={`h-10 rounded-r-[5px] rounded-l-none border px-4 font-aileron text-[14px] flex items-center gap-2 transition-colors focus:outline-none whitespace-nowrap ${dpApplied ? "border-[#0066CC] bg-[#0066CC] text-white" : "border-[#E2E8F0] bg-background text-[#202830] hover:bg-[#F7F8F9]"}`}
           >
-            <option value="all">Filter by Status</option>
-            <option value="0">Active</option>
-            <option value="1">Inactive</option>
-          </select>
+            Filter by Date <ChevronDown className="h-4 w-4" />
+          </button>
+          {datePickerOpen && (
+            <div className="absolute right-0 top-[calc(100%+6px)] z-50 rounded-[10px] border border-[#E2E8F0] bg-white shadow-2xl p-5">
+              <div className="flex gap-5">
+                {dpCal(dpLY, dpLM, "L")}
+                <div className="w-px bg-[#E2E8F0] self-stretch" />
+                {dpCal(dpRY, dpRM, "R")}
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-[#E2E8F0] pt-3">
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    disabled={!dpStart || !dpEnd}
+                    onClick={() => { if (dpStart && dpEnd) setDpApplied({ start: dpStart, end: dpEnd }); setDatePickerOpen(false); }}
+                    className="h-9 rounded-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 disabled:opacity-50 text-white font-aileron text-[13px] px-4"
+                  >
+                    Apply Filter <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => { setDpStart(dpApplied?.start ?? null); setDpEnd(dpApplied?.end ?? null); setDatePickerOpen(false); }}
+                    className="h-9 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[13px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <span className="font-aileron text-[13px] text-[#202830]">
+                  {dpStart ? dpFmt(dpStart) : ""}{dpStart && dpEnd ? ` - ${dpFmt(dpEnd)}` : ""}
+                </span>
+              </div>
+            </div>
+          )}
+          </div>
         </div>
-
-        <button
-          type="button"
-          onClick={() => { setSearchBy("all"); setSearchTerm(""); setStatusFilter("all"); setPage(1); }}
-          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
-        >
-          Clear
-        </button>
 
         {canDelete && selectedIds.size > 0 && (
           <Button
