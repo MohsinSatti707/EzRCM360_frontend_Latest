@@ -138,6 +138,15 @@ html {
   background: #a3a3a3;
 }
 
+/* Hide the main page scrollbar — inner panels scroll independently */
+main::-webkit-scrollbar {
+  display: none;
+}
+main {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 /* Form input - design system (matches design input.tsx) */
 @layer components {
   .input-enterprise {
