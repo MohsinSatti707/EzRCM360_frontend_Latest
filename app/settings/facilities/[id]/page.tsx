@@ -297,7 +297,7 @@ export default function FacilityDetailPage() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-3 gap-x-8 gap-y-6">
+        <div className="grid grid-cols-3 gap-x-8 gap-y-6 ml-6">
           <div>
             <p className="text-[12px] font-['Aileron'] font-medium text-[#64748B] tracking-wide">
               Facility Name
@@ -352,7 +352,7 @@ export default function FacilityDetailPage() {
           <div className="mt-6">
             <Button
               onClick={openEdit}
-              className="h-10 rounded-[5px] bg-[#0066CC] px-[18px] text-white hover:bg-[#0066CC]/90 font-aileron text-[14px]"
+              className="h-10 rounded-[5px] bg-[#0066CC] px-[18px] text-white hover:bg-[#0066CC]/90 font-aileron text-[14px] ml-6"
             >
               Edit <ArrowRight className="ml-1 h-4 w-4" />
             </Button>

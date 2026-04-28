@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowRight, XCircle, Link2, Users } from "lucide-react";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
@@ -311,11 +310,11 @@ export default function PayerDetailPage() {
       <h1 className="mb-4 font-aileron text-[24px] font-bold text-[#202830]">Payer Details</h1>
 
       {/* Header Card */}
-      <Card className="mb-6 p-6">
+      <div className="mb-6 rounded-[8px] bg-[#F7F8F9] p-6">
         <div className="flex items-center justify-between">
           {/* Left: avatar + name + entity type */}
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0066CC] text-lg font-bold text-white font-aileron">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#DBEAFE] text-lg font-bold text-[#3B82F6] font-aileron">
               {initials}
             </div>
             <div>
@@ -331,35 +330,16 @@ export default function PayerDetailPage() {
 
           {/* Right: status dropdown + edit button */}
           <div className="flex items-center gap-3">
-            {canUpdate && (
-              <Select
-                value={String(statusNum)}
-                onValueChange={handleStatusChange}
-                disabled={statusUpdating}
-              >
-                <SelectTrigger className="w-[140px] h-10 border-[#E2E8F0] rounded-[5px] font-aileron text-[14px] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent className="bg-white z-50">
-                  {STATUS_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={String(o.value)}>
-                      {o.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            {!canUpdate && (
-              <span
-                className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
-                  statusNum === 1
-                    ? "bg-green-50 text-green-700"
-                    : "bg-red-50 text-red-700"
-                }`}
-              >
-                {statusNum === 1 ? "Active" : "Inactive"}
-              </span>
-            )}
+            <select
+              value={statusNum}
+              onChange={(e) => handleStatusChange(String(e.target.value))}
+              disabled={!canUpdate || statusUpdating}
+              className="h-10 w-[130px] rounded-[5px] border border-[#E2E8F0] bg-white pl-3 pr-8 font-aileron text-[14px] text-[#202830] disabled:opacity-50 focus:outline-none focus:ring-0"
+            >
+              {STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.name}</option>
+              ))}
+            </select>
             {canUpdate && (
               <Button
                 onClick={() => router.push(`/settings/payers?edit=${id}`)}
@@ -370,7 +350,7 @@ export default function PayerDetailPage() {
             )}
           </div>
         </div>
-      </Card>
+      </div>
 
    <div className="h-[calc(100vh-350px)] overflow-auto">
           {/* General Information */}
@@ -381,7 +361,7 @@ export default function PayerDetailPage() {
             General Information
           </h2>
         </div>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-6 ml-6">
           {/* Payer Name */}
           <div>
             <p className="text-[12px] font-['Aileron'] font-medium text-[#64748B] tracking-wide">
@@ -407,7 +387,7 @@ export default function PayerDetailPage() {
           </div>
         </div>
         {/* Created At */}
-        <div className="mt-4">
+        <div className="mt-4 ml-6">
           <p className="text-[12px] font-['Aileron'] font-medium text-[#64748B] tracking-wide">
             Created At
           </p>
@@ -430,17 +410,17 @@ export default function PayerDetailPage() {
               No plans linked to this payer.
             </p>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto ml-6">
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Plan Name</TableHeaderCell>
-                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Plan ID</TableHeaderCell>
-                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Plan Category</TableHeaderCell>
-                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Plan Type</TableHeaderCell>
-                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">Out-of-Network Benefits</TableHeaderCell>
-                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold">NSA Eligible</TableHeaderCell>
-                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-[13px] font-semibold w-[80px]">Actions</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-xs font-semibold">Plan Name</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-xs font-semibold">Plan ID</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-xs font-semibold">Plan Category</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-xs font-semibold">Plan Type</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-xs font-semibold">Out-of-Network Benefits</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-xs font-semibold">NSA Eligible</TableHeaderCell>
+                    <TableHeaderCell className="text-[#0066CC] font-['Aileron'] text-xs font-semibold w-[80px]">Actions</TableHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

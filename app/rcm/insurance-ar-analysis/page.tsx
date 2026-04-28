@@ -179,7 +179,7 @@ export default function InsuranceArAnalysisListPage() {
         <button
           type="button"
           onClick={() => { setSearchField("all"); setSearch(""); setDateRange({ start: null, end: null }); setPage(1); }}
-          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:bg-[#F7F8F9] transition-colors focus:outline-none"
+          className="h-10 rounded-[5px] border border-[#E2E8F0] bg-background px-4 font-aileron text-[14px] text-[#202830] hover:text-[#0066CC] hover:border-[#0066CC] transition-colors focus:outline-none focus:text-[#0066CC] focus:border-[#0066CC]"
         >
           Clear
         </button>

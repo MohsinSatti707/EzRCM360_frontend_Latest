@@ -186,7 +186,7 @@ export default function EntityProviderDetailPage() {
       <h1 className="mb-4 font-aileron text-[24px] font-bold text-[#202830]">Entity Provider Details</h1>
 
       {/* Header Card */}
-      <div className="mb-6 rounded-[8px] border border-[#E2E8F0] bg-[#F7F8F9] p-6">
+      <div className="mb-6 rounded-[8px]  bg-[#F7F8F9] p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#DBEAFE] text-lg font-bold text-[#3B82F6] font-aileron">
@@ -226,7 +226,7 @@ export default function EntityProviderDetailPage() {
           <Image src="/icons/svg/admin.svg" alt="" width={16} height={16} />
           <h2 className="font-aileron text-[16px] font-bold text-[#202830]">General Information</h2>
         </div>
-        <div className="grid grid-cols-3 gap-x-8 gap-y-6">
+        <div className="grid grid-cols-3 gap-x-8 gap-y-6 ml-6">
           <div>
             <p className="text-[12px] font-aileron font-medium text-[#64748B] tracking-wide">Provider Name</p>
             <p className="mt-1 font-aileron text-[14px] font-medium text-[#202830]">{provider.providerName || "-"}</p>
@@ -263,7 +263,7 @@ export default function EntityProviderDetailPage() {
 
         {canUpdate && (
           <div className="mt-6">
-            <Button onClick={openEdit} className="h-10 rounded-[5px] bg-[#0066CC] px-[18px] text-white hover:bg-[#0066CC]/90 font-aileron text-[14px]">
+            <Button onClick={openEdit} className="h-10 rounded-[5px] bg-[#0066CC] px-[18px] text-white hover:bg-[#0066CC]/90 font-aileron text-[14px] ml-6">
               Edit <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
