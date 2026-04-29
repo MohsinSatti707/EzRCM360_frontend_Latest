@@ -1,0 +1,23 @@
+#!/bin/sh
+# Block direct pushes to protected branches.
+# Install: git config core.hooksPath .githooks
+# Bypass (not recommended): git push --no-verify
+
+protected="master main"
+
+while read local_ref local_sha remote_ref remote_sha; do
+  for branch in $protected; do
+    if [ "$remote_ref" = "refs/heads/$branch" ]; then
+      echo ""
+      echo "  ╳  Direct push to '$branch' is blocked by pre-push hook."
+      echo ""
+      echo "  Protected branches accept only merges from pull requests."
+      echo "  → open a feature branch, push it, open a PR to '$branch'."
+      echo ""
+      echo "  If you REALLY need to bypass (hotfix, rare): git push --no-verify"
+      echo ""
+      exit 1
+    fi
+  done
+done
+exit 0
