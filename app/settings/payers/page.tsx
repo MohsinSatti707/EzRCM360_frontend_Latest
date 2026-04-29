@@ -511,7 +511,7 @@ export default function PayersPage() {
                     )}
                     <TableCell className="w-[250px] min-w-[250px]">
                       <div className="max-w-xs truncate">
-                        <Link href={`/settings/payers/${row.id}`} className="text-[#0066CC] hover:underline font-medium">
+                        <Link href={`/settings/payers/${row.id}`} className="text-[#0066CC] font-medium">
                           {row.payerName}
                         </Link>
                       </div>

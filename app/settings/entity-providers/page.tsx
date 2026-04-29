@@ -491,7 +491,7 @@ export default function EntityProvidersPage() {
                     <TableCell>
                       <Link
                         href={`/settings/entity-providers/${row.id}`}
-                        className="font-aileron text-[14px] font-medium text-[#0066CC] hover:underline cursor-pointer"
+                        className="font-aileron text-[14px] font-medium text-[#0066CC] cursor-pointer"
                       >
                         {row.providerName}
                       </Link>

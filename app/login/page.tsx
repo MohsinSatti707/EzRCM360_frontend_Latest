@@ -160,7 +160,14 @@ function LoginForm() {
             disabled={loading}
             className="w-fit h-10 rounded-[5px] bg-[#0066CC] hover:bg-[#0066CC]/90 text-white font-aileron text-[14px]"
           >
-            {loading ? "Logging in…" : "Log in"} <MoveRight/>
+            {loading ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Login In
+              </>
+            ) : (
+              <>Log in <MoveRight /></>
+            )}
           </Button>
         </form>
       </Card>

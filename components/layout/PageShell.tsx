@@ -57,20 +57,22 @@ export function PageShell({
         </nav>
       )}
 
-      {/* Title row - P2 design: font-aileron font-bold text-[24px] text-[#202830] */}
-      <div className={titleWrapperClassName ? `flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${titleWrapperClassName}` : "mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"}>
-        <div>
-          <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">
-            {title}
-          </h1>
-          {description && (
-            <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{description}</p>
-          )}
+      <div className="px-6">
+        {/* Title row - P2 design: font-aileron font-bold text-[24px] text-[#202830] */}
+        <div className={titleWrapperClassName ? `flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${titleWrapperClassName}` : "mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"}>
+          <div>
+            <h1 className="font-aileron font-bold text-[24px] leading-none tracking-tight text-[#202830]">
+              {title}
+            </h1>
+            {description && (
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{description}</p>
+            )}
+          </div>
+          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
-        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
-      </div>
 
-      {children}
+        {children}
+      </div>
     </div>
   );
 }

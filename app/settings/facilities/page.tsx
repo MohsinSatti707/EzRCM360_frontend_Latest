@@ -386,7 +386,7 @@ export default function FacilitiesPage() {
                       <div className="max-w-xs truncate">
                         <Link
                           href={`/settings/facilities/${row.id}`}
-                          className="font-aileron text-[14px] text-[#0066CC] hover:underline"
+                          className="font-aileron text-[14px] text-[#0066CC]"
                         >
                           {row.name}
                         </Link>
